@@ -8,7 +8,7 @@ class Usuario(AbstractUser):
     cargo = models.CharField(max_length=4, choices=CARGOS, default="func")
 
     def __str__(self):
-        return f"{self.email}: {self.cargo}"
+        return f"{self.username} - {self.get_cargo_display()}"
 
 class Categoria(models.Model):
     nome = models.CharField(max_length=100)
@@ -20,9 +20,9 @@ class Categoria(models.Model):
 class Insumo(models.Model):
     nome = models.CharField(max_length=100)
     categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE)
-    qteAtual = models.IntegerField(default=0)
+    qteAtual = models.PositiveIntegerField(default=0)
     unidadeMedida = models.CharField(max_length=10)
-    ativo = models.BooleanField(default=False)
+    ativo = models.BooleanField(default=True)
 
     def __str__(self):
         return self.nome
@@ -39,9 +39,9 @@ class Movimentacao(models.Model):
     produto = models.ForeignKey(Produto, on_delete=models.CASCADE)
     usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
     tipo = models.CharField(max_length=7, choices=TIPOS)
-    quantidade = models.IntegerField(default=1)
+    quantidade = models.PositiveIntegerField(default=1)
     data = models.DateTimeField(auto_now_add=True)
     comentario = models.TextField(null=True)
 
     def __str__(self):
-        return f"{self.produto}: {self.quantidade} {self.tipo}"
+        return f"{self.produto}, {self.quantidade} - {self.get_tipo_disply()}"
