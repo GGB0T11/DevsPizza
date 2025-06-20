@@ -1,6 +1,7 @@
 from django.urls import path
-from .views import criar_usuario
+from .views import login, cadastro
 
 urlpatterns = [
-    path("criar/", criar_usuario, name="criar")
+    path("login/", login, name="login"),
+    path("cadastro/", cadastro, name="cadastro")
 ]

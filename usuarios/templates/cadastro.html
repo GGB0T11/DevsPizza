@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %} Cadastro {% endblock title %}
+
+{% block body %}
+    <a href="{% url 'login' %}">Login</a>
+    <br>
+    <form action="{% url 'cadastro' %}" method="POST"> {% csrf_token %}
+        <input type="text" placeholder="Nome de usuario" name="nome_usuario">
+        <br>
+        <input type="text" placeholder="Nome", name="nome">
+        <br>
+        <input type="text" placeholder="Sobrenome", name="sobrenome">
+        <br>
+        <input type="email", placeholder="exemplo@email.com", name="email">
+        <br>
+        <input type="password", placeholder="Senha...", name="senha">
+        <br>
+        <input type="password", placeholder="Confirmar Senha...", name="confirmar_senha">
+        <br>
+        <label for="cargos">Defina o cargo: </label>
+        <br>
+        <select id="cargos" name="cargo">
+            <option value="">--Selecione--</option>
+            <option value="funcionario">Funcionário</option>
+            <option value="administrador">Administrador</option>
+        </select>
+        <br>
+        <input type="submit" value="Cadastrar">
+    </form>
+{% endblock body %}

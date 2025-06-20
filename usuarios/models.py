@@ -15,7 +15,3 @@ class Usuario(AbstractUser):
     )
     data_criacao = models.DateTimeField(auto_now_add=True)
     data_alteracao = models.DateTimeField(auto_now=True)
-    
-    USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ["username"]
-
