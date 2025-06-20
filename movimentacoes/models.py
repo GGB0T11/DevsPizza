@@ -4,8 +4,8 @@ from usuarios.models import Usuario
 
 class Movimentacao(models.Model):
     TIPOS = [("entrada", "Entrada"), ("saida", "Saida")]
-    produto = models.ForeignKey(Produto, on_delete=models.CASCADE)
-    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
+    produto = models.ForeignKey(Produto, on_delete=models.DO_NOTHING)
+    usuario = models.ForeignKey(Usuario, on_delete=models.DO_NOTHING)
     tipo = models.CharField(max_length=7, choices=TIPOS)
     quantidade = models.PositiveIntegerField(default=1)
     data = models.DateTimeField(auto_now_add=True)
