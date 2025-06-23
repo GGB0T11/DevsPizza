@@ -23,7 +23,7 @@ from .views import home
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", home, name="home"),
+    path("accounts/", include("accounts.urls"), name="accounts"),
     path("movements/", include("movements.urls"), name="movements"),
     path("stock/", include("stock.urls"), name="stock"),
-    path("users/", include("users.urls"), name="users"),
 ]

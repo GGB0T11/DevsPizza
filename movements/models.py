@@ -1,7 +1,6 @@
+from accounts.models import CustomUser
 from django.db import models
-
 from stock.models import Product
-from users.models import CustomUser
 
 
 class Movement(models.Model):

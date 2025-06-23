@@ -40,9 +40,9 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "accounts",
     "movements",
     "stock",
-    "users",
 ]
 
 MIDDLEWARE = [
@@ -128,7 +128,7 @@ STATICFILES_DIR = BASE_DIR / "static"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-AUTH_USER_MODEL = "users.CustomUser"
+AUTH_USER_MODEL = "accounts.CustomUser"
 
 MESSAGE_TAGS = {
     constants.ERROR: "red",

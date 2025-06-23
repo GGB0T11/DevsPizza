@@ -3,7 +3,6 @@ from django.db import models
 
 
 class CustomUser(AbstractUser):
-    # name = models.CharField(max_length=100)
     email = models.EmailField(max_length=100, unique=True)
     role = models.CharField(
         max_length=20,
