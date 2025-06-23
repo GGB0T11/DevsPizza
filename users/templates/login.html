@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %} Login {% endblock title %}
+
+{% block body %}
+
+    <a href="{% url 'register' %}">Cadastro</a>
+    <br />
+    <form action="{% url 'login' %}" method="POST"> {% csrf_token %}
+        <input type="email" placeholder="exemplo@email.com" name="email" required />
+        <br />
+        <input type="password" placeholder="senha super secreta" name="password" required />
+        <br />
+        <input type="submit" value="Logar" />
+    </form>
+
+{% endblock body %}
