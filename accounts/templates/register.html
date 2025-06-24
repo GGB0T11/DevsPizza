@@ -6,6 +6,13 @@
 
     <a href="{% url 'login' %}">Login</a>
     <br />
+    
+    {% if messages %}
+        {% for message in messages %}
+            <span>{{message}}</span>
+        {% endfor %}
+    {% endif %}
+
     <form action="{% url 'register' %}" method="POST"> {% csrf_token %}
         <input type="text" placeholder="Nome"  name="first_name" required />
         <br />

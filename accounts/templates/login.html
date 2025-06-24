@@ -6,6 +6,13 @@
 
     <a href="{% url 'register' %}">Cadastro</a>
     <br />
+
+    {% if messages %}
+        {% for message in messages %}
+            <span>{{message}}</span>
+        {% endfor %}
+    {% endif %}
+
     <form action="{% url 'login' %}" method="POST"> {% csrf_token %}
         <input type="email" placeholder="exemplo@email.com" name="email" required />
         <br />
