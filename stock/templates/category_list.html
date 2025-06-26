@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}
+    Login
+{% endblock title %}
+{% block body %}
+    {% if messages %}
+        {% for message in messages %}<span>{{ message }}</span>{% endfor %}
+    {% endif %}
+    <table>
+        <thead>
+            <th>Nome</th>
+        </thead>
+        <tbody>
+            <br>
+            {% for category in categories %}
+                <tr>
+                    <td>{{ category.name }}</td>
+                    <td>
+                        <a href="{% url 'category_update' category.id %}">Editar</a>
+                    </td>
+                    <td>
+                        <a href="{% url 'category_delete' category.id %}">Remover</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock body %}

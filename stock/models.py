@@ -2,7 +2,7 @@ from django.db import models
 
 
 class Category(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
     description = models.TextField(null=True, blank=True)
 
     def __str__(self):
@@ -10,7 +10,7 @@ class Category(models.Model):
 
 
 class Ingredient(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
     category = models.ForeignKey(Category, null=True, on_delete=models.SET_NULL)
     current_qte = models.PositiveIntegerField(default=0)
     measure_unit = models.CharField(max_length=10)
@@ -18,7 +18,7 @@ class Ingredient(models.Model):
 
 
 class Product(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
     ingredients = models.ManyToManyField(Ingredient)
 
     def __str__(self):

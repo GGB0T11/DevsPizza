@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}
+    Atualizar
+{% endblock title %}
+{% block body %}
+    <form action="{% url 'category_update' category.id %}" method="POST">
+        {% csrf_token %}
+        <input type="text" name="name" value="{{ category.name }}" />
+        <input type="text" name="description" value="{{ category.description }}" />
+        <button type="submit">Alterar</button>
+    </form>
+{% endblock body %}
