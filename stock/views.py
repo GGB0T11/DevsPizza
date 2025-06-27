@@ -74,3 +74,17 @@ def category_delete(request, id):
 
     messages.success(request, "Categoria deletada com sucesso!")
     return redirect("category_list")
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def ingredient_create(request):
+    if request.method == "GET":
+        categories = Category.objects.all()
+
+        return render(request, "ingredient_create", {"categories": categories})
+
+    else:
+        return       
+
+    return
