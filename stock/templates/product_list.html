@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}
+    Login
+{% endblock title %}
+{% block body %}
+    {% if messages %}
+        {% for message in messages %}<span>{{ message }}</span>{% endfor %}
+    {% endif %}
+    <table>
+        <thead>
+            <th>Nome</th>
+        </thead>
+        <tbody>
+            <br />
+            {% for product in products %}
+                <tr>
+                    <td>{{ product.name }}</td>
+                    <td>
+                        <a href="{% url 'product_update' product.id %}">Editar</a>
+                    </td>
+                    <td>
+                        <a href="{% url 'product_delete' product.id %}">Remover</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock body %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}
+    Atualizar
+{% endblock title %}
+{% block body %}
+    <form action="{% url 'product_update' product.id %}" method="POST">
+        {% csrf_token %}
+        <input type="text" name="name" value="{{ product.name }}" />
+        <label for="ingredients">Ingredientes:</label>
+        <select name="ingredients" multiple>
+            {% for ingredient in ingredients %}
+                <option value="{{ ingredient.id }}"
+                        {% if ingredient.id in ingredients_ids %}selected{% endif %}>{{ ingredient.name }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Alterar</button>
+    </form>
+{% endblock body %}

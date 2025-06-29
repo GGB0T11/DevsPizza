@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}
+    Atualizar
+{% endblock title %}
+{% block body %}
+    <form action="{% url 'ingredient_update' ingredient.id %}" method="POST">
+        {% csrf_token %}
+        <input type="text" name="name" value="{{ ingredient.name }}" />
+        <label for="category">Categoria:</label>
+        <select name="category">
+            {% for category in categories %}
+                <option value="{{ category.id }}"
+                        {% if ingredient.category.id == category.id %}selected{% endif %}>{{ category.name }}</option>
+            {% endfor %}
+        </select>
+        <input type="number" name="qte" value="{{ ingredient.current_qte }}" />
+        <input type="text" name="measure_unit" value="{{ ingredient.measure_unit }}" />
+        <label for="status">Status:</label>
+        <select name="active">
+            <option value="True" {% if ingredient.active %}selected{% endif %}>Ativo</option>
+            <option value="False" {% if not ingredient.active %}selected{% endif %}>Inativo</option>
+        </select>
+        <button type="submit">Alterar</button>
+    </form>
+{% endblock body %}

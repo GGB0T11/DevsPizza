@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}
+    List
+{% endblock title %}
+{% block body %}
+    {% if messages %}
+        {% for message in messages %}<span>{{ message }}</span>{% endfor %}
+    {% endif %}
+    <table>
+        <thead>
+            <th>Nome</th>
+            <th>Quantidade</th>
+            <th>Status</th>
+        </thead>
+        <tbody>
+            <br>
+            {% for ingredient in ingredients %}
+                <tr>
+                    <td>{{ ingredient.name }}</td>
+                    <td>{{ ingredient.current_qte }}</td>
+                    <td>{{ ingredient.active }}</td>
+                    <td>
+                        <a href="{% url 'ingredient_update' ingredient.id %}">Editar</a>
+                    </td>
+                    <td>
+                        <a href="{% url 'ingredient_delete' ingredient.id %}">Remover</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock body %}

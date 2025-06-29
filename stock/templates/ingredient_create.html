@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}
+    Create
+{% endblock title %}
+{% block body %}
+    {% if messages %}
+        {% for message in messages %}<span>{{ message }}</span>{% endfor %}
+    {% endif %}
+    <form method="POST">
+        {% csrf_token %}
+        <input type="text" placeholder="Farinha ..." name="name" />
+        <label for="category">Categoria:</label>
+        <select name="category">
+            {% for category in categories %}<option value="{{ category.id }}">{{ category.name }}</option>{% endfor %}
+        </select>
+        <input type="number" placeholder="10" name="qte" />
+        <input type="text" placeholder="g" name="measure_unit" />
+        <input type="submit" value="Cadastrar" />
+    </form>
+{% endblock body %}
