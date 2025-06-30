@@ -1,32 +1,27 @@
-{% extends "base.html" %} 
-
-{% block title %} Login {% endblock title %}
-
+{% extends "base.html" %}
+{% block title %}
+    Login
+{% endblock title %}
 {% block body %}
-
-    {% if messages %}
-        {% for message in messages %}
-            <span>{{message}}</span>
-        {% endfor %}
-    {% endif %}
-
     <table>
         <thead>
             <th>Nome</th>
             <th>Cargo</th>
         </thead>
         <tbody>
-        <br>
+            <br>
             {% for account in accounts %}
                 <tr>
-                    <td>{{account.first_name}}</td>
-                    <td>{{account.role}}</td>
-                    <td><a href="{% url 'update' account.id %}">Editar</a></td>
-                    <td><a href="{% url 'delete' account.id %}">Remover</a></td>
+                    <td>{{ account.first_name }}</td>
+                    <td>{{ account.role }}</td>
+                    <td>
+                        <a href="{% url 'update' account.id %}">Editar</a>
+                    </td>
+                    <td>
+                        <a href="{% url 'delete' account.id %}">Remover</a>
+                    </td>
                 </tr>
             {% endfor %}
-        </tbody>   
+        </tbody>
     </table>
-    
-
 {% endblock body %}

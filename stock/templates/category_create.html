@@ -3,9 +3,6 @@
     Create
 {% endblock title %}
 {% block body %}
-    {% if messages %}
-        {% for message in messages %}<span>{{ message }}</span>{% endfor %}
-    {% endif %}
     <form method="POST">
         {% csrf_token %}
         <input type="text" placeholder="Frios" name="name">

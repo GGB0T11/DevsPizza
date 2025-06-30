@@ -1,18 +1,10 @@
 {% extends "base.html" %}
-
-{% block title %} Detalhar {% endblock title %}
-
+{% block title %}
+    Detalhar
+{% endblock title %}
 {% block body %}
-
-    {% if message %}
-        {% for message in messages %}
-            <span>{{message}}</span>
-        {% endfor %}
-    {% endif %}
-
-    <p>{{account.firt_name}}</p>
-    <p>{{account.last_name}}</p>
-    <p>{{account.email}}</p>
-    <p>{{account.role}}</p>
-
+    <p>{{ account.firt_name }}</p>
+    <p>{{ account.last_name }}</p>
+    <p>{{ account.email }}</p>
+    <p>{{ account.role }}</p>
 {% endblock body %}

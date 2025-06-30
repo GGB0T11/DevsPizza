@@ -3,9 +3,6 @@
     Detalhar
 {% endblock title %}
 {% block body %}
-    {% if message %}
-        {% for message in messages %}<span>{{ message }}</span>{% endfor %}
-    {% endif %}
     <p>Nome: {{ category.name }}</p>
     <p>Descrição: {{ category.description }}</p>
 {% endblock body %}

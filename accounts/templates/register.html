@@ -1,19 +1,10 @@
 {% extends "base.html" %}
-
-{% block title %} Cadastro {% endblock title %}
-
+{% block title %}
+    Cadastro
+{% endblock title %}
 {% block body %}
-
-    <a href="{% url 'login' %}">Login</a>
-    <br />
-    
-    {% if messages %}
-        {% for message in messages %}
-            <span>{{message}}</span>
-        {% endfor %}
-    {% endif %}
-
-    <form action="{% url 'register' %}" method="POST"> {% csrf_token %}
+    <form action="{% url 'register' %}" method="POST">
+        {% csrf_token %}
         <input type="text" placeholder="Nome"  name="first_name" required />
         <br />
         <input type="text" placeholder="Sobrenome"  name="last_name" required />
@@ -22,9 +13,12 @@
         <br />
         <input type="password"  placeholder="Senha..."  name="password" required />
         <br />
-        <input type="password" placeholder="Confirmar Senha..." name="confirm_password" required />
+        <input type="password"
+               placeholder="Confirmar Senha..."
+               name="confirm_password"
+               required />
         <br />
-        <label for="role">Defina o cargo: </label>
+        <label for="role">Defina o cargo:</label>
         <select id="roles" name="role" required>
             <option value="">--Selecione--</option>
             <option value="employee">Funcionário</option>
@@ -33,5 +27,4 @@
         <br />
         <input type="submit" value="Cadastrar" />
     </form>
-
 {% endblock body %}

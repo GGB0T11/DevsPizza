@@ -1,23 +1,19 @@
 {% extends "base.html" %}
-
-{% block title %} Atualizar {% endblock title %}
-
+{% block title %}
+    Atualizar
+{% endblock title %}
 {% block body %}
-
-    <form action="{% url 'update' account.id %}" method="POST"> {% csrf_token %}
+    <form action="{% url 'update' account.id %}" method="POST">
+        {% csrf_token %}
         <input type="text" name="first_name" value="{{ account.first_name }}">
         <input type="text" name="last_name" value="{{ account.last_name }}">
         <input type="email" name="email" value="{{ account.email }}">
-        <label for="role">Defina o cargo: </label>
+        <label for="role">Defina o cargo:</label>
         <select id="roles" name="role" required>
-            <option value="employee" {% if account.role == "employee" %}selected{% endif %}>
-                Funcionário
-            </option>
-            <option value="admin" {% if account.role == "admin" %}selected{% endif %}>
-                Administrador
-            </option>
+            <option value="employee"
+                    {% if account.role == "employee" %}selected{% endif %}>Funcionário</option>
+            <option value="admin" {% if account.role == "admin" %}selected{% endif %}>Administrador</option>
         </select>
         <input type="submit" value="Alterar">
     </form>
-
 {% endblock body %}
