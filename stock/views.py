@@ -9,7 +9,7 @@ from .models import Category, Ingredient, Product
 # TODO: 404 mais amigavel e detalhado
 
 
-# TODO: Fazer formatação e validação no nome
+# NOTE: Talvez fazer formatação e validação no nome
 @login_required
 @require_http_methods(["GET", "POST"])
 def category_create(request):

@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth import authenticate
 from django.contrib.auth import login as login_django
+from django.contrib.auth import logout as logout_django
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods
@@ -8,7 +9,13 @@ from django.views.decorators.http import require_http_methods
 from .models import CustomUser
 
 # TODO: Tratar o erro 404
-# TODO: Fazer o logout
+# NOTE: exemplo de Mixing
+
+# class AdminRoleRequiredMixing:
+#     def dispatch(self, request):
+#         if not request.user.role == "admin":
+#             raise PermissionDenied("Usuário não possui permissões suficientes")
+#         return super().dispatch(request)
 
 
 @require_http_methods(["GET", "POST"])
@@ -35,7 +42,7 @@ def login(request):
             return redirect("login")
 
 
-# TODO: Fazer verificações mais rígidas
+# TODO: Fazer verificações mais rígidas (letras, numeros, caracteres especiais)
 @require_http_methods(["GET", "POST"])
 def register(request):
     if request.user.role != "admin":
@@ -79,6 +86,14 @@ def register(request):
     return render(request, "register.html")
 
 
+@login_required
+@require_http_methods(["GET"])
+def logout(request):
+    logout_django(request)
+    messages.success(request, "Deslogado com sucesso!")
+    return redirect("home")
+
+
 # TODO: Fazer paginação
 @login_required
 @require_http_methods(["GET"])
@@ -91,6 +106,15 @@ def list_account(request):
 
     return render(request, "list.html", {"accounts": accounts})
 
+# NOTE: Função list no formato CBV
+
+# ListView espera template no padrão <model_name>_list.htmli
+# podemos sobrescrever, mas a ideia é que ele apenas espera accounts/customuser_list.html
+# class AccountListView(AdminRoleRequiredMixing, ListView):
+#     model = CustomUser
+#     template_name = "list.html"
+#     context_object_name = "accounts"
+    
 
 @login_required
 @require_http_methods(["GET"])
@@ -104,7 +128,8 @@ def detail_account(request, id):
     return render(request, "detail.html", {"account": account})
 
 
-# FIX: tem que poder trocar a senha com o set_password, se fode pra mostrar a senha bonita
+
+# TODO: Tem que adicionar check password
 @login_required
 @require_http_methods(["GET", "POST"])
 def update_account(request, id):
@@ -122,6 +147,9 @@ def update_account(request, id):
         account.last_name = request.POST.get("last_name")
         account.email = request.POST.get("email")
         account.role = request.POST.get("role")
+        password = request.POST.get("password")
+        if password:
+            account.set_password(request.POST.get("password"))
 
         account.save()
 
@@ -129,9 +157,6 @@ def update_account(request, id):
         return redirect("list")
 
 
-# Tailwind modal
-# TODO: Solicitar confirmação
-# NOTE: Não pode deletar a propria conta
 @login_required
 @require_http_methods(["GET", "POST"])
 def delete_account(request, id):
@@ -142,9 +167,17 @@ def delete_account(request, id):
         return redirect("home")
 
     if request.method == "POST":
+        print(request.user.email)
+        print(request.POST.get("email"))
+        
         account.delete()
 
         messages.success(request, "Conta deletada com sucesso!")
         return redirect("list")
+
+    if request.user.email == account.email:
+        messages.error(request, "Você não pode deletar a própria conta!")
+        return redirect("list")
+
 
     return render(request, "delete.html", {"account": account})

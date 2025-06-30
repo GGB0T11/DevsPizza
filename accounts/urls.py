@@ -1,12 +1,14 @@
 from django.urls import path
 
-from .views import delete_account, detail_account, list_account, login, register, update_account
+from . import views
 
 urlpatterns = [
-    path("login/", login, name="login"),
-    path("register/", register, name="register"),
-    path("", list_account, name="list"),
-    path("<int:id>", detail_account, name="detail"),
-    path("<int:id>/update", update_account, name="update"),
-    path("<int:id>/delete", delete_account, name="delete"),
+    path("login/", views.login, name="login"),
+    path("register/", views.register, name="register"),
+    path("logout/", views.logout, name="logout"),
+    path("", views.list_account, name="list")
+    # path("", AccountListView.as_view(), name="list"),
+    path("<int:id>", views.detail_account, name="detail"),
+    path("<int:id>/update", views.update_account, name="update"),
+    path("<int:id>/delete", views.delete_account, name="delete"),
 ]
