@@ -8,7 +8,7 @@ from django.views.decorators.http import require_http_methods
 from .models import CustomUser
 
 # TODO: Tratar o erro 404
-# TODO: Usar forms
+# TODO: Fazer o logout
 
 
 @require_http_methods(["GET", "POST"])
@@ -38,10 +38,11 @@ def login(request):
 # TODO: Fazer verificações mais rígidas
 @require_http_methods(["GET", "POST"])
 def register(request):
-    if request.method == "GET":
-        return render(request, "register.html")
+    if request.user.role != "admin":
+        messages.error(request, "Somente admins podem criar novas contas!")
+        return redirect("home")
 
-    else:
+    if request.method == "POST":
         first_name = request.POST.get("first_name")
         last_name = request.POST.get("last_name")
         email = request.POST.get("email")
@@ -75,33 +76,42 @@ def register(request):
         messages.success(request, "Usuário criado com sucesso!")
         return redirect("home")
 
+    return render(request, "register.html")
+
 
 # TODO: Fazer paginação
 @login_required
 @require_http_methods(["GET"])
 def list_account(request):
+    if request.user.role != "admin":
+        messages.error(request, "Somente admins podem ver os usuários!")
+        return redirect("home")
+
     accounts = CustomUser.objects.all()
 
-    if accounts:
-        return render(request, "list.html", {"accounts": accounts})
-
-    else:
-        messages.error(request, "Nenhuma conta criada")
-        redirect(request, "list.html")
+    return render(request, "list.html", {"accounts": accounts})
 
 
 @login_required
 @require_http_methods(["GET"])
 def detail_account(request, id):
+    if request.user.role != "admin":
+        messages.error(request, "Somente admins podem ver detalhes das contas!")
+        return redirect("home")
+
     account = get_object_or_404(CustomUser, id=id)
 
     return render(request, "detail.html", {"account": account})
 
 
-# TODO: Fazer o html do update
+# FIX: tem que poder trocar a senha com o set_password, se fode pra mostrar a senha bonita
 @login_required
 @require_http_methods(["GET", "POST"])
 def update_account(request, id):
+    if request.user.role != "admin":
+        messages.error(request, "Somente admins podem alterar contas")
+        return redirect("home")
+
     account = get_object_or_404(CustomUser, id=id)
 
     if request.method == "GET":
@@ -119,14 +129,22 @@ def update_account(request, id):
         return redirect("list")
 
 
+# Tailwind modal
 # TODO: Solicitar confirmação
-# Acho que essa lógica está errada mas por enquanto vou manter
+# NOTE: Não pode deletar a propria conta
 @login_required
-@require_http_methods(["GET"])
+@require_http_methods(["GET", "POST"])
 def delete_account(request, id):
     account = get_object_or_404(CustomUser, id=id)
 
-    account.delete()
+    if request.user.role != "admin":
+        messages.error(request, "Somente admins podem deletar contas")
+        return redirect("home")
 
-    messages.success(request, "Conta deletada com sucesso!")
-    return redirect("list")
+    if request.method == "POST":
+        account.delete()
+
+        messages.success(request, "Conta deletada com sucesso!")
+        return redirect("list")
+
+    return render(request, "delete.html", {"account": account})
