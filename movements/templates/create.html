@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}
+    Create
+{% endblock title %}
+{% block body %}
+    <form method="POST">
+        {% csrf_token %}
+        <label for="product">Produto:</label>
+        <select name="product" required>
+            {% for product in products %}<option value="{{ product.id }}">{{ product.name }}</option>{% endfor %}
+        </select>
+        <label for="type">Tipo:</label>
+        <select name="type" required>
+            <option value="inflow">Entrada</option>
+            <option value="outflow">Saida</option>
+        </select>
+        <label for="amount">Quantidade:</label>
+        <input type="number" name="amount" min="1" required />
+        <label for="commentary">Comentário:</label>
+        <textarea name="commentary"></textarea>
+        <input type="submit" value="Registrar" />
+    </form>
+{% endblock body %}

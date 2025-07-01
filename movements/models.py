@@ -1,5 +1,6 @@
-from accounts.models import CustomUser
 from django.db import models
+
+from accounts.models import CustomUser
 from stock.models import Product
 
 
@@ -13,7 +14,7 @@ class Movement(models.Model):
     )
     amount = models.PositiveIntegerField(default=1)
     date = models.DateTimeField(auto_now_add=True)
-    comentary = models.TextField(null=True, blank=True)
+    commentary = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.product}, {self.amount} {self.get_type_display()}"
