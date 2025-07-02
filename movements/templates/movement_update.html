@@ -3,18 +3,21 @@
     Atualizar
 {% endblock title %}
 {% block body %}
-    <form action="{% url 'update' movement.id %}" method="POST">
+    <form action="{% url 'movement_update' movement.id %}" method="POST">
         {% csrf_token %}
-        <input type="text" name="first_name" value="{{ account.first_name }}" />
-        <input type="text" name="last_name" value="{{ account.last_name }}" />
-        <input type="email" name="email" value="{{ account.email }}" />
-        <label for="role">Defina o cargo:</label>
-        <select id="roles" name="role" required>
-            <option value="employee"
-                    {% if account.role == "employee" %}selected{% endif %}>Funcionário</option>
-            <option value="admin" {% if account.role="" ="admin" %}selected{% endif %}>Administrador</option>
+        <label for="product">Produto:</label>
+        <select name="product">
+            {% for product in products %}
+                <option value="{{ product.id }}"
+                        {% if product.name == movement.product %}selected{% endif %}>{{ product.name }}</option>
+            {% endfor %}
         </select>
-        <input type="password" name="password" value="" />
+        <select>
+            <option value="inflow" {% if movement.type == "inflow" %}selected{% endif %}>Entrada</option>
+            <option value="inflow" {% if movement.type == "outflow" %}selected{% endif %}>Saida</option>
+        </select>
+        <input type="number" name="amount" value="{{ movement.amount }}" />
+        <input type="textarea" name="commentary" value="{{ movement.commentary }}" />
         <input type="submit" value="Alterar" />
     </form>
 {% endblock body %}

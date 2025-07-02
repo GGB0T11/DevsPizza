@@ -1,5 +1,5 @@
 from django.contrib import messages
-from django.shortcuts import redirect, render
+from django.shortcuts import render
 from django.urls import reverse
 from django.views import View
 from django.views.generic import DeleteView, DetailView, ListView, UpdateView
@@ -45,12 +45,12 @@ class MovementDetail(DetailView):
     context_object_name = "movement"
 
 
-# TODO: Passar os fields
+# TODO: Talvez colocar o user que alterou
 class MovementUpdate(UpdateView):
-    fields = []
+    fields = ["product", "type", "amount", "commentary"]
     model = Movement
     template_name = "movement_update.html"
-    context_object_name = "movements"
+    context_object_name = "movement"
 
     def get_context_data(self, **kargs):
         context = super().get_context_data(**kargs)
