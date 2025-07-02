@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.shortcuts import redirect, render
+from django.urls import reverse
 from django.views import View
 from django.views.generic import DeleteView, DetailView, ListView, UpdateView
 
@@ -27,8 +28,9 @@ class MovementCreate(View):
 
         Movement.objects.create(product=product, user=user, type=movement_type, amount=amount, commentary=commentary)
 
-        messages.success(request, "Movimentação registrada com sucesso!")
-        return redirect("list")
+    def get_success_url(self):
+        messages.success(self.request, "Movimentação registrada com sucesso!")
+        return reverse("movement_list")
 
 
 class MovementList(ListView):
@@ -43,7 +45,9 @@ class MovementDetail(DetailView):
     context_object_name = "movement"
 
 
+# TODO: Passar os fields
 class MovementUpdate(UpdateView):
+    fields = []
     model = Movement
     template_name = "movement_update.html"
     context_object_name = "movements"
@@ -53,3 +57,12 @@ class MovementUpdate(UpdateView):
         context["products"] = Product.objects.all()
 
         return context
+
+
+class MovementDelete(DeleteView):
+    model = Movement
+    template_name = "movement_delete.html"
+
+    def get_success_url(self):
+        messages.success(self.request, "Movimantação deletada com sucesso!")
+        return reverse("movement_list")

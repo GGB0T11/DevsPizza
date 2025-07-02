@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base.html"%}
 {% block title %}
     List
 {% endblock title %}
@@ -26,6 +26,12 @@
                         {% endif %}
                     </td>
                     <td>{{ movement.date }}</td>
+                    <td>
+                        <a href="{% url 'movement_update' movement.id %}">Editar</a>
+                    </td>
+                    <td>
+                        <a href="{% url 'movement_delete' movement.id %}">Remover</a>
+                    </td>
                 </tr>
             {% endfor %}
         </tbody>
