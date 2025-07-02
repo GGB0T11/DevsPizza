@@ -15,10 +15,10 @@
                     <td>{{ account.first_name }}</td>
                     <td>{{ account.role }}</td>
                     <td>
-                        <a href="{% url 'update' account.id %}">Editar</a>
+                        <a href="{% url 'account_update' account.id %}">Editar</a>
                     </td>
                     <td>
-                        <a href="{% url 'delete' account.id %}">Remover</a>
+                        <a href="{% url 'account_delete' account.id %}">Remover</a>
                     </td>
                 </tr>
             {% endfor %}

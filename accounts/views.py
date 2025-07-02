@@ -91,7 +91,7 @@ def register(request):
 def logout(request):
     logout_django(request)
     messages.success(request, "Deslogado com sucesso!")
-    return redirect("home")
+    return redirect("register")
 
 
 # TODO: Fazer paginação
@@ -104,7 +104,8 @@ def list_account(request):
 
     accounts = CustomUser.objects.all()
 
-    return render(request, "list.html", {"accounts": accounts})
+    return render(request, "account_list.html", {"accounts": accounts})
+
 
 # NOTE: Função list no formato CBV
 
@@ -114,7 +115,7 @@ def list_account(request):
 #     model = CustomUser
 #     template_name = "list.html"
 #     context_object_name = "accounts"
-    
+
 
 @login_required
 @require_http_methods(["GET"])
@@ -125,8 +126,7 @@ def detail_account(request, id):
 
     account = get_object_or_404(CustomUser, id=id)
 
-    return render(request, "detail.html", {"account": account})
-
+    return render(request, "account_detail.html", {"account": account})
 
 
 # TODO: Tem que adicionar check password
@@ -140,7 +140,7 @@ def update_account(request, id):
     account = get_object_or_404(CustomUser, id=id)
 
     if request.method == "GET":
-        return render(request, "update.html", {"account": account})
+        return render(request, "account_update.html", {"account": account})
 
     else:
         account.first_name = request.POST.get("first_name")
@@ -154,7 +154,7 @@ def update_account(request, id):
         account.save()
 
         messages.success(request, "Conta alterada com sucesso!")
-        return redirect("list")
+        return redirect("account_list")
 
 
 @login_required
@@ -169,15 +169,14 @@ def delete_account(request, id):
     if request.method == "POST":
         print(request.user.email)
         print(request.POST.get("email"))
-        
+
         account.delete()
 
         messages.success(request, "Conta deletada com sucesso!")
-        return redirect("list")
+        return redirect("account_list")
 
     if request.user.email == account.email:
         messages.error(request, "Você não pode deletar a própria conta!")
-        return redirect("list")
+        return redirect("account_list")
 
-
-    return render(request, "delete.html", {"account": account})
+    return render(request, "account_delete.html", {"account": account})
