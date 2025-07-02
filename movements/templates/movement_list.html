@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}
+    List
+{% endblock title %}
+{% block body %}
+    <table>
+        <thead>
+            <th>Responsável</th>
+            <th>Produto</th>
+            <th>Quantidade</th>
+            <th>Tipo</th>
+            <th>Data</th>
+        </thead>
+        <tbody>
+            <br />
+            {% for movement in movements %}
+                <tr>
+                    <td>{{ movement.user }}</td>
+                    <td>{{ movement.product }}</td>
+                    <td>{{ movement.amount }}</td>
+                    <td>
+                        {% if movement.type == "inflow" %}
+                            Entrada
+                        {% else %}
+                            Saida
+                        {% endif %}
+                    </td>
+                    <td>{{ movement.date }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock body %}

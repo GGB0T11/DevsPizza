@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.shortcuts import redirect, render
 from django.views import View
+from django.views.generic import DeleteView, DetailView, ListView, UpdateView
 
 from stock.models import Product
 
@@ -8,7 +9,7 @@ from .models import Movement
 
 
 class MovementCreate(View):
-    template_name = "create.html"
+    template_name = "movement_create.html"
 
     def get(self, request):
         products = Product.objects.all()
@@ -28,3 +29,27 @@ class MovementCreate(View):
 
         messages.success(request, "Movimentação registrada com sucesso!")
         return redirect("list")
+
+
+class MovementList(ListView):
+    model = Movement
+    template_name = "movement_list.html"
+    context_object_name = "movements"
+
+
+class MovementDetail(DetailView):
+    model = Movement
+    template_name = "movement_detail.html"
+    context_object_name = "movement"
+
+
+class MovementUpdate(UpdateView):
+    model = Movement
+    template_name = "movement_update.html"
+    context_object_name = "movements"
+
+    def get_context_data(self, **kargs):
+        context = super().get_context_data(**kargs)
+        context["products"] = Product.objects.all()
+
+        return context

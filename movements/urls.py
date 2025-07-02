@@ -1,11 +1,11 @@
 from django.urls import path
 
-from .views import MovementCreate
+from .views import MovementCreate, MovementDetail, MovementList, MovementUpdate
 
 urlpatterns = [
-    path("new", MovementCreate.as_view(), name="create"),
-    # path("", views.movements_list, name="list"),
-    # path("<int:id>", views.movements_detail, name="detail"),
-    # path("<int:id>/update", views.movements_update, name="update"),
+    path("new/", MovementCreate.as_view(), name="create"),
+    path("", MovementList.as_view(), name="list"),
+    path("<int:pk>", MovementDetail.as_view(), name="detail"),
+    path("<int:pk>/update", MovementUpdate.as_view(), name="update"),
     # path("<int:id>/delete", views.movements_delete, name="delete"),
 ]
