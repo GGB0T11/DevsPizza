@@ -3,7 +3,7 @@
     Atualizar
 {% endblock title %}
 {% block body %}
-    <form action="{% url 'update' account.id %}" method="POST">
+    <form action="{% url 'account_update' account.id %}" method="POST">
         {% csrf_token %}
         <input type="text" name="first_name" value="{{ account.first_name }}">
         <input type="text" name="last_name" value="{{ account.last_name }}">
