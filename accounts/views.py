@@ -1,45 +1,51 @@
 from django.contrib import messages
-from django.contrib.auth import authenticate
-from django.contrib.auth import login as login_django
+
+# from django.contrib.auth import authenticate
+# from django.contrib.auth import login as login_django
 from django.contrib.auth import logout as logout_django
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import LoginView
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse_lazy
 from django.views.decorators.http import require_http_methods
 
 from .models import CustomUser
 
 # TODO: Tratar o erro 404
-# NOTE: exemplo de Mixing
-
-# class AdminRoleRequiredMixing:
-#     def dispatch(self, request):
-#         if not request.user.role == "admin":
-#             raise PermissionDenied("Usuário não possui permissões suficientes")
-#         return super().dispatch(request)
 
 
-@require_http_methods(["GET", "POST"])
-def login(request):
-    if request.method == "GET":
-        if request.user.is_authenticated:
-            return redirect("home")
+class AccountLogin(LoginView):
+    template_name = "login.html"
+    success_url = reverse_lazy("home")
+    redirect_authenticated_user = True
 
-        else:
-            return render(request, "login.html")
+    def form_invalid(self, form):
+        messages.error(self.request, "Email ou senha inválidos")
+        return super().form_invalid(form)
 
-    else:
-        email = request.POST.get("email")
-        password = request.POST.get("password")
 
-        user = authenticate(email=email, password=password)
-
-        if user:
-            login_django(request, user)
-            return redirect("home")
-
-        else:
-            messages.error(request, "Email ou senha inválidos")
-            return redirect("login")
+# @require_http_methods(["GET", "POST"])
+# def login(request):
+#     if request.method == "GET":
+#         if request.user.is_authenticated:
+#             return redirect("home")
+#
+#         else:
+#             return render(request, "login.html")
+#
+#     else:
+#         email = request.POST.get("email")
+#         password = request.POST.get("password")
+#
+#         user = authenticate(email=email, password=password)
+#
+#         if user:
+#             login_django(request, user)
+#             return redirect("home")
+#
+#         else:
+#             messages.error(request, "Email ou senha inválidos")
+#             return redirect("login")
 
 
 # TODO: Fazer verificações mais rígidas (letras, numeros, caracteres especiais)
