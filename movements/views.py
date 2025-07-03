@@ -1,32 +1,25 @@
 from django.contrib import messages
-from django.shortcuts import render
 from django.urls import reverse
-from django.views import View
-from django.views.generic import DeleteView, DetailView, ListView, UpdateView
+from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
 from stock.models import Product
 
 from .models import Movement
 
 
-class MovementCreate(View):
+class MovementCreate(CreateView):
+    model = Movement
+    fields = ["product", "type", "amount", "commentary"]
     template_name = "movement_create.html"
 
-    def get(self, request):
-        products = Product.objects.all()
-        return render(request, self.template_name, {"products": products})
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        return super().form_valid(form)
 
-    def post(self, request):
-        product_id = request.POST.get("product")
-        movement_type = request.POST.get("type")
-        print(movement_type)
-        amount = request.POST.get("amount")
-        commentary = request.POST.get("commentary")
-
-        product = Product.objects.get(id=product_id)
-        user = request.user
-
-        Movement.objects.create(product=product, user=user, type=movement_type, amount=amount, commentary=commentary)
+    def get_context_data(self, **kargs):
+        context = super().get_context_data(**kargs)
+        context["products"] = Product.objects.all()
+        return context
 
     def get_success_url(self):
         messages.success(self.request, "Movimentação registrada com sucesso!")
@@ -45,7 +38,6 @@ class MovementDetail(DetailView):
     context_object_name = "movement"
 
 
-# TODO: Talvez colocar o user que alterou
 class MovementUpdate(UpdateView):
     fields = ["product", "type", "amount", "commentary"]
     model = Movement
@@ -55,8 +47,11 @@ class MovementUpdate(UpdateView):
     def get_context_data(self, **kargs):
         context = super().get_context_data(**kargs)
         context["products"] = Product.objects.all()
-
         return context
+
+    def get_success_url(self):
+        messages.success(self.request, "Movimentação alterada com sucesso!")
+        return reverse("movement_list")
 
 
 class MovementDelete(DeleteView):
@@ -64,5 +59,5 @@ class MovementDelete(DeleteView):
     template_name = "movement_delete.html"
 
     def get_success_url(self):
-        messages.success(self.request, "Movimantação deletada com sucesso!")
+        messages.success(self.request, "Movimentação deletada com sucesso!")
         return reverse("movement_list")
