@@ -1,13 +1,11 @@
 from django.contrib import messages
-
-# from django.contrib.auth import authenticate
-# from django.contrib.auth import login as login_django
 from django.contrib.auth import logout as logout_django
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.views import LoginView
+from django.contrib.auth.views import LoginView, LogoutView
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.views.decorators.http import require_http_methods
+from django.views.generic import DeleteView, DetailView, ListView, UpdateView
 
 from .models import CustomUser
 
@@ -24,30 +22,7 @@ class AccountLogin(LoginView):
         return super().form_invalid(form)
 
 
-# @require_http_methods(["GET", "POST"])
-# def login(request):
-#     if request.method == "GET":
-#         if request.user.is_authenticated:
-#             return redirect("home")
-#
-#         else:
-#             return render(request, "login.html")
-#
-#     else:
-#         email = request.POST.get("email")
-#         password = request.POST.get("password")
-#
-#         user = authenticate(email=email, password=password)
-#
-#         if user:
-#             login_django(request, user)
-#             return redirect("home")
-#
-#         else:
-#             messages.error(request, "Email ou senha inválidos")
-#             return redirect("login")
-
-
+# FIX: Fazer essa porra em CBV
 # TODO: Fazer verificações mais rígidas (letras, numeros, caracteres especiais)
 @require_http_methods(["GET", "POST"])
 def register(request):
@@ -92,6 +67,7 @@ def register(request):
     return render(request, "register.html")
 
 
+# NOTE: Nao sei se vale a pena fazer isso em CBV
 @login_required
 @require_http_methods(["GET"])
 def logout(request):
@@ -101,40 +77,19 @@ def logout(request):
 
 
 # TODO: Fazer paginação
-@login_required
-@require_http_methods(["GET"])
-def list_account(request):
-    if request.user.role != "admin":
-        messages.error(request, "Somente admins podem ver os usuários!")
-        return redirect("home")
-
-    accounts = CustomUser.objects.all()
-
-    return render(request, "account_list.html", {"accounts": accounts})
+class AccountList(ListView):
+    model = CustomUser
+    template_name = "account_list.html"
+    context_object_name = "accounts"
 
 
-# NOTE: Função list no formato CBV
-
-# ListView espera template no padrão <model_name>_list.htmli
-# podemos sobrescrever, mas a ideia é que ele apenas espera accounts/customuser_list.html
-# class AccountListView(AdminRoleRequiredMixing, ListView):
-#     model = CustomUser
-#     template_name = "list.html"
-#     context_object_name = "accounts"
+class AccountDetail(DetailView):
+    model = CustomUser
+    template_name = "account_detail.html"
+    context_object_name = "account"
 
 
-@login_required
-@require_http_methods(["GET"])
-def detail_account(request, id):
-    if request.user.role != "admin":
-        messages.error(request, "Somente admins podem ver detalhes das contas!")
-        return redirect("home")
-
-    account = get_object_or_404(CustomUser, id=id)
-
-    return render(request, "account_detail.html", {"account": account})
-
-
+# FIX: Refazer no formato CBV
 # TODO: Tem que adicionar check password
 @login_required
 @require_http_methods(["GET", "POST"])
@@ -163,26 +118,10 @@ def update_account(request, id):
         return redirect("account_list")
 
 
-@login_required
-@require_http_methods(["GET", "POST"])
-def delete_account(request, id):
-    account = get_object_or_404(CustomUser, id=id)
+class AccountDelete(DeleteView):
+    model = CustomUser
+    template_name = "account_delete.html"
 
-    if request.user.role != "admin":
-        messages.error(request, "Somente admins podem deletar contas")
-        return redirect("home")
-
-    if request.method == "POST":
-        print(request.user.email)
-        print(request.POST.get("email"))
-
-        account.delete()
-
-        messages.success(request, "Conta deletada com sucesso!")
-        return redirect("account_list")
-
-    if request.user.email == account.email:
-        messages.error(request, "Você não pode deletar a própria conta!")
-        return redirect("account_list")
-
-    return render(request, "account_delete.html", {"account": account})
+    def get_success_url(self):
+        messages.success(self.request, "Conta deletada com sucesso!")
+        return reverse("account_list")

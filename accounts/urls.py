@@ -1,14 +1,13 @@
 from django.urls import path
 
-from . import views
+from .views import AccountDelete, AccountDetail, AccountList, AccountLogin, logout, register, update_account
 
 urlpatterns = [
-    path("login/", views.AccountLogin.as_view(), name="login"),
-    # path("login/", views.login, name="login"),
-    path("register/", views.register, name="register"),
-    path("logout/", views.logout, name="logout"),
-    path("", views.list_account, name="account_list"),
-    path("<int:id>", views.detail_account, name="account_detail"),
-    path("<int:id>/update", views.update_account, name="account_update"),
-    path("<int:id>/delete", views.delete_account, name="account_delete"),
+    path("login/", AccountLogin.as_view(), name="login"),
+    path("register/", register, name="register"),
+    path("logout/", logout, name="logout"),
+    path("", AccountList.as_view(), name="account_list"),
+    path("<int:pk>", AccountDetail.as_view(), name="account_detail"),
+    path("<int:id>/update", update_account, name="account_update"),
+    path("<int:pk>/delete", AccountDelete.as_view(), name="account_delete"),
 ]
