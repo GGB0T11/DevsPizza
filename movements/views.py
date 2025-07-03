@@ -16,8 +16,8 @@ class MovementCreate(CreateView):
         form.instance.user = self.request.user
         return super().form_valid(form)
 
-    def get_context_data(self, **kargs):
-        context = super().get_context_data(**kargs)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         context["products"] = Product.objects.all()
         return context
 
@@ -44,8 +44,8 @@ class MovementUpdate(UpdateView):
     template_name = "movement_update.html"
     context_object_name = "movement"
 
-    def get_context_data(self, **kargs):
-        context = super().get_context_data(**kargs)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         context["products"] = Product.objects.all()
         return context
 
