@@ -13,7 +13,7 @@
                         {% if ingredient.category.id == category.id %}selected{% endif %}>{{ category.name }}</option>
             {% endfor %}
         </select>
-        <input type="number" name="qte" value="{{ ingredient.current_qte }}" />
+        <input type="number" name="current_qte" value="{{ ingredient.current_qte }}" />
         <input type="text" name="measure_unit" value="{{ ingredient.measure_unit }}" />
         <label for="status">Status:</label>
         <select name="active">

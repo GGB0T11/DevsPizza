@@ -1,235 +1,152 @@
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404, redirect, render
-from django.views.decorators.http import require_http_methods
+from django.urls import reverse
+from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
 from .models import Category, Ingredient, Product
 
-# TODO: Filtragem e busca nas lists
-# TODO: 404 mais amigavel e detalhado
 
+class CategoryCreate(CreateView):
+    model = Category
+    fields = ["name", "description"]
+    template_name = "category_create.html"
 
-# NOTE: Talvez fazer formatação e validação no nome
-@login_required
-@require_http_methods(["GET", "POST"])
-def category_create(request):
-    print(request)
-    if request.method == "GET":
-        return render(request, "category_create.html")
+    def get_success_url(self):
+        messages.success(self.request, "Categoria registrada com sucesso!")
+        return reverse("category_list")
 
-    else:
-        name = request.POST.get("name")
-        description = request.POST.get("description")
 
-        if Category.objects.filter(name=name):
-            messages.error(request, "A categoria que deseja cadastrar já existe!")
-            return redirect("category_list")
+class CategoryList(ListView):
+    model = Category
+    template_name = "category_list.html"
+    context_object_name = "categories"
 
-        category = Category.objects.create(name=name, description=description)
 
-        category.save()
+class CategoryDetail(DetailView):
+    model = Category
+    template_name = "category_detail.html"
+    context_object_name = "category"
 
-        messages.success(request, "Categoria criada com sucesso!")
-        return redirect("category_list")
 
+class CategoryUpdate(UpdateView):
+    fields = ["name", "description"]
+    model = Category
+    template_name = "category_update.html"
+    context_object_name = "category"
 
-# TODO: Mostrar uma mensagem se não tiver categoria
-@login_required
-@require_http_methods(["GET"])
-def category_list(request):
-    categories = Category.objects.all()
+    def get_success_url(self):
+        messages.success(self.request, "Categoria alterada com sucesso!")
+        return reverse("category_list")
 
-    return render(request, "category_list.html", {"categories": categories})
 
+class CategoryDelete(DeleteView):
+    model = Category
+    template_name = "category_delete.html"
 
-@login_required
-@require_http_methods(["GET"])
-def category_detail(request, id):
-    category = get_object_or_404(Category, id=id)
+    def get_success_url(self):
+        messages.success(self.request, "Categoria deletada com sucesso!")
+        return reverse("category_list")
 
-    return render(request, "category_detail.html", {"category": category})
 
+class IngredientCreate(CreateView):
+    model = Ingredient
+    fields = ["name", "category", "current_qte", "measure_unit"]
+    template_name = "ingredient_create.html"
 
-@login_required
-@require_http_methods(["GET", "POST"])
-def category_update(request, id):
-    category = get_object_or_404(Category, id=id)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["categories"] = Category.objects.all()
+        return context
 
-    if request.method == "GET":
-        return render(request, "category_update.html", {"category": category})
+    def get_success_url(self):
+        messages.success(self.request, "Ingrediente registrado com sucesso!")
+        return reverse("ingredient_list")
 
-    else:
-        category.name = request.POST.get("name")
-        category.description = request.POST.get("description")
 
-        category.save()
+class IngredientList(ListView):
+    model = Ingredient
+    template_name = "ingredient_list.html"
+    context_object_name = "ingredients"
 
-        messages.success(request, "Categoria alterada com sucesso!")
-        return redirect("category_list")
 
+# FIX: Exibir os Ingredientes
+class IngredientDetail(DetailView):
+    model = Ingredient
+    template_name = "ingredient_detail.html"
+    context_object_name = "ingredient"
 
-@login_required
-@require_http_methods(["GET"])
-def category_delete(request, id):
-    category = get_object_or_404(Category, id=id)
 
-    category.delete()
+class IngredientUpdate(UpdateView):
+    fields = ["name", "category", "current_qte", "measure_unit", "active"]
+    model = Ingredient
+    template_name = "ingredient_update.html"
+    context_object_name = "ingredient"
 
-    messages.success(request, "Categoria deletada com sucesso!")
-    return redirect("category_list")
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["categories"] = Category.objects.all()
+        return context
 
+    def get_success_url(self):
+        messages.success(self.request, "Ingrediente alterado com sucesso!")
+        return reverse("ingredient_list")
 
-@login_required
-@require_http_methods(["GET", "POST"])
-def ingredient_create(request):
-    if request.method == "GET":
-        categories = Category.objects.all()
 
-        return render(request, "ingredient_create.html", {"categories": categories})
+class IngredientDelete(DeleteView):
+    model = Ingredient
+    template_name = "ingredient_delete.html"
 
-    else:
-        name = request.POST.get("name")
-        qte = request.POST.get("qte")
-        category_id = request.POST.get("category")
-        measure_unit = request.POST.get("measure_unit")
+    def get_success_url(self):
+        messages.success(self.request, "Ingrediente deletado com sucesso!")
+        return reverse("ingredient_list")
 
-        category = get_object_or_404(Category, id=category_id)
 
-        if Ingredient.objects.filter(name=name):
-            messages.error(request, "O ingrediente que deseja cadastrar já existe!")
-            return redirect("ingredient_list")
+class ProductCreate(CreateView):
+    model = Product
+    fields = ["name", "ingredients"]
+    template_name = "product_create.html"
 
-        ingredient = Ingredient.objects.create(name=name, current_qte=qte, category=category, measure_unit=measure_unit)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["ingredients"] = Ingredient.objects.all()
+        return context
 
-        ingredient.save()
+    def get_success_url(self):
+        messages.success(self.request, "Produto registrado com sucesso!")
+        return reverse("product_list")
 
-        messages.success(request, "Ingrediente cadastrado com sucesso!")
-        return redirect("ingredient_list")
 
+class ProductList(ListView):
+    model = Product
+    template_name = "product_list.html"
+    context_object_name = "products"
 
-@login_required
-@require_http_methods(["GET"])
-def ingredient_list(request):
-    ingredients = Ingredient.objects.all()
 
-    return render(request, "ingredient_list.html", {"ingredients": ingredients})
+class ProductDetail(DetailView):
+    model = Product
+    template_name = "product_detail.html"
+    context_object_name = "product"
 
 
-@login_required
-@require_http_methods(["GET"])
-def ingredient_detail(request, id):
-    ingredient = get_object_or_404(Ingredient, id=id)
+class ProductUpdate(UpdateView):
+    fields = ["name", "ingredients"]
+    model = Product
+    template_name = "product_update.html"
+    context_object_name = "product"
 
-    return render(request, "detail.html", {"ingredient": ingredient})
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["ingredients"] = Ingredient.objects.all()
+        return context
 
+    def get_success_url(self):
+        messages.success(self.request, "Produto alterado com sucesso!")
+        return reverse("product_list")
 
-@login_required
-@require_http_methods(["GET", "POST"])
-def ingredient_update(request, id):
-    ingredient = get_object_or_404(Ingredient, id=id)
-    categories = Category.objects.all()
 
-    if request.method == "GET":
-        return render(request, "ingredient_update.html", {"ingredient": ingredient, "categories": categories})
+class ProductDelete(DeleteView):
+    model = Product
+    template_name = "product_delete.html"
 
-    else:
-        ingredient.name = request.POST.get("name")
-        category_id = request.POST.get("category")
-        ingredient.category = get_object_or_404(Category, id=category_id)
-        ingredient.measure_unit = request.POST.get("measure_unit")
-
-        if request.POST.get("active") == "True":
-            ingredient.active = True
-
-        else:
-            ingredient.active = False
-
-        ingredient.save()
-
-        messages.success(request, "Ingrediente alterado com sucesso!")
-        return redirect("ingredient_list")
-
-
-@login_required
-@require_http_methods(["GET"])
-def ingredient_delete(request, id):
-    ingredient = get_object_or_404(Ingredient, id=id)
-
-    ingredient.delete()
-
-    messages.success(request, "Ingrediente deletado com sucesso!")
-    return redirect("ingredient_list")
-
-
-@login_required
-@require_http_methods(["GET", "POST"])
-def product_create(request):
-    if request.method == "GET":
-        ingredients = Ingredient.objects.all()
-        return render(request, "product_create.html", {"ingredients": ingredients})
-
-    else:
-        name = request.POST.get("name")
-        ingredients_ids = request.POST.getlist("ingredients")
-        ingredients = Ingredient.objects.filter(id__in=ingredients_ids)
-
-        product = Product.objects.create(name=name)
-        product.ingredients.set(ingredients)
-        product.save()
-
-        messages.success(request, "Produto criado com sucesso!")
-        return redirect("product_list")
-
-
-@login_required
-@require_http_methods(["GET"])
-def product_list(request):
-    products = Product.objects.all()
-
-    return render(request, "product_list.html", {"products": products})
-
-
-@login_required
-@require_http_methods(["GET"])
-def product_detail(request, id):
-    product = get_object_or_404(Product, id=id)
-
-    return render(request, "product_detail", {"product": product})
-
-
-@login_required
-@require_http_methods(["GET", "POST"])
-def product_update(request, id):
-    product = get_object_or_404(Product, id=id)
-
-    if request.method == "GET":
-        ingredients = Ingredient.objects.all()
-        ingredients_ids = product.ingredients.values_list("id", flat=True)
-
-        return render(
-            request,
-            "product_update.html",
-            {"product": product, "ingredients": ingredients, "ingredients_ids": ingredients_ids},
-        )
-
-    else:
-        product.name = request.POST.get("name")
-        ingredients_ids = request.POST.getlist("ingredients")
-        ingredients = Ingredient.objects.filter(id__in=ingredients_ids)
-        product.ingredients.set(ingredients)
-
-        product.save()
-
-        messages.success(request, "Produto alterado com sucesso!")
-        return redirect("product_list")
-
-
-@login_required
-@require_http_methods(["GET"])
-def product_delete(request, id):
-    product = get_object_or_404(Product, id=id)
-
-    product.delete()
-
-    messages.success(request, "Produto deletado com sucesso!")
-    return redirect("product_list")
+    def get_success_url(self):
+        messages.success(self.request, "Produto deletado com sucesso!")
+        return reverse("product_list")
