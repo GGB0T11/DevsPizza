@@ -1,15 +1,13 @@
 from django.contrib import messages
-from django.contrib.auth import logout as logout_django
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView, LogoutView
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
-from django.views.decorators.http import require_http_methods
-from django.views.generic import DeleteView, DetailView, ListView, UpdateView
+from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
 from .models import CustomUser
 
 # TODO: Tratar o erro 404
+# TODO: Usar Mixings
 
 
 class AccountLogin(LoginView):
@@ -22,15 +20,15 @@ class AccountLogin(LoginView):
         return super().form_invalid(form)
 
 
-# FIX: Fazer essa porra em CBV
 # TODO: Fazer verificações mais rígidas (letras, numeros, caracteres especiais)
-@require_http_methods(["GET", "POST"])
-def register(request):
-    if request.user.role != "admin":
-        messages.error(request, "Somente admins podem criar novas contas!")
-        return redirect("home")
+# NOTE: tem como melhorar
+class AccountRegister(CreateView):
+    model = CustomUser
+    fields = ["first_name", "last_name", "email", "role"]
+    template_name = "register.html"
+    success_url = reverse_lazy("account_list")
 
-    if request.method == "POST":
+    def post(self, request):
         first_name = request.POST.get("first_name")
         last_name = request.POST.get("last_name")
         email = request.POST.get("email")
@@ -62,18 +60,15 @@ def register(request):
         user.save()
 
         messages.success(request, "Usuário criado com sucesso!")
-        return redirect("home")
-
-    return render(request, "register.html")
+        return redirect(self.success_url)
 
 
-# NOTE: Nao sei se vale a pena fazer isso em CBV
-@login_required
-@require_http_methods(["GET"])
-def logout(request):
-    logout_django(request)
-    messages.success(request, "Deslogado com sucesso!")
-    return redirect("register")
+class AccountLogout(LogoutView):
+    next_page = reverse_lazy("login")
+
+    def dispatch(self, request, *args, **kwargs):
+        messages.success(request, "Deslogado com sucesso!")
+        return super().dispatch(request, *args, **kwargs)
 
 
 # TODO: Fazer paginação
@@ -89,33 +84,44 @@ class AccountDetail(DetailView):
     context_object_name = "account"
 
 
-# FIX: Refazer no formato CBV
 # TODO: Tem que adicionar check password
-@login_required
-@require_http_methods(["GET", "POST"])
-def update_account(request, id):
-    if request.user.role != "admin":
-        messages.error(request, "Somente admins podem alterar contas")
-        return redirect("home")
+# TODO: Apenas mostrar o email, não pode alterar
+class AccountUpdate(UpdateView):
+    model = CustomUser
+    fields = ["first_name", "last_name", "email", "role"]
+    template_name = "account_update.html"
+    context_object_name = "account"
+    success_url = reverse_lazy("account_list")
 
-    account = get_object_or_404(CustomUser, id=id)
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
 
-    if request.method == "GET":
-        return render(request, "account_update.html", {"account": account})
-
-    else:
-        account.first_name = request.POST.get("first_name")
-        account.last_name = request.POST.get("last_name")
-        account.email = request.POST.get("email")
-        account.role = request.POST.get("role")
+        first_name = request.POST.get("first_name")
+        last_name = request.POST.get("last_name")
+        email = request.POST.get("email")
+        role = request.POST.get("role")
         password = request.POST.get("password")
+        confirm_password = request.POST.get("confirm_password")
+
         if password:
-            account.set_password(request.POST.get("password"))
+            if password != confirm_password:
+                messages.error(request, "As senhas devem ser iguais!")
+                return redirect(request.path)
 
-        account.save()
+            if len(password) < 8:
+                messages.error(request, "A senha deve ter no mínimo 8 caracteres")
+                return redirect(request.path)
 
-        messages.success(request, "Conta alterada com sucesso!")
-        return redirect("account_list")
+            self.object.set_password(password)
+
+            self.object.first_name = first_name
+            self.object.last_name = last_name
+            self.object.email = email
+            self.object.role = role
+            self.object.save()
+
+            messages.success(request, "Conta alterada com sucesso!")
+            return redirect(self.success_url)
 
 
 class AccountDelete(DeleteView):

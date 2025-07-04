@@ -28,6 +28,14 @@
                 </div>
             {% endfor %}
         {% endif %}
+        <div>
+            {% if user.is_authenticated %}
+                <form action="{% url 'logout' %}" method="POST">
+                    {% csrf_token %}
+                    <button type="submit">Sair</button>
+                </form>
+            {% endif %}
+        </div>
         {% block body %}
         {% endblock body %}
     </body>

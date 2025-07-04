@@ -15,6 +15,7 @@
             <option value="admin" {% if account.role == "admin" %}selected{% endif %}>Administrador</option>
         </select>
         <input type="password" name="password" value="">
+        <input type="password" name="confirm_password" value="">
         <input type="submit" value="Alterar">
     </form>
 {% endblock body %}
