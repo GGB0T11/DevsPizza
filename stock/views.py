@@ -68,7 +68,6 @@ class IngredientList(ListView):
     context_object_name = "ingredients"
 
 
-# FIX: Exibir os Ingredientes
 class IngredientDetail(DetailView):
     model = Ingredient
     template_name = "ingredient_detail.html"

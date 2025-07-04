@@ -4,5 +4,8 @@
 {% endblock title %}
 {% block body %}
     <p>Nome: {{ product.name }}</p>
-    <p>Ingredientes: {{ product.ingredients }}</p>
+    <p>Ingredientes:</p>
+    <ul>
+        {% for ingredient in product.ingredients.all %}<li>{{ ingredient.name }}</li>{% endfor %}
+    </ul>
 {% endblock body %}
