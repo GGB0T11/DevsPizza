@@ -2,12 +2,13 @@ from django.contrib import messages
 from django.urls import reverse
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
+from core.mixins import AdminRequiredMixin, LoginRequiredMixin
 from stock.models import Product
 
 from .models import Movement
 
 
-class MovementCreate(CreateView):
+class MovementCreate(LoginRequiredMixin, CreateView):
     model = Movement
     fields = ["product", "type", "amount", "commentary"]
     template_name = "movement_create.html"
@@ -26,19 +27,19 @@ class MovementCreate(CreateView):
         return reverse("movement_list")
 
 
-class MovementList(ListView):
+class MovementList(LoginRequiredMixin, ListView):
     model = Movement
     template_name = "movement_list.html"
     context_object_name = "movements"
 
 
-class MovementDetail(DetailView):
+class MovementDetail(LoginRequiredMixin, DetailView):
     model = Movement
     template_name = "movement_detail.html"
     context_object_name = "movement"
 
 
-class MovementUpdate(UpdateView):
+class MovementUpdate(LoginRequiredMixin, AdminRequiredMixin, UpdateView):
     fields = ["product", "type", "amount", "commentary"]
     model = Movement
     template_name = "movement_update.html"
@@ -54,7 +55,7 @@ class MovementUpdate(UpdateView):
         return reverse("movement_list")
 
 
-class MovementDelete(DeleteView):
+class MovementDelete(LoginRequiredMixin, AdminRequiredMixin, DeleteView):
     model = Movement
     template_name = "movement_delete.html"
 

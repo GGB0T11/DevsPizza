@@ -4,6 +4,8 @@ from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
+from core.mixins import AdminRequiredMixin, CustomLoginRequiredMixin
+
 from .models import CustomUser
 
 # TODO: Tratar o erro 404
@@ -22,7 +24,7 @@ class AccountLogin(LoginView):
 
 # TODO: Fazer verificações mais rígidas (letras, numeros, caracteres especiais)
 # NOTE: tem como melhorar
-class AccountRegister(CreateView):
+class AccountRegister(CustomLoginRequiredMixin, AdminRequiredMixin, CreateView):
     model = CustomUser
     fields = ["first_name", "last_name", "email", "role"]
     template_name = "register.html"
@@ -72,13 +74,13 @@ class AccountLogout(LogoutView):
 
 
 # TODO: Fazer paginação
-class AccountList(ListView):
+class AccountList(CustomLoginRequiredMixin, AdminRequiredMixin, ListView):
     model = CustomUser
     template_name = "account_list.html"
     context_object_name = "accounts"
 
 
-class AccountDetail(DetailView):
+class AccountDetail(CustomLoginRequiredMixin, AdminRequiredMixin, DetailView):
     model = CustomUser
     template_name = "account_detail.html"
     context_object_name = "account"
@@ -86,7 +88,7 @@ class AccountDetail(DetailView):
 
 # TODO: Tem que adicionar check password
 # TODO: Apenas mostrar o email, não pode alterar
-class AccountUpdate(UpdateView):
+class AccountUpdate(CustomLoginRequiredMixin, AdminRequiredMixin, UpdateView):
     model = CustomUser
     fields = ["first_name", "last_name", "email", "role"]
     template_name = "account_update.html"
@@ -114,17 +116,17 @@ class AccountUpdate(UpdateView):
 
             self.object.set_password(password)
 
-            self.object.first_name = first_name
-            self.object.last_name = last_name
-            self.object.email = email
-            self.object.role = role
-            self.object.save()
+        self.object.first_name = first_name
+        self.object.last_name = last_name
+        self.object.email = email
+        self.object.role = role
+        self.object.save()
 
-            messages.success(request, "Conta alterada com sucesso!")
-            return redirect(self.success_url)
+        messages.success(request, "Conta alterada com sucesso!")
+        return redirect(self.success_url)
 
 
-class AccountDelete(DeleteView):
+class AccountDelete(CustomLoginRequiredMixin, AdminRequiredMixin, DeleteView):
     model = CustomUser
     template_name = "account_delete.html"
 

@@ -2,10 +2,12 @@ from django.contrib import messages
 from django.urls import reverse
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
+from core.mixins import AdminRequiredMixin, LoginRequiredMixin
+
 from .models import Category, Ingredient, Product
 
 
-class CategoryCreate(CreateView):
+class CategoryCreate(LoginRequiredMixin, AdminRequiredMixin, CreateView):
     model = Category
     fields = ["name", "description"]
     template_name = "category_create.html"
@@ -15,19 +17,19 @@ class CategoryCreate(CreateView):
         return reverse("category_list")
 
 
-class CategoryList(ListView):
+class CategoryList(LoginRequiredMixin, ListView):
     model = Category
     template_name = "category_list.html"
     context_object_name = "categories"
 
 
-class CategoryDetail(DetailView):
+class CategoryDetail(LoginRequiredMixin, AdminRequiredMixin, DetailView):
     model = Category
     template_name = "category_detail.html"
     context_object_name = "category"
 
 
-class CategoryUpdate(UpdateView):
+class CategoryUpdate(LoginRequiredMixin, AdminRequiredMixin, UpdateView):
     fields = ["name", "description"]
     model = Category
     template_name = "category_update.html"
@@ -38,7 +40,7 @@ class CategoryUpdate(UpdateView):
         return reverse("category_list")
 
 
-class CategoryDelete(DeleteView):
+class CategoryDelete(LoginRequiredMixin, AdminRequiredMixin, DeleteView):
     model = Category
     template_name = "category_delete.html"
 
@@ -47,7 +49,7 @@ class CategoryDelete(DeleteView):
         return reverse("category_list")
 
 
-class IngredientCreate(CreateView):
+class IngredientCreate(LoginRequiredMixin, AdminRequiredMixin, CreateView):
     model = Ingredient
     fields = ["name", "category", "current_qte", "measure_unit"]
     template_name = "ingredient_create.html"
@@ -62,19 +64,19 @@ class IngredientCreate(CreateView):
         return reverse("ingredient_list")
 
 
-class IngredientList(ListView):
+class IngredientList(LoginRequiredMixin, ListView):
     model = Ingredient
     template_name = "ingredient_list.html"
     context_object_name = "ingredients"
 
 
-class IngredientDetail(DetailView):
+class IngredientDetail(LoginRequiredMixin, AdminRequiredMixin, DetailView):
     model = Ingredient
     template_name = "ingredient_detail.html"
     context_object_name = "ingredient"
 
 
-class IngredientUpdate(UpdateView):
+class IngredientUpdate(LoginRequiredMixin, AdminRequiredMixin, UpdateView):
     fields = ["name", "category", "current_qte", "measure_unit", "active"]
     model = Ingredient
     template_name = "ingredient_update.html"
@@ -90,7 +92,7 @@ class IngredientUpdate(UpdateView):
         return reverse("ingredient_list")
 
 
-class IngredientDelete(DeleteView):
+class IngredientDelete(LoginRequiredMixin, AdminRequiredMixin, DeleteView):
     model = Ingredient
     template_name = "ingredient_delete.html"
 
@@ -99,7 +101,7 @@ class IngredientDelete(DeleteView):
         return reverse("ingredient_list")
 
 
-class ProductCreate(CreateView):
+class ProductCreate(LoginRequiredMixin, AdminRequiredMixin, CreateView):
     model = Product
     fields = ["name", "ingredients"]
     template_name = "product_create.html"
@@ -114,19 +116,19 @@ class ProductCreate(CreateView):
         return reverse("product_list")
 
 
-class ProductList(ListView):
+class ProductList(LoginRequiredMixin, ListView):
     model = Product
     template_name = "product_list.html"
     context_object_name = "products"
 
 
-class ProductDetail(DetailView):
+class ProductDetail(LoginRequiredMixin, AdminRequiredMixin, DetailView):
     model = Product
     template_name = "product_detail.html"
     context_object_name = "product"
 
 
-class ProductUpdate(UpdateView):
+class ProductUpdate(LoginRequiredMixin, AdminRequiredMixin, UpdateView):
     fields = ["name", "ingredients"]
     model = Product
     template_name = "product_update.html"
@@ -142,7 +144,7 @@ class ProductUpdate(UpdateView):
         return reverse("product_list")
 
 
-class ProductDelete(DeleteView):
+class ProductDelete(LoginRequiredMixin, AdminRequiredMixin, DeleteView):
     model = Product
     template_name = "product_delete.html"
 
