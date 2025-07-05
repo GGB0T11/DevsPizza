@@ -16,4 +16,4 @@ class CustomUser(AbstractUser):
         return f"{self.email} | {self.role}"
 
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ["username", "role"]
