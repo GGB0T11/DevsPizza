@@ -12,14 +12,25 @@ class Category(models.Model):
 class Ingredient(models.Model):
     name = models.CharField(max_length=100, unique=True)
     category = models.ForeignKey(Category, null=True, on_delete=models.SET_NULL)
-    current_qte = models.PositiveIntegerField(default=0)
+    qte = models.PositiveIntegerField(default=0)
     measure_unit = models.CharField(max_length=10)
     active = models.BooleanField(default=True)
 
 
 class Product(models.Model):
     name = models.CharField(max_length=100, unique=True)
-    ingredients = models.ManyToManyField(Ingredient)
+    ingredients = models.ManyToManyField(
+        Ingredient, through="ProductIngredient", through_fields=("Product", "Ingredient")
+    )
 
     def __str__(self):
         return self.name
+
+
+class ProductIngredient(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
+    quantity = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.product} - {self.ingredient}: {self.quantity}"
