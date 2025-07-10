@@ -6,16 +6,35 @@ from core.mixins import AdminRequiredMixin, LoginRequiredMixin
 from stock.models import Product
 
 from .models import Movement
+from .services import create_outflow
 
 
 class MovementCreate(LoginRequiredMixin, CreateView):
     model = Movement
-    fields = ["product", "type", "amount", "commentary"]
+    fields = ["product", "transaction_type", "amount", "commentary"]
     template_name = "movement_create.html"
 
     def form_valid(self, form):
+        user = self.request.user
+        product = form.cleaned_data["product"]
+        amount = form.cleaned_data["amount"]
+        commentary = form.cleaned_data["commentary"]
+
+        if form.cleaned_data["transaction_type"] == "outflow":
+            try:
+                movement = create_outflow(user, product, amount, commentary)
+            except ValueError as e:
+                form.add_error(None, str(e))
+                return self.form_invalid(form)
+
         form.instance.user = self.request.user
         return super().form_valid(form)
+
+    def form_invalid(self, form):
+        non_field_errors = form.non_field_errors()
+        if non_field_errors:
+            messages.error(self.request, non_field_errors[0])
+        return super().form_invalid(form)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

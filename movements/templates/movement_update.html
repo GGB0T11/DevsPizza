@@ -12,7 +12,7 @@
                         {% if product.name == movement.product %}selected{% endif %}>{{ product.name }}</option>
             {% endfor %}
         </select>
-        <select name="type">
+        <select name="transaction_type">
             <option value="inflow" {% if movement.type == "inflow" %}selected{% endif %}>Entrada</option>
             <option value="outflow"
                     {% if movement.type == "outflow" %}selected{% endif %}>Saida</option>

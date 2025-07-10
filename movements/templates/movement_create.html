@@ -9,8 +9,8 @@
         <select name="product" required>
             {% for product in products %}<option value="{{ product.id }}">{{ product.name }}</option>{% endfor %}
         </select>
-        <label for="type">Tipo:</label>
-        <select name="type" required>
+        <label for="transaction_type">Tipo:</label>
+        <select name="transaction_type" required>
             <option value="inflow">Entrada</option>
             <option value="outflow">Saida</option>
         </select>

@@ -7,7 +7,7 @@ from stock.models import Product
 class Movement(models.Model):
     product = models.ForeignKey(Product, on_delete=models.DO_NOTHING)
     user = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING)
-    type = models.CharField(
+    transaction_type = models.CharField(
         max_length=7,
         choices=[("inflow", "Inflow"), ("outflow", "Outflow")],
         blank=False,
