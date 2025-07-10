@@ -16,11 +16,14 @@ class Ingredient(models.Model):
     measure_unit = models.CharField(max_length=10)
     active = models.BooleanField(default=True)
 
+    def __str__(self):
+        return self.name
+
 
 class Product(models.Model):
     name = models.CharField(max_length=100, unique=True)
     ingredients = models.ManyToManyField(
-        Ingredient, through="ProductIngredient", through_fields=("Product", "Ingredient")
+        Ingredient, through="ProductIngredient", through_fields=("product", "ingredient")
     )
 
     def __str__(self):

@@ -10,7 +10,7 @@
         <select name="category">
             {% for category in categories %}<option value="{{ category.id }}">{{ category.name }}</option>{% endfor %}
         </select>
-        <input type="number" placeholder="10" name="current_qte" />
+        <input type="number" placeholder="10" name="qte" />
         <input type="text" placeholder="g" name="measure_unit" />
         <input type="submit" value="Cadastrar" />
     </form>

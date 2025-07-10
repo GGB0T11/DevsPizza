@@ -51,7 +51,7 @@ class CategoryDelete(LoginRequiredMixin, AdminRequiredMixin, DeleteView):
 
 class IngredientCreate(LoginRequiredMixin, AdminRequiredMixin, CreateView):
     model = Ingredient
-    fields = ["name", "category", "current_qte", "measure_unit"]
+    fields = ["name", "category", "qte", "measure_unit"]
     template_name = "ingredient_create.html"
 
     def get_context_data(self, **kwargs):
@@ -77,7 +77,7 @@ class IngredientDetail(LoginRequiredMixin, AdminRequiredMixin, DetailView):
 
 
 class IngredientUpdate(LoginRequiredMixin, AdminRequiredMixin, UpdateView):
-    fields = ["name", "category", "current_qte", "measure_unit", "active"]
+    fields = ["name", "category", "qte", "measure_unit", "active"]
     model = Ingredient
     template_name = "ingredient_update.html"
     context_object_name = "ingredient"
