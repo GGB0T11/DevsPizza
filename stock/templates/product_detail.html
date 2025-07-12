@@ -5,7 +5,20 @@
 {% block body %}
     <p>Nome: {{ product.name }}</p>
     <p>Ingredientes:</p>
-    <ul>
-        {% for ingredient in product.ingredients.all %}<li>{{ ingredient.name }}</li>{% endfor %}
-    </ul>
+    <table>
+        <thead>
+            <tr>
+                <th>Ingrediente</th>
+                <th>Quantidade</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pi in products_ingredients %}
+                <tr>
+                    <td>{{ pi.ingredient.name }}</td>
+                    <td>{{ pi.quantity }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 {% endblock body %}

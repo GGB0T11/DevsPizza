@@ -1,10 +1,13 @@
 from django.contrib import messages
+from django.core.exceptions import ValidationError
+from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
 from core.mixins import AdminRequiredMixin, LoginRequiredMixin
 
-from .models import Category, Ingredient, Product
+from .models import Category, Ingredient, Product, ProductIngredient
+from .services import register_product, update_product
 
 
 class CategoryCreate(LoginRequiredMixin, AdminRequiredMixin, CreateView):
@@ -111,6 +114,19 @@ class ProductCreate(LoginRequiredMixin, AdminRequiredMixin, CreateView):
         context["ingredients"] = Ingredient.objects.all()
         return context
 
+    def form_valid(self, form):
+        product_name = form.cleaned_data["name"]
+        selected_ids = self.request.POST.getlist("ingredients")
+        post_data = self.request.POST
+
+        try:
+            self.object = register_product(product_name=product_name, selected_ids=selected_ids, post_data=post_data)
+        except ValidationError as e:
+            messages.error(self.request, e.messages[0])
+            return self.form_invalid(form)
+
+        return HttpResponseRedirect(self.get_success_url())
+
     def get_success_url(self):
         messages.success(self.request, "Produto registrado com sucesso!")
         return reverse("product_list")
@@ -127,17 +143,39 @@ class ProductDetail(LoginRequiredMixin, AdminRequiredMixin, DetailView):
     template_name = "product_detail.html"
     context_object_name = "product"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        product = self.get_object()
+        context["products_ingredients"] = product.productingredient_set.all()
+        return context
+
 
 class ProductUpdate(LoginRequiredMixin, AdminRequiredMixin, UpdateView):
-    fields = ["name", "ingredients"]
     model = Product
+    fields = ["name", "ingredients"]
     template_name = "product_update.html"
     context_object_name = "product"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["ingredients"] = Ingredient.objects.all()
+        product = self.get_object()
+        context["products_ingredients"] = product.productingredient_set.all()
         return context
+
+    def form_valid(self, form):
+        product_to_update = self.get_object()
+        new_name = form.cleaned_data["name"]
+        selected_ids = self.request.POST.getlist("ingredients")
+        post_data = self.request.POST
+
+        try:
+            self.object = update_product(product_to_update, new_name, selected_ids, post_data)
+        except ValidationError as e:
+            messages.error(self.request, e.messages[0])
+            return self.form_invalid(form)
+
+        return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
         messages.success(self.request, "Produto alterado com sucesso!")

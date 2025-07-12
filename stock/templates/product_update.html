@@ -1,20 +1,44 @@
 {% extends "base.html" %}
 {% block title %}
-    Atualizar
+    Update
 {% endblock title %}
 {% block body %}
     <form action="{% url 'product_update' product.id %}" method="POST">
         {% csrf_token %}
         <input type="text" name="name" value="{{ product.name }}" />
-        <label for="ingredients">Ingredientes:</label>
-        <select name="ingredients" multiple>
-            {% for ingredient in ingredients %}
-                <option value="{{ ingredient.id }}"
-                        {% if ingredient in product.ingredients.all %}selected{% endif %}>
-                    {{ ingredient.name }}
-                </option>
-            {% endfor %}
-        </select>
-        <button type="submit">Alterar</button>
+        <table>
+            <thead>
+                <tr>
+                    <th>Incluir</th>
+                    <th>Ingrediente</th>
+                    <th>Quantidade</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ingredient in ingredients %}
+                    <tr>
+                        <td>
+                            <input type="checkbox"
+                                   name="ingredients"
+                                   value="{{ ingredient.id }}"
+                                   id="i-{{ ingredient.id }}"
+                                   {% for pi in products_ingredients %}{% if pi.ingredient.id == ingredient.id %}checked{% endif %}
+                                   {% endfor %}>
+                        </td>
+                        <td>
+                            <label for="i-{{ ingredient.id }}">{{ ingredient.name }}</label>
+                        </td>
+                        <td>
+                            <input type="number"
+                                   name="q-{{ ingredient.id }}"
+                                   step="0.01"
+                                   placeholder="0.00"
+                                   value="{% for pi in products_ingredients %}{% if pi.ingredient.id == ingredient.id %}{{ pi.quantity }}{% endif %}{% endfor %}">
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <input type="submit" value="Alterar" />
     </form>
 {% endblock body %}

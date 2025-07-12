@@ -6,10 +6,34 @@
     <form method="POST">
         {% csrf_token %}
         <input type="text" placeholder="Pizza ..." name="name" />
-        <label for="ingredients">Ingredientes:</label>
-        <select name="ingredients" multiple>
-            {% for ingredient in ingredients %}<option value="{{ ingredient.id }}">{{ ingredient.name }}</option>{% endfor %}
-        </select>
-        <input type="submit" value="Cadastrar" />
-    </form>
-{% endblock body %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Incluir</th>
+                    <th>Ingrediente</th>
+                    <th>Quantidade</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ingredient in ingredients %}
+                    <tr>
+                        <td>
+                            <input type="checkbox" name="ingredients" value="{{ ingredient.id }}" id="i-{{ ingredient.id }}"
+                            </td>
+                            <td>
+                                <label for="i-{{ ingredient.id }}">{{ ingredient.name }}</label>
+                            </td>
+                            <td>
+                                <input type="number" name="q-{{ ingredient.id }}" step="0.01" placeholder="0.00"
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td>Nenhum ingrediente cadastrado no sistema.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <input type="submit" value="Cadastrar" />
+            </form>
+        {% endblock body %}
