@@ -3,6 +3,16 @@
     List
 {% endblock title %}
 {% block body %}
+    <form method="GET">
+        {% csrf_token %}
+        <input type="text" name="value" />
+        <select name="field">
+            <option value="name">Nome</option>
+            <option value="category">Categoria</option>
+            <option value="qte">Quantidade</option>
+        </select>
+        <input type="submit" value="Filtrar" />
+    </form>
     <table>
         <thead>
             <th>Nome</th>

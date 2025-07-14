@@ -72,6 +72,22 @@ class IngredientList(LoginRequiredMixin, ListView):
     template_name = "ingredient_list.html"
     context_object_name = "ingredients"
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        value = self.request.GET.get("value")
+        field = self.request.GET.get("field")
+
+        # NOTE: adicionar mais condicionais no filtro do qte
+        if value and field:
+            if field == "name":
+                queryset = queryset.filter(name__icontains=value)
+            elif field == "category":
+                queryset = queryset.filter(category__icontains=value)
+            elif field == "qte":
+                queryset = queryset.filter(qte=value)
+
+        return queryset
+
 
 class IngredientDetail(LoginRequiredMixin, AdminRequiredMixin, DetailView):
     model = Ingredient
