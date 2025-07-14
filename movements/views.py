@@ -22,19 +22,13 @@ class MovementCreate(LoginRequiredMixin, CreateView):
 
         if form.cleaned_data["transaction_type"] == "outflow":
             try:
-                movement = create_outflow(user, product, amount, commentary)
+                self.object = create_outflow(user, product, amount, commentary)
             except ValueError as e:
-                form.add_error(None, str(e))
+                messages.error(self.request, e.messages[0])
                 return self.form_invalid(form)
 
         form.instance.user = self.request.user
         return super().form_valid(form)
-
-    def form_invalid(self, form):
-        non_field_errors = form.non_field_errors()
-        if non_field_errors:
-            messages.error(self.request, non_field_errors[0])
-        return super().form_invalid(form)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
