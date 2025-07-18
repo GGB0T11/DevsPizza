@@ -9,7 +9,6 @@ from core.mixins import AdminRequiredMixin, CustomLoginRequiredMixin
 from .models import CustomUser
 
 # TODO: Tratar o erro 404
-# TODO: Usar Mixings
 
 
 class AccountLogin(LoginView):
@@ -73,11 +72,25 @@ class AccountLogout(LogoutView):
         return super().dispatch(request, *args, **kwargs)
 
 
-# TODO: Fazer paginação
 class AccountList(CustomLoginRequiredMixin, AdminRequiredMixin, ListView):
     model = CustomUser
     template_name = "account_list.html"
     context_object_name = "accounts"
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        value = self.request.GET.get("value")
+        field = self.request.GET.get("field")
+
+        if value and field:
+            if field == "first_name":
+                queryset = queryset.filter(first_name=value)
+            elif field == "email":
+                queryset = queryset.filter(email=value)
+            elif field == "role":
+                queryset = queryset.filter(role=value)
+
+        return queryset
 
 
 class AccountDetail(CustomLoginRequiredMixin, AdminRequiredMixin, DetailView):

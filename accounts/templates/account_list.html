@@ -1,19 +1,43 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}
-    Login
+    List
 {% endblock title %}
 {% block body %}
+    <form method="GET">
+        {% csrf_token %}
+        <select name="field" id="filter-field">
+            <option value="first_name">Nome</option>
+            <option value="email">Email</option>
+            <option value="role">Cargo</option>
+        </select>
+        <div id="filter-inputs">
+            <input type="text" name="value_text" id="value-text">
+            <select name="value_role" id="value-role" style="display:none;">
+                <option value="admin">Adiministrador</option>
+                <option value="employee">Funcionário</option>
+            </select>
+        </div>
+        <input type="submit" value="Filtrar" />
+    </form>
     <table>
         <thead>
             <th>Nome</th>
             <th>Cargo</th>
+            <th></th>
+            <th></th>
         </thead>
         <tbody>
-            <br>
             {% for account in accounts %}
                 <tr>
                     <td>{{ account.first_name }}</td>
-                    <td>{{ account.role }}</td>
+                    <td>
+                        {% if account.role == "admin" %}
+                            Adiministrador
+                        {% else %}
+                            Funcionário
+                        {% endif %}
+                    </td>
                     <td>
                         <a href="{% url 'account_update' account.id %}">Editar</a>
                     </td>
@@ -24,4 +48,5 @@
             {% endfor %}
         </tbody>
     </table>
+    <script src="{% static 'accounts/js/toggle_role.js' %}"></script>
 {% endblock body %}
