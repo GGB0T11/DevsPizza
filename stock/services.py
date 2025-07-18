@@ -1,19 +1,25 @@
-from django.core.exceptions import ValidationError
+from django.contrib import messages
 
 from .models import Ingredient, Product, ProductIngredient
 
 
-def register_product(product_name, selected_ids, post_data):
+def register_product(request, product_name, selected_ids, post_data):
     ingredients_to_create = []
 
     for ingredient_id in selected_ids:
-        quantity = float(post_data.get(f"q-{ingredient_id}"))
+        try:
+            quantity = float(post_data.get(f"q-{ingredient_id}"))
+        except ValueError:
+            ingredient_name = Ingredient.objects.get(pk=ingredient_id).name
+            messages.error(request, f"Forneça uma quantidade válida para o ingrediente {ingredient_name}!")
+            return False
 
         if quantity > 0:
             ingredients_to_create.append({"ingredient_id": int(ingredient_id), "quantity": quantity})
         else:
             ingredient_name = Ingredient.objects.get(pk=ingredient_id).name
-            raise ValidationError(f"Forneça uma quantidade válida para o ingrediente: {ingredient_name}")
+            messages.error(request, f"Forneça uma quantidade maior que 0 para o ingrediente {ingredient_name}!")
+            return False
 
     product = Product.objects.create(name=product_name)
 
@@ -27,7 +33,7 @@ def register_product(product_name, selected_ids, post_data):
     return product
 
 
-def update_product(product_instance, new_name, selected_ids, post_data):
+def update_product(request, product_instance, new_name, selected_ids, post_data):
     product_instance.name = new_name
     product_instance.save(update_fields=["name"])
 
@@ -39,11 +45,17 @@ def update_product(product_instance, new_name, selected_ids, post_data):
         ProductIngredient.objects.filter(product=product_instance, ingredient_id__in=ids_to_remove).delete()
 
     for ingredient_id in new_ingredients_ids:
-        quantity = float(post_data.get(f"q-{ingredient_id}"))
+        try:
+            quantity = float(post_data.get(f"q-{ingredient_id}"))
+        except ValueError:
+            ingredient_name = Ingredient.objects.get(pk=ingredient_id).name
+            messages.error(request, f"Forneça uma quantidade válida para o ingrediente {ingredient_name}")
+            return False
 
         if quantity <= 0:
             ingredient_name = Ingredient.objects.get(pk=ingredient_id).name
-            raise ValidationError(f"Forneça uma quantidade válida para o ingrediente: {ingredient_name}")
+            messages.error(request, f"Forneça uma quantidade válida para o ingrediente: {ingredient_name}")
+            return False
 
         ProductIngredient.objects.update_or_create(
             product=product_instance,

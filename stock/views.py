@@ -135,16 +135,21 @@ class ProductCreate(LoginRequiredMixin, AdminRequiredMixin, CreateView):
         selected_ids = self.request.POST.getlist("ingredients")
         post_data = self.request.POST
 
-        try:
-            self.object = register_product(product_name=product_name, selected_ids=selected_ids, post_data=post_data)
-        except ValidationError as e:
-            messages.error(self.request, e.messages[0])
+        product_result = register_product(self.request, product_name, selected_ids, post_data)
+
+        if product_result:
+            return HttpResponseRedirect(self.get_success_url())
+        else:
             return self.form_invalid(form)
 
-        return HttpResponseRedirect(self.get_success_url())
+    def form_invalid(self, form):
+        if "name" in form.errors:
+            messages.error(self.request, f"Já existe um produto com esse nome!")
+
+        return super().form_invalid(form)
 
     def get_success_url(self):
-        messages.success(self.request, "Produto registrado com sucesso!")
+        messages.success(self.request, "Produto criado com sucesso!")
         return reverse("product_list")
 
 
@@ -152,6 +157,19 @@ class ProductList(LoginRequiredMixin, ListView):
     model = Product
     template_name = "product_list.html"
     context_object_name = "products"
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        value = self.request.GET.get("value")
+        field = self.request.GET.get("field")
+
+        if value and field:
+            if field == "name":
+                queryset = queryset.filter(name__icontains=value)
+            elif field == "category":
+                queryset = queryset.filter(category__icontains=value)
+
+        return queryset
 
 
 class ProductDetail(LoginRequiredMixin, AdminRequiredMixin, DetailView):
@@ -185,13 +203,12 @@ class ProductUpdate(LoginRequiredMixin, AdminRequiredMixin, UpdateView):
         selected_ids = self.request.POST.getlist("ingredients")
         post_data = self.request.POST
 
-        try:
-            self.object = update_product(product_to_update, new_name, selected_ids, post_data)
-        except ValidationError as e:
-            messages.error(self.request, e.messages[0])
-            return self.form_invalid(form)
+        product_result = update_product(self.request, product_to_update, new_name, selected_ids, post_data)
 
-        return HttpResponseRedirect(self.get_success_url())
+        if product_result:
+            return HttpResponseRedirect(self.get_success_url())
+        else:
+            return self.form_invalid(form)
 
     def get_success_url(self):
         messages.success(self.request, "Produto alterado com sucesso!")
