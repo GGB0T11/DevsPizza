@@ -1,5 +1,6 @@
 from django.contrib import admin
 
-from .models import Movement
+from .models import Inflow, Outflow
 
-admin.site.register(Movement)
+admin.site.register(Outflow)
+admin.site.register(Inflow)

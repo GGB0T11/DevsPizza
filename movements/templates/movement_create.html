@@ -1,23 +1,51 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}
     Create
 {% endblock title %}
 {% block body %}
     <form method="POST">
         {% csrf_token %}
-        <label for="product">Produto:</label>
-        <select name="product" required>
-            {% for product in products %}<option value="{{ product.id }}">{{ product.name }}</option>{% endfor %}
-        </select>
-        <label for="transaction_type">Tipo:</label>
-        <select name="transaction_type" required>
+        <select name="transaction_type" id="transaction-type">
             <option value="inflow">Entrada</option>
-            <option value="outflow">Saida</option>
+            <option value="outflow">Saída</option>
         </select>
-        <label for="amount">Quantidade:</label>
-        <input type="number" name="amount" min="1" required />
-        <label for="commentary">Comentário:</label>
-        <textarea name="commentary"></textarea>
-        <input type="submit" value="Registrar" />
-    </form>
-{% endblock body %}
+        <div id="filter-transaction">
+            <select name="product" id="product-select" style="display:none;">
+                {% for product in products %}<option value="{{ product.id }}">{{ product.name }}</option>{% endfor %}
+            </select>
+            <input type="number" name="amount" id="product-amount" style="display:none;">
+            <table id="ingredient-select">
+                <thead>
+                    <tr>
+                        <th>Incluir</th>
+                        <th>Ingrediente</th>
+                        <th>Quantidade</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ingredient in ingredients %}
+                        <tr>
+                            <td>
+                                <input type="checkbox" name="ingredients" value="{{ ingredient.id }}" id="i-{{ ingredient.id }}"
+                                </td>
+                                <td>
+                                    <label for="i-{{ ingredient.id }}">{{ ingredient.name }}</label>
+                                </td>
+                                <td>
+                                    <input type="number" name="q-{{ ingredient.id }}" step="0.01" placeholder="0.00"
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td>Nenhum ingrediente cadastrado no sistema.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <input type="text" name="commentary">
+                <input type="submit" value="Registrar">
+            </form>
+            <script src="{% static 'movements/js/toogle_transaction.js' %}"></script>
+        {% endblock body %}

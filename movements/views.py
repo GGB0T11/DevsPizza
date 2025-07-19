@@ -1,60 +1,69 @@
+from itertools import chain
+
 from django.contrib import messages
+from django.shortcuts import redirect, render
 from django.urls import reverse
-from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
+from django.views import View
+from django.views.generic import DeleteView, DetailView, UpdateView
 
 from core.mixins import AdminRequiredMixin, LoginRequiredMixin
-from stock.models import Product
+from stock.models import Ingredient, Product
 
-from .models import Movement
-from .services import create_outflow
+from .models import Inflow, Outflow
+from .services import create_inflow, create_outflow
 
 
-class MovementCreate(LoginRequiredMixin, CreateView):
-    model = Movement
-    fields = ["product", "transaction_type", "amount", "commentary"]
+class MovementCreate(LoginRequiredMixin, View):
     template_name = "movement_create.html"
 
-    def form_valid(self, form):
-        user = self.request.user
-        product = form.cleaned_data["product"]
-        amount = form.cleaned_data["amount"]
-        commentary = form.cleaned_data["commentary"]
+    def get(self, request):
+        context = {"products": Product.objects.all(), "ingredients": Ingredient.objects.all()}
+        return render(request, self.template_name, context)
 
-        if form.cleaned_data["transaction_type"] == "outflow":
-            try:
-                self.object = create_outflow(user, product, amount, commentary)
-            except ValueError as e:
-                messages.error(self.request, e.messages[0])
-                return self.form_invalid(form)
+    def post(self, request):
+        user = request.user
+        commentary = request.POST.get("commentary")
 
-        form.instance.user = self.request.user
-        return super().form_valid(form)
+        if request.POST.get("transaction_type") == "inflow":
+            post_data = self.request.POST
+            ingredients_ids = self.request.POST.getlist("ingredients")
+            movement = create_inflow(request, user, ingredients_ids, commentary, post_data)
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["products"] = Product.objects.all()
-        return context
+        else:
+            product = request.POST.get("product")
+            amount = request.POST.get("amount")
+            movement = create_outflow(request, user, product, amount, commentary)
 
-    def get_success_url(self):
-        messages.success(self.request, "Movimentação registrada com sucesso!")
-        return reverse("movement_list")
+        if movement:
+            messages.success(request, "Movimentação registrada com sucesso!")
+            return redirect("movement_list")
+        else:
+            return redirect("movement_create")
 
 
-class MovementList(LoginRequiredMixin, ListView):
-    model = Movement
+class MovementList(LoginRequiredMixin, View):
     template_name = "movement_list.html"
-    context_object_name = "movements"
+
+    def get(self, request):
+        inflow = Inflow.objects.all()
+        outflow = Outflow.objects.all()
+
+        combined = list(chain(inflow, outflow))
+        sorted_combined = sorted(combined, key=lambda x: x.date, reverse=True)
+
+        context = {"movements": sorted_combined}
+        return render(request, self.template_name, context)
 
 
 class MovementDetail(LoginRequiredMixin, DetailView):
-    model = Movement
+    # model = Movement
     template_name = "movement_detail.html"
     context_object_name = "movement"
 
 
 class MovementUpdate(LoginRequiredMixin, AdminRequiredMixin, UpdateView):
     fields = ["product", "type", "amount", "commentary"]
-    model = Movement
+    # model = Movement
     template_name = "movement_update.html"
     context_object_name = "movement"
 
@@ -69,7 +78,7 @@ class MovementUpdate(LoginRequiredMixin, AdminRequiredMixin, UpdateView):
 
 
 class MovementDelete(LoginRequiredMixin, AdminRequiredMixin, DeleteView):
-    model = Movement
+    # model = Movement
     template_name = "movement_delete.html"
 
     def get_success_url(self):

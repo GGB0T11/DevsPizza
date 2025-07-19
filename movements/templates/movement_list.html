@@ -1,4 +1,4 @@
-{% extends "base.html"%}
+{% extends "base.html" %}
 {% block title %}
     List
 {% endblock title %}
@@ -6,8 +6,6 @@
     <table>
         <thead>
             <th>Responsável</th>
-            <th>Produto</th>
-            <th>Quantidade</th>
             <th>Tipo</th>
             <th>Data</th>
         </thead>
@@ -16,10 +14,8 @@
             {% for movement in movements %}
                 <tr>
                     <td>{{ movement.user }}</td>
-                    <td>{{ movement.product }}</td>
-                    <td>{{ movement.amount }}</td>
                     <td>
-                        {% if movement.type == "inflow" %}
+                        {% if movement.transaction_type == "inflow" %}
                             Entrada
                         {% else %}
                             Saida
