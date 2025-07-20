@@ -17,8 +17,8 @@ def register_product(request, product_name, selected_ids, post_data):
         if quantity > 0:
             ingredients_to_create.append({"ingredient_id": int(ingredient_id), "quantity": quantity})
         else:
-            ingredient_name = Ingredient.objects.get(pk=ingredient_id).name
-            messages.error(request, f"Forneça uma quantidade maior que 0 para o ingrediente {ingredient_name}!")
+            ingredient_name = ingredient.objects.get(pk=ingredient_id).name
+            messages.error(request, f"forneça uma quantidade maior que 0 para o ingrediente {ingredient_name}!")
             return False
 
     product = Product.objects.create(name=product_name)

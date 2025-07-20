@@ -1,12 +1,11 @@
 from django.contrib import messages
-from django.core.exceptions import ValidationError
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
 from core.mixins import AdminRequiredMixin, LoginRequiredMixin
 
-from .models import Category, Ingredient, Product, ProductIngredient
+from .models import Category, Ingredient, Product
 from .services import register_product, update_product
 
 
