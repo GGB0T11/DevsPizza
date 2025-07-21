@@ -55,6 +55,7 @@ class IngredientCreate(LoginRequiredMixin, AdminRequiredMixin, CreateView):
     model = Ingredient
     fields = ["name", "category", "qte", "measure_unit"]
     template_name = "ingredient_create.html"
+    context_object_name = "ingredient"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

@@ -13,7 +13,7 @@ class Ingredient(models.Model):
     name = models.CharField(max_length=100, unique=True)
     category = models.ForeignKey(Category, null=True, on_delete=models.SET_NULL)
     qte = models.PositiveIntegerField(default=0)
-    measure_unit = models.CharField(max_length=10)
+    measure_unit = models.CharField(max_length=10, choices=([("g", "Gramas"), ("kg", "Quilo"), ("unit", "Unidade")]))
     active = models.BooleanField(default=True)
 
     def __str__(self):

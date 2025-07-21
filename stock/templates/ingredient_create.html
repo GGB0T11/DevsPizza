@@ -11,7 +11,9 @@
             {% for category in categories %}<option value="{{ category.id }}">{{ category.name }}</option>{% endfor %}
         </select>
         <input type="number" placeholder="10" name="qte" />
-        <input type="text" placeholder="g" name="measure_unit" />
+        <select name="measure_unit">
+            {% for value, label in form.measure_unit.field.choices %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+        </select>
         <input type="submit" value="Cadastrar" />
     </form>
 {% endblock body %}

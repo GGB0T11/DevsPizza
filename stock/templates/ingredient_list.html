@@ -24,7 +24,7 @@
             {% for ingredient in ingredients %}
                 <tr>
                     <td>{{ ingredient.name }}</td>
-                    <td>{{ ingredient.qte }}</td>
+                    <td>{{ ingredient.qte }} {{ ingredient.measure_unit }}</td>
                     <td>{{ ingredient.active }}</td>
                     <td>
                         <a href="{% url 'ingredient_update' ingredient.id %}">Editar</a>
