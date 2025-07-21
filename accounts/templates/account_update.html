@@ -10,9 +10,10 @@
         <input type="email" name="email" value="{{ account.email }}">
         <label for="role">Defina o cargo:</label>
         <select id="roles" name="role" required>
-            <option value="employee"
-                    {% if account.role == "employee" %}selected{% endif %}>Funcionário</option>
-            <option value="admin" {% if account.role == "admin" %}selected{% endif %}>Administrador</option>
+            {% for value, label in form.role.field.choices %}
+                <option value="{{ value }}"
+                        {% if value == account.role %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
         </select>
         <input type="password" name="password" value="">
         <input type="password" name="confirm_password" value="">

@@ -14,8 +14,7 @@
         <div id="filter-inputs">
             <input type="text" name="value_text" id="value-text">
             <select name="value_role" id="value-role" style="display:none;">
-                <option value="admin">Adiministrador</option>
-                <option value="employee">Funcionário</option>
+                {% for value, label in role_choices %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
             </select>
         </div>
         <input type="submit" value="Filtrar" />
@@ -31,13 +30,7 @@
             {% for account in accounts %}
                 <tr>
                     <td>{{ account.first_name }}</td>
-                    <td>
-                        {% if account.role == "admin" %}
-                            Adiministrador
-                        {% else %}
-                            Funcionário
-                        {% endif %}
-                    </td>
+                    <td>{{ account.get_role_display }}</td>
                     <td>
                         <a href="{% url 'account_update' account.id %}">Editar</a>
                     </td>

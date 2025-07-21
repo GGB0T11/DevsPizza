@@ -6,8 +6,7 @@ class CustomUser(AbstractUser):
     email = models.EmailField(max_length=100, unique=True)
     role = models.CharField(
         max_length=20,
-        choices=[("employee", "Employee"), ("admin", "Admin")],
-        blank=False,
+        choices=[("employee", "Funcionário"), ("admin", "Administrador")],
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

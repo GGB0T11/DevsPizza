@@ -19,10 +19,8 @@
                required />
         <br />
         <label for="role">Defina o cargo:</label>
-        <select id="roles" name="role" required>
-            <option value="">--Selecione--</option>
-            <option value="employee">Funcionário</option>
-            <option value="admin">Administrador</option>
+        <select id="roles" name="role" required
+            {% for value, label in form.role.field.choices %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
         </select>
         <br />
         <input type="submit" value="Cadastrar" />
