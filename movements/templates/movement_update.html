@@ -3,8 +3,10 @@
     Atualizar
 {% endblock title %}
 {% block body %}
-    <form action="{% url 'movement_update' movement.id %}" method="POST">
+    <form action="{% url 'movement_update' type=movement.transaction_type id=movement.id %}"
+          method="POST">
         {% csrf_token %}
+        {% if movement.transaction_type == "inflow" %}{% endif %}
         <label for="product">Produto:</label>
         <select name="product">
             {% for product in products %}

@@ -1,10 +1,10 @@
 from itertools import chain
 
 from django.contrib import messages
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views import View
-from django.views.generic import DeleteView, DetailView, UpdateView
+from django.views.generic import DeleteView, UpdateView
 
 from core.mixins import AdminRequiredMixin, LoginRequiredMixin
 from stock.models import Ingredient, Product
@@ -41,6 +41,7 @@ class MovementCreate(LoginRequiredMixin, View):
             return redirect("movement_create")
 
 
+# NOTE: Adicionar o filter aqui (data e user)
 class MovementList(LoginRequiredMixin, View):
     template_name = "movement_list.html"
 
@@ -55,32 +56,71 @@ class MovementList(LoginRequiredMixin, View):
         return render(request, self.template_name, context)
 
 
-class MovementDetail(LoginRequiredMixin, DetailView):
-    # model = Movement
+class MovementDetail(LoginRequiredMixin, View):
     template_name = "movement_detail.html"
-    context_object_name = "movement"
+
+    def get(self, request, *args, **kwargs):
+        transaction_type = self.kwargs["type"]
+        movement_id = self.kwargs["id"]
+
+        if transaction_type == "inflow":
+            movement = Inflow.objects.get(pk=movement_id)
+            ingredients = movement.inflowingredient_set.all() if isinstance(movement, Inflow) else None
+            print(ingredients)
+            context = {"movement": movement, "ingredients": ingredients}
+
+        else:
+            movement = Outflow.objects.get(pk=movement_id)
+            context = {"movement": movement}
+
+        return render(request, self.template_name, context)
 
 
 class MovementUpdate(LoginRequiredMixin, AdminRequiredMixin, UpdateView):
-    fields = ["product", "type", "amount", "commentary"]
-    # model = Movement
     template_name = "movement_update.html"
-    context_object_name = "movement"
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["products"] = Product.objects.all()
-        return context
+    def get(self, request, *args, **kwargs):
+        transaction_type = self.kwargs["type"]
+        movement_id = self.kwargs["id"]
 
-    def get_success_url(self):
-        messages.success(self.request, "Movimentação alterada com sucesso!")
-        return reverse("movement_list")
+        if transaction_type == "inflow":
+            movement = Inflow.objects.get(pk=movement_id)
+        else:
+            movement = Outflow.objects.get(pk=movement_id)
+
+        context = {"movement": movement}
+
+        return render(request, self.template_name, context)
 
 
-class MovementDelete(LoginRequiredMixin, AdminRequiredMixin, DeleteView):
-    # model = Movement
+class MovementDelete(LoginRequiredMixin, AdminRequiredMixin, View):
     template_name = "movement_delete.html"
 
-    def get_success_url(self):
-        messages.success(self.request, "Movimentação deletada com sucesso!")
-        return reverse("movement_list")
+    def get(self, request, *args, **kwargs):
+        transaction_type = self.kwargs["type"]
+        movement_id = self.kwargs["id"]
+
+        if transaction_type == "inflow":
+            movement = Inflow.objects.get(pk=movement_id)
+
+        else:
+            movement = Outflow.objects.get(pk=movement_id)
+
+        context = {"movement": movement}
+
+        return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        transaction_type = self.kwargs["type"]
+        movement_id = self.kwargs["id"]
+
+        if transaction_type == "inflow":
+            movement = get_object_or_404(Inflow, id=movement_id)
+
+        else:
+            movement = get_object_or_404(Outflow, id=movement_id)
+
+        movement.delete()
+
+        messages.success(request, "Movimentação deletada com sucesso!")
+        return redirect("movement_list")

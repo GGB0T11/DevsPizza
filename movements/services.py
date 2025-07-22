@@ -35,6 +35,7 @@ def create_inflow(request, user, ingredients_ids, commentary, post_data):
     )
 
     for ingredient, quantity_added in ingredients_to_add:
+        print(f"Salvando: {ingredient.name} - {quantity_added}")
         InflowIngredient.objects.create(
             inflow=movement,
             ingredient=ingredient,

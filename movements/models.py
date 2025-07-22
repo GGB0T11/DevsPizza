@@ -24,7 +24,7 @@ class Inflow(models.Model):
     commentary = models.TextField(null=True, blank=True)
 
     def __str__(self):
-        return f"Entrada {self.id} por {self.user}"
+        return f"{self.id} - {self.user}"
 
 
 class InflowIngredient(models.Model):
@@ -33,4 +33,4 @@ class InflowIngredient(models.Model):
     quantity = models.FloatField()
 
     def __str__(self):
-        return f"{self.inflow} - {self.ingredient}: {self.quantity}"
+        return f"{self.ingredient}: {self.quantity}"
