@@ -3,7 +3,7 @@ from django.contrib import messages
 from .models import Ingredient, Product, ProductIngredient
 
 
-def register_product(request, product_name, selected_ids, post_data):
+def register_product(request, product_name, price, selected_ids, post_data):
     ingredients_to_create = []
 
     for ingredient_id in selected_ids:
@@ -21,7 +21,7 @@ def register_product(request, product_name, selected_ids, post_data):
             messages.error(request, f"forneça uma quantidade maior que 0 para o ingrediente {ingredient_name}!")
             return False
 
-    product = Product.objects.create(name=product_name)
+    product = Product.objects.create(name=product_name, price=price)
 
     for data in ingredients_to_create:
         ProductIngredient.objects.create(
@@ -33,9 +33,10 @@ def register_product(request, product_name, selected_ids, post_data):
     return product
 
 
-def update_product(request, product_instance, new_name, selected_ids, post_data):
+def update_product(request, product_instance, new_name, new_price, selected_ids, post_data):
     product_instance.name = new_name
-    product_instance.save(update_fields=["name"])
+    product_instance.price = new_price
+    product_instance.save(update_fields=["name", "price"])
 
     old_ingredients_ids = set(product_instance.productingredient_set.values_list("ingredient_id", flat=True))
     new_ingredients_ids = set(int(pk) for pk in selected_ids)

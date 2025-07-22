@@ -9,18 +9,21 @@
         <select name="field">
             <option value="name">Nome</option>
             <option value="category">Ingrediente</option>
+            <option value="price">Preço</option>
         </select>
         <input type="submit" value="Filtrar" />
     </form>
     <table>
         <thead>
             <th>Nome</th>
+            <th>Preço</th>
         </thead>
         <tbody>
             <br />
             {% for product in products %}
                 <tr>
                     <td>{{ product.name }}</td>
+                    <td>{{ product.price }}</td>
                     <td>
                         <a href="{% url 'product_update' product.id %}">Editar</a>
                     </td>

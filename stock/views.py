@@ -53,7 +53,7 @@ class CategoryDelete(LoginRequiredMixin, AdminRequiredMixin, DeleteView):
 
 class IngredientCreate(LoginRequiredMixin, AdminRequiredMixin, CreateView):
     model = Ingredient
-    fields = ["name", "category", "qte", "measure_unit"]
+    fields = ["name", "category", "qte", "min_qte", "price", "measure_unit"]
     template_name = "ingredient_create.html"
     context_object_name = "ingredient"
 
@@ -85,6 +85,13 @@ class IngredientList(LoginRequiredMixin, ListView):
                 queryset = queryset.filter(category__icontains=value)
             elif field == "qte":
                 queryset = queryset.filter(qte=value)
+            elif field == "min_qte":
+                queryset = queryset.filter(min_qte=value)
+            elif field == "price":
+                queryset = queryset.filter(price=value)
+            elif field == "active":
+                status = {"ativo": True, "inativo": False}
+                queryset = queryset.filter(active=status[value.lower()])
 
         return queryset
 
@@ -96,8 +103,8 @@ class IngredientDetail(LoginRequiredMixin, AdminRequiredMixin, DetailView):
 
 
 class IngredientUpdate(LoginRequiredMixin, AdminRequiredMixin, UpdateView):
-    fields = ["name", "category", "qte", "measure_unit", "active"]
     model = Ingredient
+    fields = ["name", "category", "qte", "min_qte", "price", "measure_unit", "active"]
     template_name = "ingredient_update.html"
     context_object_name = "ingredient"
 
@@ -122,7 +129,7 @@ class IngredientDelete(LoginRequiredMixin, AdminRequiredMixin, DeleteView):
 
 class ProductCreate(LoginRequiredMixin, AdminRequiredMixin, CreateView):
     model = Product
-    fields = ["name", "ingredients"]
+    fields = ["name", "ingredients", "price"]
     template_name = "product_create.html"
 
     def get_context_data(self, **kwargs):
@@ -132,10 +139,11 @@ class ProductCreate(LoginRequiredMixin, AdminRequiredMixin, CreateView):
 
     def form_valid(self, form):
         product_name = form.cleaned_data["name"]
+        price = form.cleaned_data["price"]
         selected_ids = self.request.POST.getlist("ingredients")
         post_data = self.request.POST
 
-        product_result = register_product(self.request, product_name, selected_ids, post_data)
+        product_result = register_product(self.request, product_name, price, selected_ids, post_data)
 
         if product_result:
             return HttpResponseRedirect(self.get_success_url())
@@ -155,6 +163,7 @@ class ProductCreate(LoginRequiredMixin, AdminRequiredMixin, CreateView):
 
 class ProductList(LoginRequiredMixin, ListView):
     model = Product
+    fields = ["name", "price"]
     template_name = "product_list.html"
     context_object_name = "products"
 
@@ -168,12 +177,15 @@ class ProductList(LoginRequiredMixin, ListView):
                 queryset = queryset.filter(name__icontains=value)
             elif field == "category":
                 queryset = queryset.filter(category__icontains=value)
+            elif field == "price":
+                quryset = queryset.filter(price=value)
 
         return queryset
 
 
 class ProductDetail(LoginRequiredMixin, AdminRequiredMixin, DetailView):
     model = Product
+    fields = ["name", "ingredients", "price"]
     template_name = "product_detail.html"
     context_object_name = "product"
 
@@ -186,7 +198,7 @@ class ProductDetail(LoginRequiredMixin, AdminRequiredMixin, DetailView):
 
 class ProductUpdate(LoginRequiredMixin, AdminRequiredMixin, UpdateView):
     model = Product
-    fields = ["name", "ingredients"]
+    fields = ["name", "ingredients", "price"]
     template_name = "product_update.html"
     context_object_name = "product"
 
@@ -200,10 +212,11 @@ class ProductUpdate(LoginRequiredMixin, AdminRequiredMixin, UpdateView):
     def form_valid(self, form):
         product_to_update = self.get_object()
         new_name = form.cleaned_data["name"]
+        new_price = form.cleaned_data["price"]
         selected_ids = self.request.POST.getlist("ingredients")
         post_data = self.request.POST
 
-        product_result = update_product(self.request, product_to_update, new_name, selected_ids, post_data)
+        product_result = update_product(self.request, product_to_update, new_name, new_price, selected_ids, post_data)
 
         if product_result:
             return HttpResponseRedirect(self.get_success_url())

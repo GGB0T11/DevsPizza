@@ -10,6 +10,9 @@
             <option value="name">Nome</option>
             <option value="category">Categoria</option>
             <option value="qte">Quantidade</option>
+            <option value="min_qte">Quantidade Mínima</option>
+            <option value="price">Preço</option>
+            <option value="active">Status</option>
         </select>
         <input type="submit" value="Filtrar" />
     </form>
@@ -17,6 +20,7 @@
         <thead>
             <th>Nome</th>
             <th>Quantidade</th>
+            <th>Preço</th>
             <th>Status</th>
         </thead>
         <tbody>
@@ -25,6 +29,7 @@
                 <tr>
                     <td>{{ ingredient.name }}</td>
                     <td>{{ ingredient.qte }} {{ ingredient.measure_unit }}</td>
+                    <td>{{ ingredient.price }}</td>
                     <td>{{ ingredient.active }}</td>
                     <td>
                         <a href="{% url 'ingredient_update' ingredient.id %}">Editar</a>

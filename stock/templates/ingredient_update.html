@@ -5,6 +5,7 @@
 {% block body %}
     <form action="{% url 'ingredient_update' ingredient.id %}" method="POST">
         {% csrf_token %}
+        <label for="name">Nome:</label>
         <input type="text" name="name" value="{{ ingredient.name }}" />
         <label for="category">Categoria:</label>
         <select name="category">
@@ -13,13 +14,19 @@
                         {% if ingredient.category.id == category.id %}selected{% endif %}>{{ category.name }}</option>
             {% endfor %}
         </select>
+        <label for="qte">Quantidade:</label>
         <input type="number" name="qte" value="{{ ingredient.qte }}" />
+        <label for="min_qte">Quantidade Mínima:</label>
+        <input type="number" name="min_qte" value={{ ingredient.min_qte }}>
+        <label for="measure_unit">Unidade de Medida:</label>
         <select name="measure_unit">
             {% for value, label in form.measure_unit.field.choices %}
                 <option value="{{ value }}"
                         {% if form.measure_unit.value == value %}selected{% endif %}>{{ label }}</option>
             {% endfor %}
         </select>
+        <label for="price">Preço:</label>
+        <input type="number" name="price" step="0.01" value={{ ingredient.price }}>
         <label for="status">Status:</label>
         <select name="active">
             <option value="True" {% if ingredient.active %}selected{% endif %}>Ativo</option>

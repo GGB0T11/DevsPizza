@@ -33,7 +33,7 @@
                                    name="q-{{ ingredient.id }}"
                                    step="0.01"
                                    placeholder="0.00"
-                                   value="{% for pi in products_ingredients %}{% if pi.ingredient.id == ingredient.id %}{{ pi.quantity }}{% endif %}{% endfor %}">
+                                   value="{% for pi in products_ingredients %}{% if pi.ingredient.id == ingredient.id %}{{ pi.quantity }} {{ ingredient.get_measure_unit_display }} {% endif %}{% endfor %}">
                         </td>
                     </tr>
                 {% endfor %}
