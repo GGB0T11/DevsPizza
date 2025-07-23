@@ -1,35 +1,44 @@
 from django.contrib import messages
-from django.contrib.auth.views import LoginView, LogoutView
-from django.shortcuts import redirect
-from django.urls import reverse, reverse_lazy
-from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
-
-from core.mixins import AdminRequiredMixin, CustomLoginRequiredMixin
+from django.contrib.auth import authenticate
+from django.contrib.auth import login as login_django
+from django.contrib.auth import logout as logout_django
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_http_methods
 
 from .models import CustomUser
 
-# TODO: Tratar o erro 404
+
+@require_http_methods(["GET", "POST"])
+def login(request):
+    if request.method == "GET":
+        if request.user.is_authenticated:
+            return redirect("home")
+        else:
+            return render(request, "login.html")
+
+    else:
+        email = request.POST.get("email")
+        password = request.POST.get("password")
+
+        user = authenticate(email=email, password=password)
+
+        if user:
+            login_django(request, user)
+            return redirect("home")
+        else:
+            messages.error(request, "Email ou senha inválidos")
+            return redirect("login")
 
 
-class AccountLogin(LoginView):
-    template_name = "login.html"
-    success_url = reverse_lazy("home")
-    redirect_authenticated_user = True
+@login_required
+@require_http_methods(["GET", "POST"])
+def register(request):
+    if request.method == "GET":
+        context = {"role_choices": CustomUser._meta.get_field("role").choices}
+        return render(request, "register.html", context)
 
-    def form_invalid(self, form):
-        messages.error(self.request, "Email ou senha inválidos")
-        return super().form_invalid(form)
-
-
-# TODO: Fazer verificações mais rígidas (letras, numeros, caracteres especiais)
-# NOTE: tem como melhorar
-class AccountRegister(CustomLoginRequiredMixin, AdminRequiredMixin, CreateView):
-    model = CustomUser
-    fields = ["first_name", "last_name", "email", "role"]
-    template_name = "register.html"
-    success_url = reverse_lazy("account_list")
-
-    def post(self, request):
+    else:
         first_name = request.POST.get("first_name")
         last_name = request.POST.get("last_name")
         email = request.POST.get("email")
@@ -61,93 +70,105 @@ class AccountRegister(CustomLoginRequiredMixin, AdminRequiredMixin, CreateView):
         user.save()
 
         messages.success(request, "Usuário criado com sucesso!")
-        return redirect(self.success_url)
+        return redirect("account_list")
 
 
-class AccountLogout(LogoutView):
-    next_page = reverse_lazy("login")
-
-    def dispatch(self, request, *args, **kwargs):
-        messages.success(request, "Deslogado com sucesso!")
-        return super().dispatch(request, *args, **kwargs)
-
-
-class AccountList(CustomLoginRequiredMixin, AdminRequiredMixin, ListView):
-    model = CustomUser
-    template_name = "account_list.html"
-    context_object_name = "accounts"
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        value = self.request.GET.get("value")
-        field = self.request.GET.get("field")
-
-        if value and field:
-            if field == "first_name":
-                queryset = queryset.filter(first_name=value)
-            elif field == "email":
-                queryset = queryset.filter(email=value)
-            elif field == "role":
-                queryset = queryset.filter(role=value)
-
-        return queryset
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["role_choices"] = CustomUser._meta.get_field("role").choices
-        return context
+@login_required
+@require_http_methods(["POST"])
+def logout(request):
+    logout_django(request)
+    messages.success(request, "Deslogado com sucesso!")
+    return redirect("register")
 
 
-class AccountDetail(CustomLoginRequiredMixin, AdminRequiredMixin, DetailView):
-    model = CustomUser
-    template_name = "account_detail.html"
-    context_object_name = "account"
+@login_required
+@require_http_methods(["GET"])
+def account_list(request):
+    accounts = CustomUser.objects.all()
+
+    field = request.GET.get("field")
+    value = request.GET.get("value")
+
+    if field and value:
+        if field == "first_name":
+            accounts = accounts.filter(first_name__icontains=value)
+        elif field == "email":
+            accounts = accounts.filter(email=value)
+        elif field == "role":
+            accounts = accounts.filter(role=value)
+
+    context = {
+        "accounts": accounts,
+        "role_choices": CustomUser._meta.get_field("role").choices,
+        "field": field,
+        "value": value,
+    }
+    return render(request, "account_list.html", context)
 
 
-# TODO: Tem que adicionar check password
-# TODO: Apenas mostrar o email, não pode alterar
-class AccountUpdate(CustomLoginRequiredMixin, AdminRequiredMixin, UpdateView):
-    model = CustomUser
-    fields = ["first_name", "last_name", "email", "role"]
-    template_name = "account_update.html"
-    context_object_name = "account"
-    success_url = reverse_lazy("account_list")
+@login_required
+@require_http_methods(["GET"])
+def account_detail(request, id):
+    account = get_object_or_404(CustomUser, id=id)
 
-    def post(self, request, *args, **kwargs):
-        self.object = self.get_object()
+    context = {"account": account}
+    return render(request, "account_detail.html", context)
 
-        first_name = request.POST.get("first_name")
-        last_name = request.POST.get("last_name")
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def account_update(request, id):
+    account = get_object_or_404(CustomUser, id=id)
+
+    if request.method == "GET":
+        context = {"account": account, "role_choices": CustomUser._meta.get_field("role").choices}
+        return render(request, "account_update.html", context)
+
+    else:
         email = request.POST.get("email")
-        role = request.POST.get("role")
+
+        if CustomUser.objects.filter(email=email).exclude(id=account.id).exists():
+            messages.error(request, "O novo email que deseja inserir já está associado a uma conta!")
+            return redirect("account_list")
+
+        account.first_name = request.POST.get("first_name")
+        account.last_name = request.POST.get("last_name")
+        account.email = email
+        account.role = request.POST.get("role")
         password = request.POST.get("password")
         confirm_password = request.POST.get("confirm_password")
+        if password and confirm_password:
+            if password == confirm_password:
+                if len(password) >= 8:
+                    account.set_password(request.POST.get("password"))
+                else:
+                    messages.error(request, "A senha deve ter no mínimo 8 caracteres")
+                    return redirect("account_list")
+            else:
+                messages.error(request, "As senhas não coincidem!")
+                return redirect("account_list")
 
-        if password:
-            if password != confirm_password:
-                messages.error(request, "As senhas devem ser iguais!")
-                return redirect(request.path)
-
-            if len(password) < 8:
-                messages.error(request, "A senha deve ter no mínimo 8 caracteres")
-                return redirect(request.path)
-
-            self.object.set_password(password)
-
-        self.object.first_name = first_name
-        self.object.last_name = last_name
-        self.object.email = email
-        self.object.role = role
-        self.object.save()
+        account.save()
 
         messages.success(request, "Conta alterada com sucesso!")
-        return redirect(self.success_url)
+        return redirect("account_list")
 
 
-class AccountDelete(CustomLoginRequiredMixin, AdminRequiredMixin, DeleteView):
-    model = CustomUser
-    template_name = "account_delete.html"
+@login_required
+@require_http_methods(["GET", "POST"])
+def account_delete(request, id):
+    account = get_object_or_404(CustomUser, id=id)
 
-    def get_success_url(self):
-        messages.success(self.request, "Conta deletada com sucesso!")
-        return reverse("account_list")
+    if request.method == "GET":
+        context = {"account": account}
+        return render(request, "account_delete.html", context)
+
+    else:
+        if request.user.email == account.email:
+            messages.error(request, "Você não pode deletar a própria conta!")
+            return redirect("account_list")
+
+        account.delete()
+
+        messages.success(request, "Conta deletada com sucesso!")
+        return redirect("account_list")

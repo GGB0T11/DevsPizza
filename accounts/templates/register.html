@@ -5,24 +5,23 @@
 {% block body %}
     <form action="{% url 'register' %}" method="POST">
         {% csrf_token %}
+        <label for="name">Nome:</label>
         <input type="text" placeholder="Nome"  name="first_name" required />
-        <br />
+        <label for="last_name">Sobrenome:</label>
         <input type="text" placeholder="Sobrenome"  name="last_name" required />
-        <br />
+        <label for="email">Email:</label>
         <input type="email"  placeholder="exemplo@email.com"  name="email" required />
-        <br />
+        <label for="password">Senha:</label>
         <input type="password"  placeholder="Senha..."  name="password" required />
-        <br />
+        <label for="confirm_password">Confirmar Senha:</label>
         <input type="password"
                placeholder="Confirmar Senha..."
                name="confirm_password"
                required />
-        <br />
-        <label for="role">Defina o cargo:</label>
-        <select id="roles" name="role" required
-            {% for value, label in form.role.field.choices %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+        <label for="role">Cargo:</label>
+        <select id="roles" name="role" required>
+            {% for value, label in role_choices %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
         </select>
-        <br />
         <input type="submit" value="Cadastrar" />
     </form>
 {% endblock body %}

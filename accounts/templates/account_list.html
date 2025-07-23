@@ -7,14 +7,20 @@
     <form method="GET">
         {% csrf_token %}
         <select name="field" id="filter-field">
-            <option value="first_name">Nome</option>
-            <option value="email">Email</option>
-            <option value="role">Cargo</option>
+            <option value="first_name" {% if field == "first_name" %}selected{% endif %}>Nome</option>
+            <option value="email" {% if field == "email" %}selected{% endif %}>Email</option>
+            <option value="role" {% if field == "role" %}selected{% endif %}>Cargo</option>
         </select>
         <div id="filter-inputs">
-            <input type="text" name="value_text" id="value-text">
+            <input type="text"
+                   name="value_text"
+                   id="value-text"
+                   value="{{ value|default:'' }}">
             <select name="value_role" id="value-role" style="display:none;">
-                {% for value, label in role_choices %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+                {% for value_role, label in role_choices %}
+                    <option value="{{ value_role }}"
+                            {% if value == value_role %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
             </select>
         </div>
         <input type="submit" value="Filtrar" />

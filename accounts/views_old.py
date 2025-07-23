@@ -1,48 +1,35 @@
 from django.contrib import messages
-from django.contrib.auth import authenticate
-from django.contrib.auth import login as login_django
-from django.contrib.auth import logout as logout_django
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404, redirect, render
-from django.views.decorators.http import require_http_methods
+from django.contrib.auth.views import LoginView, LogoutView
+from django.shortcuts import redirect
+from django.urls import reverse, reverse_lazy
+from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
+
+from core.mixins import AdminRequiredMixin, CustomLoginRequiredMixin
 
 from .models import CustomUser
 
 # TODO: Tratar o erro 404
 
 
-@require_http_methods(["GET", "POST"])
-def login(request):
-    if request.method == "GET":
-        if request.user.is_authenticated:
-            return redirect("home")
+class AccountLogin(LoginView):
+    template_name = "login.html"
+    success_url = reverse_lazy("home")
+    redirect_authenticated_user = True
 
-        else:
-            return render(request, "login.html")
-
-    else:
-        email = request.POST.get("email")
-        password = request.POST.get("password")
-
-        user = authenticate(email=email, password=password)
-
-        if user:
-            login_django(request, user)
-            return redirect("home")
-
-        else:
-            messages.error(request, "Email ou senha inválidos")
-            return redirect("login")
+    def form_invalid(self, form):
+        messages.error(self.request, "Email ou senha inválidos")
+        return super().form_invalid(form)
 
 
 # TODO: Fazer verificações mais rígidas (letras, numeros, caracteres especiais)
-@require_http_methods(["GET", "POST"])
-def register(request):
-    if request.user.role != "admin":
-        messages.error(request, "Somente admins podem criar novas contas!")
-        return redirect("home")
+# NOTE: tem como melhorar
+class AccountRegister(CustomLoginRequiredMixin, AdminRequiredMixin, CreateView):
+    model = CustomUser
+    fields = ["first_name", "last_name", "email", "role"]
+    template_name = "register.html"
+    success_url = reverse_lazy("account_list")
 
-    if request.method == "POST":
+    def post(self, request):
         first_name = request.POST.get("first_name")
         last_name = request.POST.get("last_name")
         email = request.POST.get("email")
@@ -74,92 +61,93 @@ def register(request):
         user.save()
 
         messages.success(request, "Usuário criado com sucesso!")
-        return redirect("home")
-
-    return render(request, "register.html")
+        return redirect(self.success_url)
 
 
-@login_required
-@require_http_methods(["GET"])
-def logout(request):
-    logout_django(request)
-    messages.success(request, "Deslogado com sucesso!")
-    return redirect("register")
+class AccountLogout(LogoutView):
+    next_page = reverse_lazy("login")
+
+    def dispatch(self, request, *args, **kwargs):
+        messages.success(request, "Deslogado com sucesso!")
+        return super().dispatch(request, *args, **kwargs)
 
 
-# TODO: Fazer paginação
-@login_required
-@require_http_methods(["GET"])
-def list_account(request):
-    if request.user.role != "admin":
-        messages.error(request, "Somente admins podem ver os usuários!")
-        return redirect("home")
+class AccountList(CustomLoginRequiredMixin, AdminRequiredMixin, ListView):
+    model = CustomUser
+    template_name = "account_list.html"
+    context_object_name = "accounts"
 
-    accounts = CustomUser.objects.all()
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        value = self.request.GET.get("value")
+        field = self.request.GET.get("field")
 
-    return render(request, "account_list.html", {"accounts": accounts})
+        if value and field:
+            if field == "first_name":
+                queryset = queryset.filter(first_name=value)
+            elif field == "email":
+                queryset = queryset.filter(email=value)
+            elif field == "role":
+                queryset = queryset.filter(role=value)
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["role_choices"] = CustomUser._meta.get_field("role").choices
+        return context
 
 
-@login_required
-@require_http_methods(["GET"])
-def detail_account(request, id):
-    if request.user.role != "admin":
-        messages.error(request, "Somente admins podem ver detalhes das contas!")
-        return redirect("home")
-
-    account = get_object_or_404(CustomUser, id=id)
-
-    return render(request, "account_detail.html", {"account": account})
+class AccountDetail(CustomLoginRequiredMixin, AdminRequiredMixin, DetailView):
+    model = CustomUser
+    template_name = "account_detail.html"
+    context_object_name = "account"
 
 
 # TODO: Tem que adicionar check password
-@login_required
-@require_http_methods(["GET", "POST"])
-def update_account(request, id):
-    if request.user.role != "admin":
-        messages.error(request, "Somente admins podem alterar contas")
-        return redirect("home")
+# TODO: Apenas mostrar o email, não pode alterar
+class AccountUpdate(CustomLoginRequiredMixin, AdminRequiredMixin, UpdateView):
+    model = CustomUser
+    fields = ["first_name", "last_name", "email", "role"]
+    template_name = "account_update.html"
+    context_object_name = "account"
+    success_url = reverse_lazy("account_list")
 
-    account = get_object_or_404(CustomUser, id=id)
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
 
-    if request.method == "GET":
-        return render(request, "account_update.html", {"account": account})
-
-    else:
-        account.first_name = request.POST.get("first_name")
-        account.last_name = request.POST.get("last_name")
-        account.email = request.POST.get("email")
-        account.role = request.POST.get("role")
+        first_name = request.POST.get("first_name")
+        last_name = request.POST.get("last_name")
+        email = request.POST.get("email")
+        role = request.POST.get("role")
         password = request.POST.get("password")
-        if password:
-            account.set_password(request.POST.get("password"))
+        confirm_password = request.POST.get("confirm_password")
 
-        account.save()
+        if password:
+            if password != confirm_password:
+                messages.error(request, "As senhas devem ser iguais!")
+                return redirect(request.path)
+
+            if len(password) < 8:
+                messages.error(request, "A senha deve ter no mínimo 8 caracteres")
+                return redirect(request.path)
+
+            self.object.set_password(password)
+
+        self.object.first_name = first_name
+        self.object.last_name = last_name
+        self.object.email = email
+        self.object.role = role
+        self.object.save()
 
         messages.success(request, "Conta alterada com sucesso!")
-        return redirect("account_list")
+        return redirect(self.success_url)
 
 
-@login_required
-@require_http_methods(["GET", "POST"])
-def delete_account(request, id):
-    account = get_object_or_404(CustomUser, id=id)
+class AccountDelete(CustomLoginRequiredMixin, AdminRequiredMixin, DeleteView):
+    model = CustomUser
+    template_name = "account_delete.html"
 
-    if request.user.role != "admin":
-        messages.error(request, "Somente admins podem deletar contas")
-        return redirect("home")
-
-    if request.method == "POST":
-        print(request.user.email)
-        print(request.POST.get("email"))
-
-        account.delete()
-
-        messages.success(request, "Conta deletada com sucesso!")
-        return redirect("account_list")
-
-    if request.user.email == account.email:
-        messages.error(request, "Você não pode deletar a própria conta!")
-        return redirect("account_list")
-
-    return render(request, "account_delete.html", {"account": account})
+    def get_success_url(self):
+        messages.success(self.request, "Conta deletada com sucesso!")
+        return reverse("account_list")
