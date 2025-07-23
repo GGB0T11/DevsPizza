@@ -1,23 +1,37 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}
     List
 {% endblock title %}
 {% block body %}
     <form method="GET">
         {% csrf_token %}
-        <input type="text" name="value" />
-        <select name="field">
-            <option value="name">Nome</option>
-            <option value="category">Categoria</option>
-            <option value="qte">Quantidade</option>
+        <select name="field" id="filter-field">
+            <option value="name"{% if field == "name" %}selected{% endif %}>Nome</option>
+            <option value="category"{% if field == "category" %}selected{% endif %}>Categoria</option>
+            <option value="qte"{% if field == "qte" %}selected{% endif %}>Quantidade</option>
+            <option value="min_qte"{% if field == "min_qte" %}selected{% endif %}>Quantidade Mínima</option>
+            <option value="price"{% if field == "name" %}selected{% endif %}>Preço</option>
         </select>
+        <div id="filter-inputs">
+            <input type="text"
+                   name="value"
+                   id="value-text"
+                   value="{{ value|default:'' }}" />
+            <select name="value_category" id="value-category" style="display:none">
+                {% for category in categories %}
+                    <option value="{{ category.name }}"
+                            {% if value == category.name %}selected{% endif %}>{{ category.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
         <input type="submit" value="Filtrar" />
     </form>
     <table>
         <thead>
             <th>Nome</th>
             <th>Quantidade</th>
-            <th>Status</th>
+            <th>Preço</th>
         </thead>
         <tbody>
             <br>
@@ -25,7 +39,7 @@
                 <tr>
                     <td>{{ ingredient.name }}</td>
                     <td>{{ ingredient.qte }} {{ ingredient.measure_unit }}</td>
-                    <td>{{ ingredient.active }}</td>
+                    <td>{{ ingredient.price }}</td>
                     <td>
                         <a href="{% url 'ingredient_update' ingredient.id %}">Editar</a>
                     </td>
@@ -36,4 +50,5 @@
             {% endfor %}
         </tbody>
     </table>
+    <script src="{% static 'stock/js/toggle_category.js' %}"></script>
 {% endblock body %}
