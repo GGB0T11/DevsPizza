@@ -5,7 +5,9 @@
 {% block body %}
     <form action="{% url 'category_update' category.id %}" method="POST">
         {% csrf_token %}
+        <label for="name">Nome:</label>
         <input type="text" name="name" value="{{ category.name }}" />
+        <label for="description">Descrição:</label>
         <input type="text" name="description" value="{{ category.description }}" />
         <button type="submit">Alterar</button>
     </form>

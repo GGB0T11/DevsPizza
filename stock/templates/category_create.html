@@ -5,8 +5,10 @@
 {% block body %}
     <form method="POST">
         {% csrf_token %}
-        <input type="text" placeholder="Frios" name="name">
+        <label for="name">Nome:</label>
+        <input type="text" placeholder="Ex: Frios" name="name">
+        <label for="description">Descrição</label>
         <input type="text" placeholder="..." name="description">
-        <input type="submit" value="Cadastrar">
+        <button type="submit">Cadastrar</button>
     </form>
 {% endblock body %}

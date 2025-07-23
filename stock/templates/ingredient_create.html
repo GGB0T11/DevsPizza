@@ -6,21 +6,21 @@
     <form method="POST">
         {% csrf_token %}
         <label for="name">Nome:</label>
-        <input type="text" placeholder="Farinha ..." name="name" />
+        <input type="text" placeholder="Ex: Farinha" name="name" />
         <label for="category">Categoria:</label>
         <select name="category">
             {% for category in categories %}<option value="{{ category.id }}">{{ category.name }}</option>{% endfor %}
         </select>
-        <label for="qte">Quantidade</label>
-        <input type="number" placeholder="10" name="qte" />
-        <label for="min_qte">Quantidade Mínima</label>
-        <input type="number" name="min_qte">
-        <label for="measure_unit">Unidade de Medida</label>
+        <label for="qte">Quantidade:</label>
+        <input type="number" name="qte" min="0" />
+        <label for="min_qte">Quantidade Mínima:</label>
+        <input type="number" name="min_qte" min="0" />
+        <label for="measure_unit">Unidade de Medida:</label>
         <select name="measure_unit">
-            {% for value, label in form.measure_unit.field.choices %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+            {% for value, label in measure_units %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
         </select>
-        <label for="price">Preço</label>
+        <label for="price">Preço:</label>
         <input type="number" name="price" step="0.01">
-        <input type="submit" value="Cadastrar" />
+        <button type="submit">Cadastrar</button>
     </form>
 {% endblock body %}

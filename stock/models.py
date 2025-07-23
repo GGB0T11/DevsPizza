@@ -16,7 +16,6 @@ class Ingredient(models.Model):
     min_qte = models.PositiveIntegerField(default=0)
     measure_unit = models.CharField(max_length=10, choices=([("g", "Gramas"), ("kg", "Quilo"), ("unit", "Unidade")]))
     price = models.DecimalField(default=0, max_digits=10, decimal_places=2)
-    active = models.BooleanField(default=True)
 
     def __str__(self):
         return self.name

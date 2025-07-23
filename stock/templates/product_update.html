@@ -5,7 +5,14 @@
 {% block body %}
     <form action="{% url 'product_update' product.id %}" method="POST">
         {% csrf_token %}
+        <label for="name">Nome:</label>
         <input type="text" name="name" value="{{ product.name }}" />
+        <label for="price">Preço:</label>
+        <input type="number"
+               step="0.01"
+               name="price"
+               value="{{ product.price }}"
+               min="0" />
         <table>
             <thead>
                 <tr>
@@ -22,7 +29,7 @@
                                    name="ingredients"
                                    value="{{ ingredient.id }}"
                                    id="i-{{ ingredient.id }}"
-                                   {% for pi in products_ingredients %}{% if pi.ingredient.id == ingredient.id %}checked{% endif %}
+                                   {% for pi in product_ingredients %}{% if pi.ingredient.id == ingredient.id %}checked{% endif %}
                                    {% endfor %}>
                         </td>
                         <td>
@@ -32,8 +39,10 @@
                             <input type="number"
                                    name="q-{{ ingredient.id }}"
                                    step="0.01"
+                                   min="0"
                                    placeholder="0.00"
-                                   value="{% for pi in products_ingredients %}{% if pi.ingredient.id == ingredient.id %}{{ pi.quantity }} {{ ingredient.get_measure_unit_display }} {% endif %}{% endfor %}">
+                                   value="{% for pi in product_ingredients %}{% if pi.ingredient.id == ingredient.id %}{{ pi.quantity }}{% endif %}{% endfor %}">
+                            {{ ingredient.get_measure_unit_display }}
                         </td>
                     </tr>
                 {% endfor %}

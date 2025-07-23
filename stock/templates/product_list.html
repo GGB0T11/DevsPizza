@@ -5,12 +5,11 @@
 {% block body %}
     <form method="GET">
         {% csrf_token %}
-        <input type="text" name="value" />
         <select name="field">
-            <option value="name">Nome</option>
-            <option value="category">Ingrediente</option>
-            <option value="price">Preço</option>
+            <option value="name" {% if field == "name" %}selected{% endif %}>Nome</option>
+            <option value="price" {% if field == "price" %}selected{% endif %}>Preço</option>
         </select>
+        <input type="text" name="value" value="{{ value|default:'' }}" />
         <input type="submit" value="Filtrar" />
     </form>
     <table>
