@@ -108,13 +108,17 @@ def movement_list(request):
 def movement_detail(request, transaction_type, id):
     if transaction_type == "inflow":
         movement = get_object_or_404(Inflow, id=id)
+        context = {
+            "movement": movement,
+            "ingredients": movement.inflowingredient_set.all() if isinstance(movement, Inflow) else None,
+        }
     elif transaction_type == "outflow":
         movement = get_object_or_404(Outflow, id=id)
+        context = {"movement": movement}
     else:
         messages.error(request, "Tipo de movimentação inválido!")
         return redirect("movement_list")
 
-    context = {"movement": movement}
     return render(request, "movement_detail.html", context)
 
 
@@ -131,7 +135,7 @@ def movement_delete(request, transaction_type, id):
 
     if request.method == "GET":
         context = {"movement": movement}
-        return render(request, "movement_update.html", context)
+        return render(request, "movement_delete.html", context)
 
     else:
         movement.delete()
