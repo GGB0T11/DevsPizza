@@ -175,6 +175,12 @@ def account_delete(request, id):
             messages.error(request, "Você não pode deletar a própria conta!")
             return redirect("account_list")
 
+        password = request.POST.get("password")
+
+        if not request.user.check_password(password):
+            messages.error(request, "A senha que você inseriu está incorreta!")
+            return redirect("account_list")
+
         account.delete()
 
         messages.success(request, "Conta deletada com sucesso!")

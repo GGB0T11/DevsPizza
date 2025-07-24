@@ -84,6 +84,12 @@ def category_delete(request, id):
         return render(request, "category_delete.html", context)
 
     else:
+        password = request.POST.get("password")
+
+        if not request.user.check_password(password):
+            messages.error(request, "A senha que você inseriu está incorreta!")
+            return redirect("category_list")
+
         category.delete()
 
         messages.success(request, "Categoria deletada com sucesso!")
@@ -214,6 +220,12 @@ def ingredient_delete(request, id):
         return render(request, "ingredient_delete.html", context)
 
     else:
+        password = request.POST.get("password")
+
+        if not request.user.check_password(password):
+            messages.error(request, "A senha que você inseriu está incorreta!")
+            return redirect("ingredient_list")
+
         ingredient.delete()
 
         messages.success(request, "Ingrediente deletado com sucesso!")
@@ -370,6 +382,12 @@ def product_delete(request, id):
         return render(request, "product_delete.html", context)
 
     else:
+        password = request.POST.get("password")
+
+        if not request.user.check_password(password):
+            messages.error(request, "A senha que você inseriu está incorreta!")
+            return redirect("product_list")
+
         product.delete()
 
         messages.success(request, "Produto deletado com sucesso!")

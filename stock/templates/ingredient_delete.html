@@ -9,6 +9,8 @@
     </p>
     <form method="post">
         {% csrf_token %}
+        <label for="password">Confirmar com senha:</label>
+        <input type="password" name="password">
         <a href="{% url 'ingredient_list' %}">Cancelar</a>
         <button type="submit">Confirmar exclusão</button>
     </form>

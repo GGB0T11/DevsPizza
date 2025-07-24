@@ -157,6 +157,12 @@ def movement_delete(request, transaction_type, id):
         return render(request, "movement_delete.html", context)
 
     else:
+        password = request.POST.get("password")
+
+        if not request.user.check_password(password):
+            messages.error(request, "A senha que você inseriu está incorreta!")
+            return redirect("movement_list")
+
         movement.delete()
 
         messages.success(request, "Movimentação deletada com sucesso!")
