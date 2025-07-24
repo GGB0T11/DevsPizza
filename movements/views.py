@@ -1,9 +1,12 @@
+from datetime import datetime
 from itertools import chain
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.views.decorators.http import require_http_methods
+
 from stock.models import Ingredient, Product
 
 from .models import Inflow, InflowIngredient, Outflow
@@ -93,8 +96,21 @@ def movement_create(request):
 @login_required
 @require_http_methods(["GET"])
 def movement_list(request):
-    inflow = Inflow.objects.all()
-    outflow = Outflow.objects.all()
+    start_date = request.GET.get("start_date")
+    end_date = request.GET.get("end_date")
+
+    if start_date and end_date:
+        start_dt = datetime.strptime(start_date, "%Y-%m-%d")
+        end_dt = datetime.strptime(end_date + " 23:59:59", "%Y-%m-%d %H:%M:%S")
+
+        start_dt = timezone.make_aware(start_dt)
+        end_dt = timezone.make_aware(end_dt)
+
+        inflow = Inflow.objects.filter(date__range=(start_dt, end_dt))
+        outflow = Outflow.objects.filter(date__range=(start_dt, end_dt))
+    else:
+        inflow = Inflow.objects.all()
+        outflow = Outflow.objects.all()
 
     combined = list(chain(inflow, outflow))
     sorted_combined = sorted(combined, key=lambda x: x.date, reverse=True)
@@ -119,6 +135,7 @@ def movement_detail(request, transaction_type, id):
         messages.error(request, "Tipo de movimentação inválido!")
         return redirect("movement_list")
 
+    print(movement.date)
     return render(request, "movement_detail.html", context)
 
 

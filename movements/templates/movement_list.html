@@ -3,6 +3,13 @@
     List
 {% endblock title %}
 {% block body %}
+    <form method="GET">
+        <label for="start_date">Data Inicial:</label>
+        <input type="date" name="start_date">
+        <label for="end_date">Data Final:</label>
+        <input type="date" name="end_date">
+        <button type="submit">Filtrar</button>
+    </form>
     <table>
         <thead>
             <th>Responsável</th>
