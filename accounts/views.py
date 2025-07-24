@@ -6,6 +6,8 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods
 
+from core.decorators import admin_required
+
 from .models import CustomUser
 
 
@@ -32,6 +34,7 @@ def login(request):
 
 
 @login_required
+@admin_required
 @require_http_methods(["GET", "POST"])
 def register(request):
     if request.method == "GET":
@@ -82,6 +85,7 @@ def logout(request):
 
 
 @login_required
+@admin_required
 @require_http_methods(["GET"])
 def account_list(request):
     accounts = CustomUser.objects.all()
@@ -107,6 +111,7 @@ def account_list(request):
 
 
 @login_required
+@admin_required
 @require_http_methods(["GET"])
 def account_detail(request, id):
     account = get_object_or_404(CustomUser, id=id)
@@ -116,6 +121,7 @@ def account_detail(request, id):
 
 
 @login_required
+@admin_required
 @require_http_methods(["GET", "POST"])
 def account_update(request, id):
     account = get_object_or_404(CustomUser, id=id)
@@ -155,6 +161,7 @@ def account_update(request, id):
 
 
 @login_required
+@admin_required
 @require_http_methods(["GET", "POST"])
 def account_delete(request, id):
     account = get_object_or_404(CustomUser, id=id)

@@ -1,13 +1,15 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.forms import ValidationError
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods
+
+from core.decorators import admin_required
 
 from .models import Category, Ingredient, Product, ProductIngredient
 
 
 @login_required
+@admin_required
 @require_http_methods(["GET", "POST"])
 def category_create(request):
     if request.method == "GET":
@@ -30,6 +32,7 @@ def category_create(request):
 
 
 @login_required
+@admin_required
 @require_http_methods(["GET"])
 def category_list(request):
     context = {"categories": Category.objects.all()}
@@ -37,6 +40,7 @@ def category_list(request):
 
 
 @login_required
+@admin_required
 @require_http_methods(["GET"])
 def category_detail(request, id):
     context = {"category": get_object_or_404(Category, id=id)}
@@ -45,6 +49,7 @@ def category_detail(request, id):
 
 
 @login_required
+@admin_required
 @require_http_methods(["GET", "POST"])
 def category_update(request, id):
     category = get_object_or_404(Category, id=id)
@@ -69,6 +74,7 @@ def category_update(request, id):
 
 
 @login_required
+@admin_required
 @require_http_methods(["GET", "POST"])
 def category_delete(request, id):
     category = get_object_or_404(Category, id=id)
@@ -85,6 +91,7 @@ def category_delete(request, id):
 
 
 @login_required
+@admin_required
 @require_http_methods(["GET", "POST"])
 def ingredient_create(request):
     if request.method == "GET":
@@ -124,6 +131,7 @@ def ingredient_create(request):
 
 
 @login_required
+@admin_required
 @require_http_methods(["GET"])
 def ingredient_list(request):
     ingredients = Ingredient.objects.all()
@@ -154,6 +162,7 @@ def ingredient_list(request):
 
 
 @login_required
+@admin_required
 @require_http_methods(["GET"])
 def ingredient_detail(request, id):
     context = {"ingredient": get_object_or_404(Ingredient, id=id)}
@@ -161,6 +170,7 @@ def ingredient_detail(request, id):
 
 
 @login_required
+@admin_required
 @require_http_methods(["GET", "POST"])
 def ingredient_update(request, id):
     ingredient = get_object_or_404(Ingredient, id=id)
@@ -194,6 +204,7 @@ def ingredient_update(request, id):
 
 
 @login_required
+@admin_required
 @require_http_methods(["GET", "POST"])
 def ingredient_delete(request, id):
     ingredient = get_object_or_404(Ingredient, id=id)
@@ -210,6 +221,7 @@ def ingredient_delete(request, id):
 
 
 @login_required
+@admin_required
 @require_http_methods(["GET", "POST"])
 def product_create(request):
     if request.method == "GET":
@@ -252,6 +264,7 @@ def product_create(request):
 
 
 @login_required
+@admin_required
 @require_http_methods(["GET"])
 def product_list(request):
     products = Product.objects.all()
@@ -281,6 +294,7 @@ def product_list(request):
 
 
 @login_required
+@admin_required
 @require_http_methods(["GET"])
 def product_detail(request, id):
     product = get_object_or_404(Product, id=id)
@@ -292,6 +306,7 @@ def product_detail(request, id):
 
 
 @login_required
+@admin_required
 @require_http_methods(["GET", "POST"])
 def product_update(request, id):
     product = get_object_or_404(Product, id=id)
@@ -345,6 +360,7 @@ def product_update(request, id):
 
 
 @login_required
+@admin_required
 @require_http_methods(["GET", "POST"])
 def product_delete(request, id):
     product = get_object_or_404(Product, id=id)
