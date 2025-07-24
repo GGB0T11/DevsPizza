@@ -16,7 +16,7 @@
             {% for pi in products_ingredients %}
                 <tr>
                     <td>{{ pi.ingredient.name }}</td>
-                    <td>{{ pi.quantity }}</td>
+                    <td>{{ pi.quantity }} {{ pi.ingredient.measure_unit }}</td>
                 </tr>
             {% endfor %}
         </tbody>

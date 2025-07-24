@@ -3,8 +3,10 @@
     Detalhar
 {% endblock title %}
 {% block body %}
-    <p>{{ account.firt_name }}</p>
-    <p>{{ account.last_name }}</p>
-    <p>{{ account.email }}</p>
-    <p>{{ account.get_role_display }}</p>
+    <p>Nome: {{ account.firt_name }}</p>
+    <p>Sobrenome: {{ account.last_name }}</p>
+    <p>Email: {{ account.email }}</p>
+    <p>Cargo: {{ account.get_role_display }}</p>
+    <p>Data de Criação: {{ account.created_at }}</p>
+    <p>Data da Última alteração: {{ account.updated_at }}</p>
 {% endblock body %}

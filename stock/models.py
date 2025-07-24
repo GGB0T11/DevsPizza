@@ -13,8 +13,9 @@ class Ingredient(models.Model):
     name = models.CharField(max_length=100, unique=True)
     category = models.ForeignKey(Category, null=True, on_delete=models.SET_NULL)
     qte = models.PositiveIntegerField(default=0)
+    min_qte = models.PositiveIntegerField(default=0)
     measure_unit = models.CharField(max_length=10, choices=([("g", "Gramas"), ("kg", "Quilo"), ("unit", "Unidade")]))
-    active = models.BooleanField(default=True)
+    price = models.DecimalField(default=0, max_digits=10, decimal_places=2)
 
     def __str__(self):
         return self.name
@@ -25,6 +26,7 @@ class Product(models.Model):
     ingredients = models.ManyToManyField(
         Ingredient, through="ProductIngredient", through_fields=("product", "ingredient")
     )
+    price = models.DecimalField(default=0, max_digits=10, decimal_places=2)
 
     def __str__(self):
         return self.name

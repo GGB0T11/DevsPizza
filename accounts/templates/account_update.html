@@ -5,18 +5,22 @@
 {% block body %}
     <form action="{% url 'account_update' account.id %}" method="POST">
         {% csrf_token %}
+        <label for="first_name">Nome:</label>
         <input type="text" name="first_name" value="{{ account.first_name }}">
+        <label for="last_name">Sobrenome:</label>
         <input type="text" name="last_name" value="{{ account.last_name }}">
+        <label for="email">Email:</label>
         <input type="email" name="email" value="{{ account.email }}">
-        <label for="role">Defina o cargo:</label>
+        <label for="role">Cargo:</label>
         <select id="roles" name="role" required>
-            {% for value, label in form.role.field.choices %}
-                <option value="{{ value }}"
-                        {% if value == account.role %}selected{% endif %}>{{ label }}</option>
+            {% for value, label in role_choices %}
+                <option value="{{ value }}" {% if value == account.role %}selected{% endif %}>{{ label }}</option>
             {% endfor %}
         </select>
-        <input type="password" name="password" value="">
-        <input type="password" name="confirm_password" value="">
-        <input type="submit" value="Alterar">
+        <label for="password">Senha</label>
+        <input type="password" name="password">
+        <label for="confirm_password">Confirmar Senha:</label>
+        <input type="password" name="confirm_password">
+        <button type="submit">Alterar</button>
     </form>
 {% endblock body %}
