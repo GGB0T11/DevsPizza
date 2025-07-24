@@ -11,7 +11,7 @@
             <option value="outflow">Saída</option>
         </select>
         <div id="filter-transaction">
-            <select name="product" id="product-select" style="display:none;">
+            <select name="product_id" id="product-select" style="display:none;">
                 {% for product in products %}<option value="{{ product.id }}">{{ product.name }}</option>{% endfor %}
             </select>
             <input type="number" name="amount" id="product-amount" style="display:none;">

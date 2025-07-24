@@ -1,125 +1,139 @@
 from itertools import chain
 
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse
-from django.views import View
-from django.views.generic import DeleteView, UpdateView
-
-from core.mixins import AdminRequiredMixin, LoginRequiredMixin
+from django.views.decorators.http import require_http_methods
 from stock.models import Ingredient, Product
 
-from .models import Inflow, Outflow
-from .services import create_inflow, create_outflow
+from .models import Inflow, InflowIngredient, Outflow
 
 
-class MovementCreate(LoginRequiredMixin, View):
-    template_name = "movement_create.html"
-
-    def get(self, request):
+@login_required
+@require_http_methods(["GET", "POST"])
+def movement_create(request):
+    if request.method == "GET":
         context = {"products": Product.objects.all(), "ingredients": Ingredient.objects.all()}
-        return render(request, self.template_name, context)
+        return render(request, "movement_create.html", context)
 
-    def post(self, request):
+    else:
         user = request.user
+        transaction_type = request.POST.get("transaction_type")
         commentary = request.POST.get("commentary")
 
-        if request.POST.get("transaction_type") == "inflow":
-            post_data = self.request.POST
-            ingredients_ids = self.request.POST.getlist("ingredients")
-            movement = create_inflow(request, user, ingredients_ids, commentary, post_data)
+        if transaction_type == "inflow":
+            ingredients_ids = request.POST.getlist("ingredients")
+            ingredients_to_add = []
 
-        else:
-            product = request.POST.get("product")
-            amount = request.POST.get("amount")
-            movement = create_outflow(request, user, product, amount, commentary)
+            for ingredient_id in ingredients_ids:
+                try:
+                    add_qte = float(request.POST.get(f"q-{ingredient_id}"))
+                except ValueError:
+                    ingredient_name = Ingredient.objects.get(pk=ingredient_id).name
+                    messages.error(request, f"Insira uma quantodade válida para o ingrediente {ingredient_name}!")
+                    return redirect("movement_list")
 
-        if movement:
+                ingredient = Ingredient.objects.get(pk=ingredient_id)
+                ingredient.qte += add_qte
+                ingredients_to_add.append((ingredient, add_qte))
+
+            Ingredient.objects.bulk_update([i[0] for i in ingredients_to_add], ["qte"])
+
+            movement = Inflow.objects.create(
+                user=user,
+                commentary=commentary,
+            )
+
+            for ingredient, qte_added in ingredients_to_add:
+                InflowIngredient.objects.create(
+                    inflow=movement,
+                    ingredient=ingredient,
+                    quantity=qte_added,
+                )
+
             messages.success(request, "Movimentação registrada com sucesso!")
             return redirect("movement_list")
+
+        elif transaction_type == "outflow":
+            product_id = request.POST.get("product_id")
+            amount = request.POST.get("amount")
+
+            product = Product.objects.get(pk=product_id)
+            ingredients_to_reduce = []
+
+            for recipe_item in product.productingredient_set.all():
+                ingredient = recipe_item.ingredient
+                decrease_qte = recipe_item.quantity * int(amount)
+                remaining = ingredient.qte - decrease_qte
+
+                if remaining < 0:
+                    messages.error(request, f"Estoque insuficiente para o ingrediente {ingredient.name}!")
+                    return redirect("movement_list")
+
+                ingredient.qte = remaining
+                ingredients_to_reduce.append(ingredient)
+
+            Ingredient.objects.bulk_update(ingredients_to_reduce, ["qte"])
+
+            Outflow.objects.create(
+                user=user,
+                product=product,
+                amount=amount,
+                commentary=commentary,
+            )
+
+            messages.success(request, "Movimentação registrada com sucesso!")
+            return redirect("movement_list")
+
         else:
-            return redirect("movement_create")
+            messages.error(request, "Tipo de movimentação inválida!")
+            return redirect("movement_list")
 
 
-# NOTE: Adicionar o filter aqui (data e user)
-class MovementList(LoginRequiredMixin, View):
-    template_name = "movement_list.html"
+@login_required
+@require_http_methods(["GET"])
+def movement_list(request):
+    inflow = Inflow.objects.all()
+    outflow = Outflow.objects.all()
 
-    def get(self, request):
-        inflow = Inflow.objects.all()
-        outflow = Outflow.objects.all()
+    combined = list(chain(inflow, outflow))
+    sorted_combined = sorted(combined, key=lambda x: x.date, reverse=True)
 
-        combined = list(chain(inflow, outflow))
-        sorted_combined = sorted(combined, key=lambda x: x.date, reverse=True)
-
-        context = {"movements": sorted_combined}
-        return render(request, self.template_name, context)
+    context = {"movements": sorted_combined}
+    return render(request, "movement_list.html", context)
 
 
-class MovementDetail(LoginRequiredMixin, View):
-    template_name = "movement_detail.html"
+@login_required
+@require_http_methods(["GET"])
+def movement_detail(request, transaction_type, id):
+    if transaction_type == "inflow":
+        movement = get_object_or_404(Inflow, id=id)
+    elif transaction_type == "outflow":
+        movement = get_object_or_404(Outflow, id=id)
+    else:
+        messages.error(request, "Tipo de movimentação inválido!")
+        return redirect("movement_list")
 
-    def get(self, request, *args, **kwargs):
-        transaction_type = self.kwargs["type"]
-        movement_id = self.kwargs["id"]
-
-        if transaction_type == "inflow":
-            movement = Inflow.objects.get(pk=movement_id)
-            ingredients = movement.inflowingredient_set.all() if isinstance(movement, Inflow) else None
-            print(ingredients)
-            context = {"movement": movement, "ingredients": ingredients}
-
-        else:
-            movement = Outflow.objects.get(pk=movement_id)
-            context = {"movement": movement}
-
-        return render(request, self.template_name, context)
+    context = {"movement": movement}
+    return render(request, "movement_detail.html", context)
 
 
-class MovementUpdate(LoginRequiredMixin, AdminRequiredMixin, UpdateView):
-    template_name = "movement_update.html"
+@login_required
+@require_http_methods(["GET", "POST"])
+def movement_delete(request, transaction_type, id):
+    if transaction_type == "inflow":
+        movement = get_object_or_404(Inflow, id=id)
+    elif transaction_type == "outflow":
+        movement = get_object_or_404(Outflow, id=id)
+    else:
+        messages.error(request, "Tipo de movimentação inválido!")
+        return redirect("movement_list")
 
-    def get(self, request, *args, **kwargs):
-        transaction_type = self.kwargs["type"]
-        movement_id = self.kwargs["id"]
-
-        if transaction_type == "inflow":
-            movement = Inflow.objects.get(pk=movement_id)
-        else:
-            movement = Outflow.objects.get(pk=movement_id)
-
+    if request.method == "GET":
         context = {"movement": movement}
+        return render(request, "movement_update.html", context)
 
-        return render(request, self.template_name, context)
-
-
-class MovementDelete(LoginRequiredMixin, AdminRequiredMixin, View):
-    template_name = "movement_delete.html"
-
-    def get(self, request, *args, **kwargs):
-        transaction_type = self.kwargs["type"]
-        movement_id = self.kwargs["id"]
-
-        if transaction_type == "inflow":
-            movement = Inflow.objects.get(pk=movement_id)
-
-        else:
-            movement = Outflow.objects.get(pk=movement_id)
-
-        context = {"movement": movement}
-
-        return render(request, self.template_name, context)
-
-    def post(self, request, *args, **kwargs):
-        transaction_type = self.kwargs["type"]
-        movement_id = self.kwargs["id"]
-
-        if transaction_type == "inflow":
-            movement = get_object_or_404(Inflow, id=movement_id)
-
-        else:
-            movement = get_object_or_404(Outflow, id=movement_id)
-
+    else:
         movement.delete()
 
         messages.success(request, "Movimentação deletada com sucesso!")

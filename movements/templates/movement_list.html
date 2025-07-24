@@ -23,10 +23,7 @@
                     </td>
                     <td>{{ movement.date }}</td>
                     <td>
-                        <a href="{% url 'movement_update' type=movement.transaction_type id=movement.id %}">Editar</a>
-                    </td>
-                    <td>
-                        <a href="{% url 'movement_delete' type=movement.transaction_type id=movement.id %}">Remover</a>
+                        <a href="{% url 'movement_delete' transaction_type=movement.transaction_type id=movement.id %}">Remover</a>
                     </td>
                 </tr>
             {% endfor %}
