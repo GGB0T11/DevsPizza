@@ -7,8 +7,8 @@
         <p>Responsável: {{ movement.user }}</p>
         <p>Tipo: Entrada</p>
         <label for="ingredients">Ingredientes:</label>
-        {% for ingredient in ingredients %}
-            <p>{{ ingredient.ingredient.name }}: {{ ingredient.quantity }}{{ ingredient.ingredient.measure_unit }}</p>
+        {% for ingredient in movement.ingredients.all %}
+            <p>{{ ingredient.name }}: {{ ingredient.quantity }}{{ ingredient.measure_unit }}</p>
         {% endfor %}
         <p>Data: {{ movement.date }}</p>
         <p>Comentário: {{ movement.commentary }}</p>
@@ -16,7 +16,7 @@
         <p>Responsável: {{ movement.user }}</p>
         <p>Tipo: Saida</p>
         <p>Produto: {{ movement.product }}</p>
-        <p>Quantidade: {{ movement.quantity }}</p>
+        <p>Quantidade: {{ movement.amount }}</p>
         <p>Data: {{ movement.date }}</p>
         <p>Comentário: {{ movement.commentary }}</p>
     {% endif %}

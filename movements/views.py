@@ -51,8 +51,9 @@ def movement_create(request):
             for ingredient, qte_added in ingredients_to_add:
                 InflowIngredient.objects.create(
                     inflow=movement,
-                    ingredient=ingredient,
+                    ingredient=ingredient.name,
                     quantity=qte_added,
+                    measure_unit=ingredient.measure_unit,
                 )
 
             messages.success(request, "Movimentação registrada com sucesso!")
@@ -81,7 +82,7 @@ def movement_create(request):
 
             Outflow.objects.create(
                 user=user,
-                product=product,
+                product=product.name,
                 amount=amount,
                 commentary=commentary,
             )
@@ -125,18 +126,13 @@ def movement_list(request):
 def movement_detail(request, transaction_type, id):
     if transaction_type == "inflow":
         movement = get_object_or_404(Inflow, id=id)
-        context = {
-            "movement": movement,
-            "ingredients": movement.inflowingredient_set.all() if isinstance(movement, Inflow) else None,
-        }
     elif transaction_type == "outflow":
         movement = get_object_or_404(Outflow, id=id)
-        context = {"movement": movement}
     else:
         messages.error(request, "Tipo de movimentação inválido!")
         return redirect("movement_list")
 
-    print(movement.date)
+    context = {"movement": movement}
     return render(request, "movement_detail.html", context)
 
 
