@@ -1,5 +1,6 @@
 asgiref==3.8.1
 Django==5.2.3
+django-schema-viewer==0.5.3
 django-tailwind==4.0.1
 python-decouple==3.8
 sqlparse==0.5.3

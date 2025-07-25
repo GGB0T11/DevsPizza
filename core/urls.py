@@ -22,6 +22,7 @@ from .views import home
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("schema-viewer/", include("schema_viewer.urls")),
     path("", home, name="home"),
     path("accounts/", include("accounts.urls"), name="accounts"),
     path("movements/", include("movements.urls"), name="movements"),
