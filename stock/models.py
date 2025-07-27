@@ -14,6 +14,7 @@ class Ingredient(models.Model):
     category = models.ForeignKey(Category, null=True, on_delete=models.SET_NULL)
     qte = models.PositiveIntegerField(default=0)
     min_qte = models.PositiveIntegerField(default=0)
+    measure = models.CharField(max_length=10, choices=([("g", "Gramas"), ("kg", "Quilo"), ("unit", "Unidade")]))
 
     def __str__(self):
         return self.name
