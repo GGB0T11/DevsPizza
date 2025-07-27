@@ -18,19 +18,6 @@
         <input type="number" name="qte" value="{{ ingredient.qte }}" min="0" />
         <label for="min_qte">Quantidade Mínima:</label>
         <input type="number" name="min_qte" value="{{ ingredient.min_qte }}" min="0" />
-        <label for="measure_unit">Unidade de Medida:</label>
-        <select name="measure_unit">
-            {% for value, label in measure_units %}
-                <option value="{{ value }}"
-                        {% if ingredient.measure_unit == value %}selected{% endif %}>{{ label }}</option>
-            {% endfor %}
-        </select>
-        <label for="price">Preço:</label>
-        <input type="number"
-               name="price"
-               step="0.01"
-               value="{{ ingredient.price }}"
-               min="0" />
         <button type="submit">Alterar</button>
     </form>
 {% endblock body %}

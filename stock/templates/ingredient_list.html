@@ -11,7 +11,6 @@
             <option value="category"{% if field == "category" %}selected{% endif %}>Categoria</option>
             <option value="qte"{% if field == "qte" %}selected{% endif %}>Quantidade</option>
             <option value="min_qte"{% if field == "min_qte" %}selected{% endif %}>Quantidade Mínima</option>
-            <option value="price"{% if field == "name" %}selected{% endif %}>Preço</option>
         </select>
         <div id="filter-inputs">
             <input type="text"
@@ -39,7 +38,6 @@
                 <tr>
                     <td>{{ ingredient.name }}</td>
                     <td>{{ ingredient.qte }} {{ ingredient.measure_unit }}</td>
-                    <td>{{ ingredient.price }}</td>
                     <td>
                         <a href="{% url 'ingredient_update' ingredient.id %}">Editar</a>
                     </td>

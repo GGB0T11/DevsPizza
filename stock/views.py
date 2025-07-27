@@ -101,10 +101,7 @@ def category_delete(request, id):
 @require_http_methods(["GET", "POST"])
 def ingredient_create(request):
     if request.method == "GET":
-        context = {
-            "categories": Category.objects.all(),
-            "measure_units": Ingredient._meta.get_field("measure_unit").choices,
-        }
+        context = {"categories": Category.objects.all()}
         return render(request, "ingredient_create.html", context)
 
     else:
@@ -155,8 +152,6 @@ def ingredient_list(request):
             ingredients = ingredients.filter(qte=value)
         elif field == "min_qte":
             ingredients = ingredients.filter(min_qte=value)
-        elif field == "price":
-            ingredients = ingredients.filter(price=value)
 
     context = {
         "ingredients": ingredients,
@@ -183,7 +178,6 @@ def ingredient_update(request, id):
     context = {
         "ingredient": ingredient,
         "categories": Category.objects.all(),
-        "measure_units": Ingredient._meta.get_field("measure_unit").choices,
     }
     if request.method == "GET":
         return render(request, "ingredient_update.html", context)
@@ -200,8 +194,6 @@ def ingredient_update(request, id):
         ingredient.category = get_object_or_404(Category, id=category_id)
         ingredient.qte = request.POST.get("qte")
         ingredient.min_qte = request.POST.get("min_qte")
-        ingredient.measure_unit = request.POST.get("measure_unit")
-        ingredient.price = request.POST.get("price")
 
         ingredient.save()
 
