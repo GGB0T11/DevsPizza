@@ -3,21 +3,19 @@
     Detalhar
 {% endblock title %}
 {% block body %}
-    {% if movement.transaction_type == "inflow" %}
-        <p>Responsável: {{ movement.user }}</p>
-        <p>Tipo: Entrada</p>
-        <label for="ingredients">Ingredientes:</label>
+    <p>Responsável: {{ movement.user }}</p>
+    <p>Tipo: {{ movement.get_type_display }}</p>
+    <p>Data: {{ movement.date }}</p>
+    {% if movement.type == "in" %}
+        <p>Ingredientes:</p>
         {% for ingredient in movement.ingredients.all %}
-            <p>{{ ingredient.name }}: {{ ingredient.quantity }}{{ ingredient.measure_unit }}</p>
+            <p>{{ ingredient.name }}: {{ ingredient.quantity }}{{ ingredient.measure }} - {{ ingredient.price }}</p>
         {% endfor %}
-        <p>Data: {{ movement.date }}</p>
-        <p>Comentário: {{ movement.commentary }}</p>
     {% else %}
-        <p>Responsável: {{ movement.user }}</p>
-        <p>Tipo: Saida</p>
-        <p>Produto: {{ movement.product }}</p>
-        <p>Quantidade: {{ movement.amount }}</p>
-        <p>Data: {{ movement.date }}</p>
-        <p>Comentário: {{ movement.commentary }}</p>
+        {% for product in movement.products.all %}
+            <p>{{ product.name }}: {{ product.quantity }} - {{ product.price }}</p>
+        {% endfor %}
     {% endif %}
+    <p>Total: {{ movement.value }}</p>
+    <p>Comentário: {{ movement.commentary }}</p>
 {% endblock body %}

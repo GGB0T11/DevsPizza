@@ -11,41 +11,82 @@
             <option value="outflow">Saída</option>
         </select>
         <div id="filter-transaction">
-            <select name="product_id" id="product-select" style="display:none;">
-                {% for product in products %}<option value="{{ product.id }}">{{ product.name }}</option>{% endfor %}
-            </select>
-            <input type="number" name="amount" id="product-amount" style="display:none;">
             <table id="ingredient-select">
                 <thead>
                     <tr>
                         <th>Incluir</th>
                         <th>Ingrediente</th>
                         <th>Quantidade</th>
+                        <th>Preço</th>
+                        <th>Unidade de medida</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for ingredient in ingredients %}
                         <tr>
                             <td>
-                                <input type="checkbox" name="ingredients" value="{{ ingredient.id }}" id="i-{{ ingredient.id }}"
-                                </td>
-                                <td>
-                                    <label for="i-{{ ingredient.id }}">{{ ingredient.name }}</label>
-                                </td>
-                                <td>
-                                    <input type="number" name="q-{{ ingredient.id }}" step="0.01" placeholder="0.00"
-                                    </td>
-                                </tr>
-                            {% empty %}
-                                <tr>
-                                    <td>Nenhum ingrediente cadastrado no sistema.</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                <input type="text" name="commentary">
-                <input type="submit" value="Registrar">
-            </form>
-            <script src="{% static 'movements/js/toogle_transaction.js' %}"></script>
-        {% endblock body %}
+                                <input type="checkbox"
+                                       name="ingredients"
+                                       value="{{ ingredient.id }}"
+                                       id="i-{{ ingredient.id }}">
+                            </td>
+                            <td>
+                                <label for="i-{{ ingredient.id }}">{{ ingredient.name }}</label>
+                            </td>
+                            <td>
+                                <input type="number"
+                                       name="q-{{ ingredient.id }}"
+                                       step="0.01"
+                                       placeholder="0.00">
+                            </td>
+                            <td>
+                                <input type="number"
+                                       name="p-{{ ingredient.id }}"
+                                       step="0.01"
+                                       placeholder="0.00">
+                            </td>
+                            <td>
+                                <select name="m-{{ ingredient.id }}">
+                                    {% for value, label in measures %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+                                </select>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <table id="product-select" style="display:none;">
+                <thead>
+                    <tr>
+                        <th>Incluir</th>
+                        <th>Produto</th>
+                        <th>Quantidade</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                        <tr>
+                            <td>
+                                <input type="checkbox"
+                                       name="products"
+                                       value="{{ product.id }}"
+                                       id="p-{{ product.id }}">
+                            </td>
+                            <td>
+                                <label for="p-{{ product.id }}">{{ product.name }}</label>
+                            </td>
+                            <td>
+                                <input type="number"
+                                       name="q-{{ product.id }}"
+                                       step="0.01"
+                                       placeholder="0.00">
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <input type="text" name="commentary" placeholder="Comentário">
+        <input type="submit" value="Registrar">
+    </form>
+    <script src="{% static 'movements/js/toogle_transaction.js' %}"></script>
+{% endblock body %}

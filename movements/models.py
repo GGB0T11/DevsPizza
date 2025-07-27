@@ -3,33 +3,33 @@ from django.db import models
 from accounts.models import CustomUser
 
 
-class Inflow(models.Model):
+class Movement(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING)
-    transaction_type = models.CharField(default="inflow")
+    value = models.DecimalField(default=0, max_digits=10, decimal_places=2)
+    type = models.CharField(max_length=10, choices=([("in", "Entrada"), ("out", "Saida")]))
     date = models.DateTimeField(auto_now_add=True)
     commentary = models.TextField(null=True, blank=True)
 
     def __str__(self):
-        return f"{self.id} - {self.user}"
+        return f"{self.date} - {self.user}: {self.value}"
 
 
-class InflowIngredient(models.Model):
-    inflow = models.ForeignKey(Inflow, on_delete=models.CASCADE, related_name="ingredients")
+class MovementInflow(models.Model):
+    movement = models.ForeignKey(Movement, on_delete=models.CASCADE, related_name="ingredients")
     name = models.CharField(max_length=100)
     quantity = models.DecimalField(default=0, max_digits=10, decimal_places=2)
-    measure_unit = models.CharField(max_length=10, default="N/A")
+    price = models.DecimalField(default=0, max_digits=10, decimal_places=2)
+    measure = models.CharField(max_length=10, choices=([("g", "Gramas"), ("kg", "Quilo"), ("unit", "Unidade")]))
 
     def __str__(self):
-        return f"{self.name}: {self.quantity}"
+        return f"{self.name}: {self.quantity} - {self.price}"
 
 
-class Outflow(models.Model):
-    product = models.CharField(max_length=100)
-    user = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING)
-    transaction_type = models.CharField(default="outflow")
-    amount = models.PositiveIntegerField()
-    date = models.DateTimeField(auto_now_add=True)
-    commentary = models.TextField(null=True, blank=True)
+class MovementOutflow(models.Model):
+    movement = models.ForeignKey(Movement, on_delete=models.CASCADE, related_name="products")
+    name = models.CharField(max_length=100)
+    quantity = models.PositiveIntegerField(default=0)
+    price = models.DecimalField(default=0, max_digits=10, decimal_places=2)
 
     def __str__(self):
-        return f"Saida por {self.user} {self.product}: {self.amount}"
+        return f"{self.name}: {self.quantity} - {self.price}"

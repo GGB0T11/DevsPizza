@@ -12,25 +12,20 @@
     </form>
     <table>
         <thead>
-            <th>Responsável</th>
             <th>Tipo</th>
             <th>Data</th>
+            <th>Responsável</th>
+            <th></th>
         </thead>
         <tbody>
             <br />
             {% for movement in movements %}
                 <tr>
+                    <td>{{ movement.get_type_display }}</td>
+                    <td>{{ movement.date }}</td>
                     <td>{{ movement.user }}</td>
                     <td>
-                        {% if movement.transaction_type == "inflow" %}
-                            Entrada
-                        {% else %}
-                            Saida
-                        {% endif %}
-                    </td>
-                    <td>{{ movement.date }}</td>
-                    <td>
-                        <a href="{% url 'movement_delete' transaction_type=movement.transaction_type id=movement.id %}">Remover</a>
+                        <a href="{% url 'movement_delete' movement.id %}">Remover</a>
                     </td>
                 </tr>
             {% endfor %}

@@ -1,5 +1,5 @@
 from datetime import datetime
-from itertools import chain
+from decimal import Decimal
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -10,14 +10,18 @@ from django.views.decorators.http import require_http_methods
 from core.decorators import admin_required
 from stock.models import Ingredient, Product
 
-from .models import Inflow, InflowIngredient, Outflow
+from .models import Movement, MovementInflow, MovementOutflow
 
 
 @login_required
 @require_http_methods(["GET", "POST"])
 def movement_create(request):
     if request.method == "GET":
-        context = {"products": Product.objects.all(), "ingredients": Ingredient.objects.all()}
+        context = {
+            "products": Product.objects.all(),
+            "ingredients": Ingredient.objects.all(),
+            "measures": MovementInflow._meta.get_field("measure").choices,
+        }
         return render(request, "movement_create.html", context)
 
     else:
@@ -28,71 +32,101 @@ def movement_create(request):
         if transaction_type == "inflow":
             ingredients_ids = request.POST.getlist("ingredients")
             ingredients_to_add = []
+            value = 0
 
             for ingredient_id in ingredients_ids:
+                ingredient = Ingredient.objects.get(pk=ingredient_id)
                 try:
-                    add_qte = float(request.POST.get(f"q-{ingredient_id}"))
+                    qte_to_add = Decimal(request.POST.get(f"q-{ingredient_id}"))
+                    price = Decimal(request.POST.get(f"p-{ingredient_id}"))  # NOTE: tenho que fazer um outro try...
                 except ValueError:
-                    ingredient_name = Ingredient.objects.get(pk=ingredient_id).name
-                    messages.error(request, f"Insira uma quantodade válida para o ingrediente {ingredient_name}!")
+                    messages.error(request, f"Insira uma quantidade válida para o ingrediente {ingredient.name}!")
                     return redirect("movement_list")
 
-                ingredient = Ingredient.objects.get(pk=ingredient_id)
-                ingredient.qte += add_qte
-                ingredients_to_add.append((ingredient, add_qte))
+                measure = request.POST.get(f"m-{ingredient_id}")
+                if measure == "kg":
+                    multiplier = 1000
+                else:
+                    multiplier = 1
+
+                ingredient.qte += qte_to_add * multiplier
+                ingredients_to_add.append((ingredient, qte_to_add, price, measure))
+
+                value += qte_to_add * price
 
             Ingredient.objects.bulk_update([i[0] for i in ingredients_to_add], ["qte"])
 
-            movement = Inflow.objects.create(
+            movement = Movement.objects.create(
                 user=user,
+                value=value,
+                type="in",
                 commentary=commentary,
             )
 
-            for ingredient, qte_added in ingredients_to_add:
-                InflowIngredient.objects.create(
-                    inflow=movement,
-                    ingredient=ingredient.name,
+            for ingredient, qte_added, price, measure in ingredients_to_add:
+                MovementInflow.objects.create(
+                    movement=movement,
+                    name=ingredient.name,
                     quantity=qte_added,
-                    measure_unit=ingredient.measure_unit,
+                    price=price,
+                    measure=measure,
                 )
 
-            messages.success(request, "Movimentação registrada com sucesso!")
-            return redirect("movement_list")
-
         elif transaction_type == "outflow":
-            product_id = request.POST.get("product_id")
-            amount = request.POST.get("amount")
+            products_ids = request.POST.getlist("products")
+            products_sold = []
+            total_value = 0
 
-            product = Product.objects.get(pk=product_id)
-            ingredients_to_reduce = []
+            for product_id in products_ids:
+                product = Product.objects.get(pk=product_id)
+                ingredients_to_reduce = []
 
-            for recipe_item in product.productingredient_set.all():
-                ingredient = recipe_item.ingredient
-                decrease_qte = recipe_item.quantity * int(amount)
-                remaining = ingredient.qte - decrease_qte
-
-                if remaining < 0:
-                    messages.error(request, f"Estoque insuficiente para o ingrediente {ingredient.name}!")
+                try:
+                    quantity = int(request.POST.get(f"q-{product_id}"))
+                except ValueError:
+                    messages.error(request, f"Insira uma quantidade válida para o produto {product.name}")
                     return redirect("movement_list")
 
-                ingredient.qte = remaining
-                ingredients_to_reduce.append(ingredient)
+                for recipe_item in product.productingredient_set.all():
+                    ingredient = recipe_item.ingredient
+                    decrease_qte = recipe_item.quantity * quantity
+                    remaining = ingredient.qte - decrease_qte
 
-            Ingredient.objects.bulk_update(ingredients_to_reduce, ["qte"])
+                    if remaining < 0:
+                        messages.error(request, f"Estoque insuficiente para o ingrediente {ingredient.name}!")
+                        return redirect("movement_list")
 
-            Outflow.objects.create(
+                    ingredient.qte = remaining
+                    ingredients_to_reduce.append(ingredient)
+
+                value = product.price * quantity
+                total_value += value
+
+                Ingredient.objects.bulk_update(ingredients_to_reduce, ["qte"])
+
+                products_sold.append((product.name, quantity, value))
+
+            movement = Movement.objects.create(
                 user=user,
-                product=product.name,
-                amount=amount,
+                value=total_value,
+                type="out",
                 commentary=commentary,
             )
 
-            messages.success(request, "Movimentação registrada com sucesso!")
-            return redirect("movement_list")
+            for name, quantity, price in products_sold:
+                MovementOutflow.objects.create(
+                    movement=movement,
+                    name=name,
+                    quantity=quantity,
+                    price=price,
+                )
 
         else:
             messages.error(request, "Tipo de movimentação inválida!")
             return redirect("movement_list")
+
+        messages.success(request, "Movimentação registrada com sucesso!")
+        return redirect("movement_list")
 
 
 @login_required
@@ -108,29 +142,18 @@ def movement_list(request):
         start_dt = timezone.make_aware(start_dt)
         end_dt = timezone.make_aware(end_dt)
 
-        inflow = Inflow.objects.filter(date__range=(start_dt, end_dt))
-        outflow = Outflow.objects.filter(date__range=(start_dt, end_dt))
+        movements = Movement.objects.filter(date__range=(start_dt, end_dt)).order_by("-date")
     else:
-        inflow = Inflow.objects.all()
-        outflow = Outflow.objects.all()
+        movements = Movement.objects.all().order_by("-date")
 
-    combined = list(chain(inflow, outflow))
-    sorted_combined = sorted(combined, key=lambda x: x.date, reverse=True)
-
-    context = {"movements": sorted_combined}
+    context = {"movements": movements}
     return render(request, "movement_list.html", context)
 
 
 @login_required
 @require_http_methods(["GET"])
-def movement_detail(request, transaction_type, id):
-    if transaction_type == "inflow":
-        movement = get_object_or_404(Inflow, id=id)
-    elif transaction_type == "outflow":
-        movement = get_object_or_404(Outflow, id=id)
-    else:
-        messages.error(request, "Tipo de movimentação inválido!")
-        return redirect("movement_list")
+def movement_detail(request, id):
+    movement = get_object_or_404(Movement, id=id)
 
     context = {"movement": movement}
     return render(request, "movement_detail.html", context)
@@ -139,14 +162,8 @@ def movement_detail(request, transaction_type, id):
 @login_required
 @admin_required
 @require_http_methods(["GET", "POST"])
-def movement_delete(request, transaction_type, id):
-    if transaction_type == "inflow":
-        movement = get_object_or_404(Inflow, id=id)
-    elif transaction_type == "outflow":
-        movement = get_object_or_404(Outflow, id=id)
-    else:
-        messages.error(request, "Tipo de movimentação inválido!")
-        return redirect("movement_list")
+def movement_delete(request, id):
+    movement = get_object_or_404(Movement, id=id)
 
     if request.method == "GET":
         context = {"movement": movement}
