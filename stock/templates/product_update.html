@@ -42,7 +42,7 @@
                                    min="0"
                                    placeholder="0.00"
                                    value="{% for pi in product_ingredients %}{% if pi.ingredient.id == ingredient.id %}{{ pi.quantity }}{% endif %}{% endfor %}">
-                            {{ ingredient.get_measure_unit_display }}
+                            {{ ingredient.get_measure_display }}
                         </td>
                     </tr>
                 {% endfor %}
