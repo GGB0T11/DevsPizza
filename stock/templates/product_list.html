@@ -1,36 +1,94 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}
-    Login
+    Listar
 {% endblock title %}
 {% block body %}
-    <form method="GET">
-        {% csrf_token %}
-        <select name="field">
-            <option value="name" {% if field == "name" %}selected{% endif %}>Nome</option>
-            <option value="price" {% if field == "price" %}selected{% endif %}>Preço</option>
-        </select>
-        <input type="text" name="value" value="{{ value|default:'' }}" />
-        <input type="submit" value="Filtrar" />
-    </form>
-    <table>
-        <thead>
-            <th>Nome</th>
-            <th>Preço</th>
-        </thead>
-        <tbody>
-            <br />
-            {% for product in products %}
-                <tr>
-                    <td>{{ product.name }}</td>
-                    <td>{{ product.price }}</td>
-                    <td>
-                        <a href="{% url 'product_update' product.id %}">Editar</a>
-                    </td>
-                    <td>
-                        <a href="{% url 'product_delete' product.id %}">Remover</a>
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-4xl mx-auto space-y-8">
+            <!-- Header -->
+            <div class="text-center">
+                <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white">Lista de Contas</h2>
+            </div>
+            <!-- Filtro -->
+            <div class="bg-white dark:bg-gray-800 py-8 px-6 shadow-xl rounded-lg border border-gray-200 dark:border-gray-700">
+                <form method="GET" class="space-y-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <label for="field"
+                                   class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Filtrar por
+                            </label>
+                            <select name="field"
+                                    class="appearance-none block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white bg-white dark:bg-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="name" {% if field == "name" %}selected{% endif %}>Nome</option>
+                                <option value="price" {% if field == "price" %}selected{% endif %}>Preço</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="value"
+                                   class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Valor
+                            </label>
+                            <input type="text"
+                                   name="value"
+                                   value="{{ value|default:'' }}"
+                                   placeholder="Digite o valor..."
+                                   class="appearance-none block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        </div>
+                        <div class="flex items-end">
+                            <button type="submit"
+                                    class="w-full flex justify-center py-3 px-4 text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800 transition-colors shadow-md hover:shadow-lg transform hover:scale-[1.02] active:scale-[0.98]">
+                                Filtrar
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <!-- Tabela -->
+            <div class="bg-white dark:bg-gray-800 py-8 px-6 shadow-xl rounded-lg border border-gray-200 dark:border-gray-700">
+                <div class="flex justify-end mb-4">
+                    <a href="{% url 'product_create' %}"
+                       class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 dark:focus:ring-offset-gray-800 transition-colors shadow-md hover:shadow-lg transform hover:scale-[1.02] active:scale-[0.98]">
+                        + Registrar Produto
+                    </a>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead>
+                            <tr class="border-b border-gray-200 dark:border-gray-700">
+                                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Nome</th>
+                                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Preço</th>
+                                <th class="px-4 py-3 text-right text-sm font-medium text-gray-700 dark:text-gray-300">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                            {% for product in products %}
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                    <td class="px-4 py-4 text-sm text-gray-900 dark:text-gray-100">{{ product.name }}</td>
+                                    <td class="px-4 py-4 text-sm text-gray-900 dark:text-gray-100">R$ {{ product.price }}</td>
+                                    <td class="px-4 py-4 text-right">
+                                        <div class="flex justify-end space-x-2">
+                                            <a href="{% url 'product_detail' product.id %}"
+                                               class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 transition-colors">
+                                                Ver
+                                            </a>
+                                            <a href="{% url 'product_update' product.id %}"
+                                               class="text-sm text-yellow-600 dark:text-yellow-400 hover:text-yellow-500 dark:hover:text-yellow-300 transition-colors">
+                                                Editar
+                                            </a>
+                                            <a href="{% url 'product_delete' product.id %}"
+                                               class="text-sm text-red-600 dark:text-red-400 hover:text-red-500 dark:hover:text-red-300 transition-colors">
+                                                Remover
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock body %}

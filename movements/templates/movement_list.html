@@ -3,32 +3,97 @@
     List
 {% endblock title %}
 {% block body %}
-    <form method="GET">
-        <label for="start_date">Data Inicial:</label>
-        <input type="date" name="start_date">
-        <label for="end_date">Data Final:</label>
-        <input type="date" name="end_date">
-        <button type="submit">Filtrar</button>
-    </form>
-    <table>
-        <thead>
-            <th>Tipo</th>
-            <th>Data</th>
-            <th>Responsável</th>
-            <th></th>
-        </thead>
-        <tbody>
-            <br />
-            {% for movement in movements %}
-                <tr>
-                    <td>{{ movement.get_type_display }}</td>
-                    <td>{{ movement.date }}</td>
-                    <td>{{ movement.user }}</td>
-                    <td>
-                        <a href="{% url 'movement_delete' movement.id %}">Remover</a>
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-4xl mx-auto space-y-8">
+            <!-- Header -->
+            <div class="text-center">
+                <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white">Lista de Movimentações</h2>
+            </div>
+            <!-- Filtros -->
+            <div class="bg-white dark:bg-gray-800 py-8 px-6 shadow-xl rounded-lg border border-gray-200 dark:border-gray-700">
+                <form method="GET" class="space-y-6">
+                    {% csrf_token %}
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="start_date"
+                                   class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Data Inicial
+                            </label>
+                            <input type="date"
+                                   name="start_date"
+                                   id="start_date"
+                                   value="{{ request.GET.start_date }}"
+                                   class="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white bg-white dark:bg-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200" />
+                        </div>
+                        <div>
+                            <label for="end_date"
+                                   class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Data Final
+                            </label>
+                            <input type="date"
+                                   name="end_date"
+                                   id="end_date"
+                                   value="{{ request.GET.end_date }}"
+                                   class="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white bg-white dark:bg-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200" />
+                        </div>
+                    </div>
+                    <div>
+                        <button type="submit"
+                                class="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800 transition-colors duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.02] active:scale-[0.98]">
+                            Filtrar
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <!-- Tabela -->
+            <div class="bg-white dark:bg-gray-800 py-8 px-6 shadow-xl rounded-lg border border-gray-200 dark:border-gray-700">
+                <div class="flex justify-end mb-4">
+                    <a href="{% url 'movement_create' %}"
+                       class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 dark:focus:ring-offset-gray-800 transition-colors shadow-md hover:shadow-lg transform hover:scale-[1.02] active:scale-[0.98]">
+                        + Registrar Movimentação
+                    </a>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead>
+                            <tr class="border-b border-gray-200 dark:border-gray-700">
+                                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Tipo</th>
+                                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Data</th>
+                                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Responsável</th>
+                                <th class="px-4 py-3 text-right text-sm font-medium text-gray-700 dark:text-gray-300">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                            {% for movement in movements %}
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
+                                    <td class="px-4 py-4 text-sm text-gray-900 dark:text-gray-100">{{ movement.get_type_display }}</td>
+                                    <td class="px-4 py-4 text-sm text-gray-900 dark:text-gray-100">{{ movement.date }}</td>
+                                    <td class="px-4 py-4 text-sm text-gray-900 dark:text-gray-100">{{ movement.user }}</td>
+                                    <td class="px-4 py-4 text-right">
+                                        <div class="flex justify-end space-x-2">
+                                            <a href="{% url 'movement_detail' movement.id %}"
+                                               class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 transition-colors duration-200">
+                                                Ver
+                                            </a>
+                                            <a href="{% url 'movement_delete' movement.id %}"
+                                               class="text-sm text-red-600 dark:text-red-400 hover:text-red-500 dark:hover:text-red-300 transition-colors duration-200">
+                                                Remover
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="4"
+                                        class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
+                                        Nenhuma movimentação encontrada
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock body %}
