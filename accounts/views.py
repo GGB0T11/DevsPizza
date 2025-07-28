@@ -42,38 +42,41 @@ def register(request):
         return render(request, "register.html", context)
 
     else:
-        first_name = request.POST.get("first_name")
-        last_name = request.POST.get("last_name")
-        email = request.POST.get("email")
-        role = request.POST.get("role")
-        password = request.POST.get("password")
-        confirm_password = request.POST.get("confirm_password")
+        try:
+            first_name = request.POST.get("first_name")
+            last_name = request.POST.get("last_name")
+            email = request.POST.get("email")
+            role = request.POST.get("role")
+            password = request.POST.get("password")
+            confirm_password = request.POST.get("confirm_password")
 
-        if CustomUser.objects.filter(email=email):
-            messages.error(request, "Já existe um usuário cadastrado com esse email, insira outro")
-            return redirect("register")
+            if CustomUser.objects.filter(email=email):
+                raise Exception("Já existe um usuário cadastrado com esse email, insira outro")
 
-        if password != confirm_password:
-            messages.error(request, "As senhas devem ser iguais!")
-            return redirect("register")
+            if password != confirm_password:
+                raise Exception("As senhas devem ser iguais!")
 
-        if len(password) < 8:
-            messages.error(request, "A senha deve ter no mínimo 8 caracteres!")
-            return redirect("register")
+            if len(password) < 8:
+                raise Exception("A senha deve ter no mínimo 8 caracteres!")
 
-        user = CustomUser.objects.create_user(
-            username=email,
-            first_name=first_name,
-            last_name=last_name,
-            email=email,
-            role=role,
-            password=password,
-        )
+            user = CustomUser.objects.create_user(
+                username=email,
+                first_name=first_name,
+                last_name=last_name,
+                email=email,
+                role=role,
+                password=password,
+            )
 
-        user.save()
+            user.save()
 
-        messages.success(request, "Usuário criado com sucesso!")
-        return redirect("account_list")
+            messages.success(request, "Usuário criado com sucesso!")
+            return redirect("account_list")
+
+        except Exception as e:
+            messages.error(request, str(e))
+            context = context = {"role_choices": CustomUser._meta.get_field("role").choices, "old_data": request.POST}
+            return render(request, "register.html", context)
 
 
 @login_required
@@ -125,39 +128,40 @@ def account_detail(request, id):
 @require_http_methods(["GET", "POST"])
 def account_update(request, id):
     account = get_object_or_404(CustomUser, id=id)
+    context = {"account": account, "role_choices": CustomUser._meta.get_field("role").choices}
 
     if request.method == "GET":
-        context = {"account": account, "role_choices": CustomUser._meta.get_field("role").choices}
         return render(request, "account_update.html", context)
 
     else:
-        email = request.POST.get("email")
+        try:
+            email = request.POST.get("email")
 
-        if CustomUser.objects.filter(email=email).exclude(id=account.id).exists():
-            messages.error(request, "O novo email que deseja inserir já está associado a uma conta!")
-            return redirect("account_list")
+            if CustomUser.objects.filter(email=email).exclude(id=account.id).exists():
+                raise Exception("O novo email que deseja inserir já está associado a uma conta!")
 
-        account.first_name = request.POST.get("first_name")
-        account.last_name = request.POST.get("last_name")
-        account.email = email
-        account.role = request.POST.get("role")
-        password = request.POST.get("password")
-        confirm_password = request.POST.get("confirm_password")
-        if password and confirm_password:
-            if password == confirm_password:
-                if len(password) >= 8:
-                    account.set_password(request.POST.get("password"))
+            account.first_name = request.POST.get("first_name")
+            account.last_name = request.POST.get("last_name")
+            account.email = email
+            account.role = request.POST.get("role")
+            password = request.POST.get("password")
+            confirm_password = request.POST.get("confirm_password")
+            if password and confirm_password:
+                if password == confirm_password:
+                    if len(password) >= 8:
+                        account.set_password(request.POST.get("password"))
+                    else:
+                        raise Exception("A senha deve ter no mínimo 8 caracteres")
                 else:
-                    messages.error(request, "A senha deve ter no mínimo 8 caracteres")
-                    return redirect("account_list")
-            else:
-                messages.error(request, "As senhas não coincidem!")
-                return redirect("account_list")
+                    raise Exception("As senhas não coincidem!")
 
-        account.save()
+            account.save()
 
-        messages.success(request, "Conta alterada com sucesso!")
-        return redirect("account_list")
+            messages.success(request, "Conta alterada com sucesso!")
+            return redirect("account_list")
+        except Exception as e:
+            messages.error(request, str(e))
+            return render(request, "account_update.html", context)
 
 
 @login_required

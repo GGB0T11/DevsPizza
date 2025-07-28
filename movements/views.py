@@ -30,116 +30,117 @@ def convert_measures(qte, origin, destiny):
 @login_required
 @require_http_methods(["GET", "POST"])
 def movement_create(request):
+    context = {
+        "products": Product.objects.all(),
+        "ingredients": Ingredient.objects.all(),
+        "type_choices": Movement._meta.get_field("type").choices,
+    }
+
     if request.method == "GET":
-        context = {
-            "products": Product.objects.all(),
-            "ingredients": Ingredient.objects.all(),
-            "type_choices": Movement._meta.get_field("type").choices,
-        }
         return render(request, "movement_create.html", context)
 
     else:
-        user = request.user
-        transaction_type = request.POST.get("type")
-        commentary = request.POST.get("commentary")
-        print(request.POST)
-        if transaction_type == "in":
-            ingredients_ids = request.POST.getlist("ingredients")
-            ingredients_to_add = []
-            value = 0
+        try:
+            user = request.user
+            transaction_type = request.POST.get("type")
+            commentary = request.POST.get("commentary")
 
-            for ingredient_id in ingredients_ids:
-                ingredient = Ingredient.objects.get(pk=ingredient_id)
-                try:
-                    qte_to_add = Decimal(request.POST.get(f"qi-{ingredient_id}"))
-                    price = Decimal(request.POST.get(f"pi-{ingredient_id}"))
-                except (InvalidOperation, ValueError):
-                    messages.error(request, f"Insira um valor válido para o ingrediente {ingredient.name}!")
-                    return redirect("movement_list")
+            if transaction_type == "in":
+                ingredients_ids = request.POST.getlist("ingredients")
+                ingredients_to_add = []
+                value = 0
 
-                measure = request.POST.get(f"m-{ingredient_id}")
+                for ingredient_id in ingredients_ids:
+                    ingredient = Ingredient.objects.get(pk=ingredient_id)
+                    try:
+                        qte_to_add = Decimal(request.POST.get(f"qi-{ingredient_id}"))
+                        price = Decimal(request.POST.get(f"pi-{ingredient_id}"))
+                    except (InvalidOperation, ValueError):
+                        raise Exception(f"Insira um valor válido para o ingrediente {ingredient.name}!")
 
-                try:
-                    converted_qte = convert_measures(qte_to_add, measure, ingredient.measure)
-                    ingredient.qte += converted_qte
-                except ValueError:
-                    messages.error(request, f"Insira uma unidade de medida válida para o ingrediente {ingredient.name}")
-                    return redirect("movement_list")
+                    measure = request.POST.get(f"m-{ingredient_id}")
 
-                ingredients_to_add.append((ingredient, qte_to_add, price, measure))
+                    try:
+                        converted_qte = convert_measures(qte_to_add, measure, ingredient.measure)
+                        ingredient.qte += converted_qte
+                    except ValueError:
+                        raise Exception(f"Insira uma unidade de medida válida para o ingrediente {ingredient.name}")
 
-                value += qte_to_add * price
+                    ingredients_to_add.append((ingredient, qte_to_add, price, measure))
 
-            Ingredient.objects.bulk_update([i[0] for i in ingredients_to_add], ["qte"])
+                    value += qte_to_add * price
 
-            movement = Movement.objects.create(
-                user=user,
-                value=value,
-                type="in",
-                commentary=commentary,
-            )
+                Ingredient.objects.bulk_update([i[0] for i in ingredients_to_add], ["qte"])
 
-            for ingredient, qte_added, price, measure in ingredients_to_add:
-                MovementInflow.objects.create(
-                    movement=movement,
-                    name=ingredient.name,
-                    quantity=qte_added,
-                    price=price,
-                    measure=measure,
+                movement = Movement.objects.create(
+                    user=user,
+                    value=value,
+                    type="in",
+                    commentary=commentary,
                 )
 
-        elif transaction_type == "out":
-            products_ids = request.POST.getlist("products")
-            products_sold = []
-            total_value = 0
+                for ingredient, qte_added, price, measure in ingredients_to_add:
+                    MovementInflow.objects.create(
+                        movement=movement,
+                        name=ingredient.name,
+                        quantity=qte_added,
+                        price=price,
+                        measure=measure,
+                    )
 
-            for product_id in products_ids:
-                product = Product.objects.get(pk=product_id)
-                ingredients_to_reduce = []
+            elif transaction_type == "out":
+                products_ids = request.POST.getlist("products")
+                products_sold = []
+                total_value = 0
 
-                try:
-                    quantity = int(request.POST.get(f"qp-{product_id}"))
-                except ValueError:
-                    messages.error(request, f"Insira uma quantidade válida para o produto {product.name}")
-                    return redirect("movement_list")
+                for product_id in products_ids:
+                    product = Product.objects.get(pk=product_id)
+                    ingredients_to_reduce = []
 
-                for recipe_item in product.productingredient_set.all():
-                    ingredient = recipe_item.ingredient
-                    decrease_qte = recipe_item.quantity * quantity
-                    remaining = ingredient.qte - decrease_qte
+                    try:
+                        quantity = int(request.POST.get(f"qp-{product_id}"))
+                    except ValueError:
+                        raise Exception(f"Insira uma quantidade válida para o produto {product.name}")
 
-                    if remaining < 0:
-                        messages.error(request, f"Estoque insuficiente para o ingrediente {ingredient.name}!")
-                        return redirect("movement_list")
+                    for recipe_item in product.productingredient_set.all():
+                        ingredient = recipe_item.ingredient
+                        decrease_qte = recipe_item.quantity * quantity
+                        remaining = ingredient.qte - decrease_qte
 
-                    ingredient.qte = remaining
-                    ingredients_to_reduce.append(ingredient)
+                        if remaining < 0:
+                            raise Exception(f"Estoque insuficiente para o ingrediente {ingredient.name}!")
 
-                value = product.price * quantity
-                total_value += value
+                        ingredient.qte = remaining
+                        ingredients_to_reduce.append(ingredient)
 
-                Ingredient.objects.bulk_update(ingredients_to_reduce, ["qte"])
+                    value = product.price * quantity
+                    total_value += value
 
-                products_sold.append((product.name, quantity, value))
+                    Ingredient.objects.bulk_update(ingredients_to_reduce, ["qte"])
 
-            movement = Movement.objects.create(
-                user=user,
-                value=total_value,
-                type="out",
-                commentary=commentary,
-            )
+                    products_sold.append((product.name, quantity, value))
 
-            for name, quantity, price in products_sold:
-                MovementOutflow.objects.create(
-                    movement=movement,
-                    name=name,
-                    quantity=quantity,
-                    price=price,
+                movement = Movement.objects.create(
+                    user=user,
+                    value=total_value,
+                    type="out",
+                    commentary=commentary,
                 )
 
-        else:
-            messages.error(request, "Tipo de movimentação inválida!")
-            return redirect("movement_list")
+                for name, quantity, price in products_sold:
+                    MovementOutflow.objects.create(
+                        movement=movement,
+                        name=name,
+                        quantity=quantity,
+                        price=price,
+                    )
+
+            else:
+                raise Exception("Tipo de movimentação inválida!")
+
+        except Exception as e:
+            messages.error(request, str(e))
+            return render(request, "movement_create.html", context)
 
         messages.success(request, "Movimentação registrada com sucesso!")
         return redirect("movement_list")
@@ -180,9 +181,9 @@ def movement_detail(request, id):
 @require_http_methods(["GET", "POST"])
 def movement_delete(request, id):
     movement = get_object_or_404(Movement, id=id)
+    context = {"movement": movement}
 
     if request.method == "GET":
-        context = {"movement": movement}
         return render(request, "movement_delete.html", context)
 
     else:
@@ -190,7 +191,7 @@ def movement_delete(request, id):
 
         if not request.user.check_password(password):
             messages.error(request, "A senha que você inseriu está incorreta!")
-            return redirect("movement_list")
+            return render(request, "movement_delete.html", context)
 
         movement.delete()
 

@@ -6,21 +6,40 @@
     <form action="{% url 'register' %}" method="POST">
         {% csrf_token %}
         <label for="name">Nome:</label>
-        <input type="text" placeholder="Nome"  name="first_name" required />
+        <input type="text"
+               placeholder="Nome"
+               name="first_name"
+               value="{{ old_data.first_name|default:'' }}"
+               required />
         <label for="last_name">Sobrenome:</label>
-        <input type="text" placeholder="Sobrenome"  name="last_name" required />
+        <input type="text"
+               placeholder="Sobrenome"
+               name="last_name"
+               value="{{ old_data.last_name|default:'' }}"
+               required />
         <label for="email">Email:</label>
-        <input type="email"  placeholder="exemplo@email.com"  name="email" required />
+        <input type="email"
+               placeholder="exemplo@email.com"
+               name="email"
+               value="{{ old_data.email|default:'' }}"
+               required />
         <label for="password">Senha:</label>
-        <input type="password"  placeholder="Senha..."  name="password" required />
+        <input type="password"
+               placeholder="Senha..."
+               name="password"
+               value="{{ old_data.password|default:'' }}"
+               required />
         <label for="confirm_password">Confirmar Senha:</label>
         <input type="password"
                placeholder="Confirmar Senha..."
                name="confirm_password"
+               value="{{ old_data.confirm_password|default:'' }}"
                required />
         <label for="role">Cargo:</label>
         <select id="roles" name="role" required>
-            {% for value, label in role_choices %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+            {% for val, label in role_choices %}
+                <option value="{{ val }}" {% if old_data.role == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
         </select>
         <input type="submit" value="Cadastrar" />
     </form>
