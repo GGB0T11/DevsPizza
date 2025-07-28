@@ -171,10 +171,6 @@ def account_delete(request, id):
         return render(request, "account_delete.html", context)
 
     else:
-        if request.user.email == account.email:
-            messages.error(request, "Você não pode deletar a própria conta!")
-            return redirect("account_list")
-
         password = request.POST.get("password")
 
         if not request.user.check_password(password):
