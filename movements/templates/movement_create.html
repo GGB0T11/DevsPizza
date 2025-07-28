@@ -6,9 +6,8 @@
 {% block body %}
     <form method="POST">
         {% csrf_token %}
-        <select name="transaction_type" id="transaction-type">
-            <option value="inflow">Entrada</option>
-            <option value="outflow">Saída</option>
+        <select name="type" id="type">
+            {% for value, label in type_choices %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
         </select>
         <div id="filter-transaction">
             <table id="ingredient-select">
@@ -35,20 +34,26 @@
                             </td>
                             <td>
                                 <input type="number"
-                                       name="q-{{ ingredient.id }}"
+                                       name="qi-{{ ingredient.id }}"
                                        step="0.01"
                                        placeholder="0.00">
                             </td>
                             <td>
                                 <input type="number"
-                                       name="p-{{ ingredient.id }}"
+                                       name="pi-{{ ingredient.id }}"
                                        step="0.01"
                                        placeholder="0.00">
                             </td>
                             <td>
-                                <select name="m-{{ ingredient.id }}">
-                                    {% for value, label in measures %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
-                                </select>
+                                {% if ingredient.measure == "unit" %}
+                                    <span>Unidade</span>
+                                    <input type="hidden" name="m-{{ ingredient.id }}" value="unit">
+                                {% else %}
+                                    <select name="m-{{ ingredient.id }}">
+                                        <option value="g" {% if ingredient.measure == "g" %}selected{% endif %}>Gramas</option>
+                                        <option value="kg" {% if ingredient.measure == "kg" %}selected{% endif %}>Quilo</option>
+                                    </select>
+                                {% endif %}
                             </td>
                         </tr>
                     {% endfor %}
@@ -76,7 +81,7 @@
                             </td>
                             <td>
                                 <input type="number"
-                                       name="q-{{ product.id }}"
+                                       name="qp-{{ product.id }}"
                                        step="0.01"
                                        placeholder="0.00">
                             </td>

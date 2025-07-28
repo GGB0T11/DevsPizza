@@ -1,10 +1,10 @@
 document.addEventListener("DOMContentLoaded", function () {
-  const transactionType = document.getElementById("transaction-type");
+  const transactionType = document.getElementById("type");
   const productSelect = document.getElementById("product-select");
   const ingredientSelect = document.getElementById("ingredient-select");
 
   function toggleInputVisibility() {
-    if (transactionType.value === "inflow") {
+    if (transactionType.value === "in") {
       ingredientSelect.style.display = "block";
       productSelect.style.display = "none";
     } else {

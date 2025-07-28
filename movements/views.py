@@ -1,5 +1,5 @@
 from datetime import datetime
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -13,6 +13,20 @@ from stock.models import Ingredient, Product
 from .models import Movement, MovementInflow, MovementOutflow
 
 
+def convert_measures(qte, origin, destiny):
+    factors = {
+        ("g", "kg"): lambda x: x / 1000,
+        ("kg", "g"): lambda x: x * 1000,
+        ("g", "g"): lambda x: x,
+        ("kg", "kg"): lambda x: x,
+        ("unit", "unit"): lambda x: x,
+    }
+    try:
+        return factors[(origin, destiny)](qte)
+    except KeyError:
+        raise ValueError(f"Conversão inválida de {origin} para {destiny}")
+
+
 @login_required
 @require_http_methods(["GET", "POST"])
 def movement_create(request):
@@ -20,16 +34,16 @@ def movement_create(request):
         context = {
             "products": Product.objects.all(),
             "ingredients": Ingredient.objects.all(),
-            "measures": MovementInflow._meta.get_field("measure").choices,
+            "type_choices": Movement._meta.get_field("type").choices,
         }
         return render(request, "movement_create.html", context)
 
     else:
         user = request.user
-        transaction_type = request.POST.get("transaction_type")
+        transaction_type = request.POST.get("type")
         commentary = request.POST.get("commentary")
-
-        if transaction_type == "inflow":
+        print(request.POST)
+        if transaction_type == "in":
             ingredients_ids = request.POST.getlist("ingredients")
             ingredients_to_add = []
             value = 0
@@ -37,19 +51,21 @@ def movement_create(request):
             for ingredient_id in ingredients_ids:
                 ingredient = Ingredient.objects.get(pk=ingredient_id)
                 try:
-                    qte_to_add = Decimal(request.POST.get(f"q-{ingredient_id}"))
-                    price = Decimal(request.POST.get(f"p-{ingredient_id}"))  # NOTE: tenho que fazer um outro try...
-                except ValueError:
-                    messages.error(request, f"Insira uma quantidade válida para o ingrediente {ingredient.name}!")
+                    qte_to_add = Decimal(request.POST.get(f"qi-{ingredient_id}"))
+                    price = Decimal(request.POST.get(f"pi-{ingredient_id}"))
+                except (InvalidOperation, ValueError):
+                    messages.error(request, f"Insira um valor válido para o ingrediente {ingredient.name}!")
                     return redirect("movement_list")
 
                 measure = request.POST.get(f"m-{ingredient_id}")
-                if measure == "kg":
-                    multiplier = 1000
-                else:
-                    multiplier = 1
 
-                ingredient.qte += qte_to_add * multiplier
+                try:
+                    converted_qte = convert_measures(qte_to_add, measure, ingredient.measure)
+                    ingredient.qte += converted_qte
+                except ValueError:
+                    messages.error(request, f"Insira uma unidade de medida válida para o ingrediente {ingredient.name}")
+                    return redirect("movement_list")
+
                 ingredients_to_add.append((ingredient, qte_to_add, price, measure))
 
                 value += qte_to_add * price
@@ -72,7 +88,7 @@ def movement_create(request):
                     measure=measure,
                 )
 
-        elif transaction_type == "outflow":
+        elif transaction_type == "out":
             products_ids = request.POST.getlist("products")
             products_sold = []
             total_value = 0
@@ -82,7 +98,7 @@ def movement_create(request):
                 ingredients_to_reduce = []
 
                 try:
-                    quantity = int(request.POST.get(f"q-{product_id}"))
+                    quantity = int(request.POST.get(f"qp-{product_id}"))
                 except ValueError:
                     messages.error(request, f"Insira uma quantidade válida para o produto {product.name}")
                     return redirect("movement_list")
