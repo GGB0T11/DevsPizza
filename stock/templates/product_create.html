@@ -6,44 +6,44 @@
     <form method="POST">
         {% csrf_token %}
         <label for="name">Nome:</label>
-        <input type="text" placeholder="Pizza ..." name="name" />
-        <label for="price">Preço:</label>
-        <input type="number" name="price" step="0.01">
-        <table>
-            <thead>
-                <tr>
-                    <th>Incluir</th>
-                    <th>Ingrediente</th>
-                    <th>Quantidade</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for ingredient in ingredients %}
-                    <tr>
-                        <td>
-                            <input type="checkbox"
-                                   name="ingredients"
-                                   value="{{ ingredient.id }}"
-                                   id="i-{{ ingredient.id }}" />
-                        </td>
-                        <td>
-                            <label for="i-{{ ingredient.id }}">{{ ingredient.name }}</label>
-                        </td>
-                        <td>
-                            <input type="number"
-                                   name="q-{{ ingredient.id }}"
-                                   step="0.01"
-                                   placeholder="0.00" />
-                            {{ ingredient.get_measure_unit_display }}
-                        </td>
-                    </tr>
-                {% empty %}
-                    <tr>
-                        <td>Nenhum ingrediente cadastrado no sistema.</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        <input type="submit" value="Cadastrar" />
-    </form>
-{% endblock body %}
+        <input type="text" placeholder="Pizza ..." name="name"
+            <label for="price">Preço:</label>
+            <input type="number" name="price" step="0.01"
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Incluir</th>
+                            <th>Ingrediente</th>
+                            <th>Quantidade</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ingredient in ingredients %}
+                            <tr>
+                                <td>
+                                    <input type="checkbox"
+                                           name="ingredients"
+                                           value="{{ ingredient.id }}"
+                                           id="i-{{ ingredient.id }}" />
+                                </td>
+                                <td>
+                                    <label for="i-{{ ingredient.id }}">{{ ingredient.name }}</label>
+                                </td>
+                                <td>
+                                    <input type="number"
+                                           name="q-{{ ingredient.id }}"
+                                           step="0.01"
+                                           placeholder="0.00" />
+                                    {{ ingredient.get_measure_display }}
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td>Nenhum ingrediente cadastrado no sistema.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <input type="submit" value="Cadastrar" />
+            </form>
+        {% endblock body %}

@@ -108,30 +108,47 @@ def ingredient_create(request):
         return render(request, "ingredient_create.html", context)
 
     else:
-        name = request.POST.get("name")
-        category_id = request.POST.get("category")
-        qte = request.POST.get("qte")
-        min_qte = request.POST.get("min_qte")
-        measure = request.POST.get("measure")
+        try:
+            name = request.POST.get("name")
+            category_id = request.POST.get("category")
+            measure = request.POST.get("measure")
 
-        category = get_object_or_404(Category, id=category_id)
+            category = get_object_or_404(Category, id=category_id)
 
-        if Ingredient.objects.filter(name__iexact=name).exists():
-            messages.error(request, "O ingrediente que deseja cadastrar já existe!")
+            if Ingredient.objects.filter(name__iexact=name).exists():
+                raise Exception("O ingrediente que deseja cadastrar já existe!")
+
+            try:
+                qte = int(request.POST.get("qte"))
+            except ValueError:
+                raise Exception("Insira uma quantidade válida!")
+
+            try:
+                min_qte = int(request.POST.get("min_qte"))
+            except ValueError:
+                raise Exception("Insira uma quantidade mínima válida!")
+
+            ingredient = Ingredient.objects.create(
+                name=name,
+                category=category,
+                qte=qte,
+                min_qte=min_qte,
+                measure=measure,
+            )
+
+            ingredient.save()
+
+            messages.success(request, "Ingrediente cadastrado com sucesso!")
             return redirect("ingredient_list")
 
-        ingredient = Ingredient.objects.create(
-            name=name,
-            category=category,
-            qte=qte,
-            min_qte=min_qte,
-            measure=measure,
-        )
-
-        ingredient.save()
-
-        messages.success(request, "Ingrediente cadastrado com sucesso!")
-        return redirect("ingredient_list")
+        except Exception as e:
+            messages.error(request, str(e))
+            context = {
+                "categories": Category.objects.all(),
+                "measure_choices": Ingredient._meta.get_field("measure").choices,
+                "old_data": request.POST,
+            }
+            return render(request, "ingredient_create.html", context)
 
 
 @login_required
@@ -185,23 +202,37 @@ def ingredient_update(request, id):
         return render(request, "ingredient_update.html", context)
 
     else:
-        name = request.POST.get("name")
+        try:
+            name = request.POST.get("name")
 
-        if Ingredient.objects.filter(name__iexact=name).exclude(id=ingredient.id).exists():
-            messages.error(request, "O novo nome que deseja inserir já está associado a um ingrediente")
+            if Ingredient.objects.filter(name__iexact=name).exclude(id=ingredient.id).exists():
+                raise Exception("O novo nome que deseja inserir já está associado a um ingrediente")
+
+            try:
+                qte = int(request.POST.get("qte"))
+            except ValueError:
+                raise Exception("Insira uma quantidade válida!")
+
+            try:
+                min_qte = int(request.POST.get("min_qte"))
+            except ValueError:
+                raise Exception("Insira uma quantidade mínima válida!")
+
+            ingredient.name = name
+            category_id = request.POST.get("category")
+            ingredient.category = get_object_or_404(Category, id=category_id)
+            ingredient.qte = qte
+            ingredient.min_qte = min_qte
+            ingredient.measure = request.POST.get("measure")
+
+            ingredient.save()
+
+            messages.success(request, "Ingrediente alterado com sucesso!")
             return redirect("ingredient_list")
 
-        ingredient.name = name
-        category_id = request.POST.get("category")
-        ingredient.category = get_object_or_404(Category, id=category_id)
-        ingredient.qte = request.POST.get("qte")
-        ingredient.min_qte = request.POST.get("min_qte")
-        ingredient.measure = request.POST.get("measure")
-
-        ingredient.save()
-
-        messages.success(request, "Ingrediente alterado com sucesso!")
-        return redirect("ingredient_list")
+        except Exception as e:
+            messages.error(request, str(e))
+            return render(request, "ingredient_update.html", context)
 
 
 @login_required
@@ -231,43 +262,51 @@ def ingredient_delete(request, id):
 @admin_required
 @require_http_methods(["GET", "POST"])
 def product_create(request):
+    context = {"ingredients": Ingredient.objects.all()}
+
     if request.method == "GET":
-        context = {"ingredients": Ingredient.objects.all()}
         return render(request, "product_create.html", context)
 
     else:
-        name = request.POST.get("name")
+        try:
+            name = request.POST.get("name")
 
-        if Product.objects.filter(name__iexact=name).exists():
-            messages.error(request, "O produto que deseja criar já existe!")
+            if Product.objects.filter(name__iexact=name).exists():
+                raise Exception("O produto que deseja criar já existe!")
+
+            try:
+                price = request.POST.get("price")
+            except ValueError:
+                raise Exception("Insira um preço válido!")
+
+            ingredients_ids = request.POST.getlist("ingredients")
+
+            ingredients_to_create = []
+
+            for ingredient_id in ingredients_ids:
+                try:
+                    quantity = float(request.POST.get(f"q-{ingredient_id}"))
+                except ValueError:
+                    ingredient_name = Ingredient.objects.get(pk=ingredient_id).name
+                    raise Exception(f"Forneça uma quantidade válida para o ingrediente {ingredient_name}!")
+
+                ingredients_to_create.append((int(ingredient_id), quantity))
+
+            product = Product.objects.create(name=name, price=price)
+
+            for ingredient_id, quantity in ingredients_to_create:
+                ProductIngredient.objects.create(
+                    product=product,
+                    ingredient_id=ingredient_id,
+                    quantity=quantity,
+                )
+
+            messages.success(request, "Produto criado com sucesso!")
             return redirect("product_list")
 
-        price = request.POST.get("price")
-        ingredients_ids = request.POST.getlist("ingredients")
-
-        ingredients_to_create = []
-
-        for ingredient_id in ingredients_ids:
-            try:
-                quantity = float(request.POST.get(f"q-{ingredient_id}"))
-            except ValueError:
-                ingredient_name = Ingredient.objects.get(pk=ingredient_id).name
-                messages.error(request, f"Forneça uma quantidade válida para o ingrediente {ingredient_name}!")
-                return redirect("product_list")
-
-            ingredients_to_create.append((int(ingredient_id), quantity))
-
-        product = Product.objects.create(name=name, price=price)
-
-        for ingredient_id, quantity in ingredients_to_create:
-            ProductIngredient.objects.create(
-                product=product,
-                ingredient_id=ingredient_id,
-                quantity=quantity,
-            )
-
-        messages.success(request, "Produto criado com sucesso!")
-        return redirect("product_list")
+        except Exception as e:
+            messages.error(request, str(e))
+            return render(request, "product_create.html", context)
 
 
 @login_required
