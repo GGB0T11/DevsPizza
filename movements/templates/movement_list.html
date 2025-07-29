@@ -68,7 +68,9 @@
                                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
                                     <td class="px-4 py-4 text-sm text-gray-900 dark:text-gray-100">{{ movement.get_type_display }}</td>
                                     <td class="px-4 py-4 text-sm text-gray-900 dark:text-gray-100">{{ movement.date|date:"d/m/Y H:i:s" }}</td>
-                                    <td class="px-4 py-4 text-sm text-gray-900 dark:text-gray-100">{{ movement.user }}</td>
+                                    <td class="px-4 py-4 text-sm text-gray-900 dark:text-gray-100">
+                                        {{ movement.user.first_name }} {{ movement.user.last_name }}
+                                    </td>
                                     <td class="px-4 py-4 text-right">
                                         <div class="flex justify-end space-x-2">
                                             <a href="{% url 'movement_detail' movement.id %}"
