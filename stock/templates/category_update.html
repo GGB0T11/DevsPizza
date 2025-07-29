@@ -1,14 +1,43 @@
 {% extends "base.html" %}
 {% block title %}
-    Atualizar
+    Editar Categoria
 {% endblock title %}
 {% block body %}
-    <form action="{% url 'category_update' category.id %}" method="POST">
-        {% csrf_token %}
-        <label for="name">Nome:</label>
-        <input type="text" name="name" value="{{ category.name }}" />
-        <label for="description">Descrição:</label>
-        <input type="text" name="description" value="{{ category.description }}" />
-        <button type="submit">Alterar</button>
-    </form>
+    <div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-10 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-xl mx-auto bg-white dark:bg-gray-800 shadow-xl rounded-lg p-8 border border-gray-200 dark:border-gray-700">
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-6">Atualizar Categoria</h2>
+            <form action="{% url 'category_update' category.id %}"
+                  method="POST"
+                  class="space-y-6">
+                {% csrf_token %}
+                <div>
+                    <label for="name"
+                           class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nome:</label>
+                    <input type="text"
+                           name="name"
+                           value="{{ category.name }}"
+                           required
+                           class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+                <div>
+                    <label for="description"
+                           class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Descrição:</label>
+                    <textarea name="description"
+                              rows="4"
+                              required
+                              class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">{{ category.description }}</textarea>
+                </div>
+                <div class="flex flex-col sm:flex-row sm:justify-end sm:space-x-4 space-y-4 sm:space-y-0 pt-4">
+                    <a href="{% url 'category_list' %}"
+                       class="inline-block px-5 py-2.5 text-sm font-medium rounded-md bg-gray-300 hover:bg-gray-400 text-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white transition">
+                        Cancelar
+                    </a>
+                    <button type="submit"
+                            class="inline-block px-5 py-2.5 text-sm font-medium rounded-md bg-blue-600 hover:bg-blue-700 text-white transition">
+                        Alterar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 {% endblock body %}

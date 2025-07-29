@@ -1,26 +1,86 @@
 {% extends "base.html" %}
 {% block title %}
-    Atualizar
+    Editar Ingrediente
 {% endblock title %}
 {% block body %}
-    <form action="{% url 'ingredient_update' ingredient.id %}" method="POST">
-        {% csrf_token %}
-        <label for="name">Nome:</label>
-        <input type="text" name="name" value="{{ ingredient.name }}" />
-        <label for="category">Categoria:</label>
-        <select name="category">
-            {% for category in categories %}
-                <option value="{{ category.id }}"
-                        {% if ingredient.category.id == category.id %}selected{% endif %}>{{ category.name }}</option>
-            {% endfor %}
-        </select>
-        <label for="qte">Quantidade:</label>
-        <input type="number" name="qte" value="{{ ingredient.qte }}" min="0" />
-        <label for="min_qte">Quantidade Mínima:</label>
-        <input type="number" name="min_qte" value="{{ ingredient.min_qte }}" min="0" />
-        <select name="measure">
-            {% for value, label in measure_choices %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
-        </select>
-        <button type="submit">Alterar</button>
-    </form>
+    <div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-10 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-xl mx-auto bg-white dark:bg-gray-800 shadow-xl rounded-lg p-8 border border-gray-200 dark:border-gray-700">
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-6">Atualizar Ingrediente</h2>
+            <form action="{% url 'ingredient_update' ingredient.id %}"
+                  method="POST"
+                  class="space-y-6">
+                {% csrf_token %}
+                <div>
+                    <label for="name"
+                           class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nome:</label>
+                    <input type="text"
+                           name="name"
+                           value="{{ ingredient.name }}"
+                           required
+                           class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+                <div>
+                    <label for="category"
+                           class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Categoria:</label>
+                    <select name="category"
+                            required
+                            class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        {% for category in categories %}
+                            <option value="{{ category.id }}"
+                                    {% if ingredient.category.id == category.id %}selected{% endif %}>
+                                {{ category.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label for="qte"
+                           class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Quantidade:</label>
+                    <input type="number"
+                           name="qte"
+                           value="{{ ingredient.qte }}"
+                           min="0"
+                           required
+                           class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+                <div>
+                    <label for="min_qte"
+                           class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Quantidade Mínima:
+                    </label>
+                    <input type="number"
+                           name="min_qte"
+                           value="{{ ingredient.min_qte }}"
+                           min="0"
+                           required
+                           class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+                <div>
+                    <label for="measure"
+                           class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Unidade de Medida:
+                    </label>
+                    <select name="measure"
+                            id="roles"
+                            required
+                            class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        {% for val, label in measure_choices %}
+                            <option value="{{ val }}"
+                                    {% if val == ingredient.measure %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="flex flex-col sm:flex-row sm:justify-end sm:space-x-4 space-y-4 sm:space-y-0 pt-4">
+                    <a href="{% url 'ingredient_list' %}"
+                       class="inline-block px-5 py-2.5 text-sm font-medium rounded-md bg-gray-300 hover:bg-gray-400 text-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white transition">
+                        Cancelar
+                    </a>
+                    <button type="submit"
+                            class="inline-block px-5 py-2.5 text-sm font-medium rounded-md bg-blue-600 hover:bg-blue-700 text-white transition">
+                        Alterar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 {% endblock body %}
