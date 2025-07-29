@@ -25,11 +25,11 @@
                 </div>
                 <div>
                     <span class="block text-sm font-medium text-gray-500 dark:text-gray-400">Data de Criação:</span>
-                    <span class="text-lg">{{ account.created_at }}</span>
+                    <span class="text-lg">{{ account.created_at|date:"d/m/Y H:i:s" }}</span>
                 </div>
                 <div>
                     <span class="block text-sm font-medium text-gray-500 dark:text-gray-400">Última Alteração:</span>
-                    <span class="text-lg">{{ account.updated_at }}</span>
+                    <span class="text-lg">{{ account.updated_at|date:"d/m/Y H:i:s" }}</span>
                 </div>
             </div>
             <div class="mt-8 flex flex-col sm:flex-row sm:justify-end sm:space-x-4 space-y-4 sm:space-y-0">
