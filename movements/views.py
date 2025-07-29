@@ -3,9 +3,11 @@ from decimal import Decimal, InvalidOperation
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods
+from fpdf import FPDF
 
 from core.decorators import admin_required
 from stock.models import Ingredient, Product
@@ -197,3 +199,53 @@ def movement_delete(request, id):
 
         messages.success(request, "Movimentação deletada com sucesso!")
         return redirect("movement_list")
+
+
+@login_required
+@admin_required
+@require_http_methods(["GET", "POST"])
+def report(request):
+    if request.method == "GET":
+        return render(request, "report.html")
+
+    else:
+        start_date = request.POST.get("start_date")
+        end_date = request.POST.get("end_date")
+
+        if start_date and end_date:
+            start_dt = datetime.strptime(start_date, "%Y-%m-%d")
+            end_dt = datetime.strptime(end_date + " 23:59:59", "%Y-%m-%d %H:%M:%S")
+            start_dt = timezone.make_aware(start_dt)
+            end_dt = timezone.make_aware(end_dt)
+            movements = Movement.objects.filter(date__range=(start_dt, end_dt)).order_by("-date")
+        else:
+            messages.error(request, f"Insira uma data válida!")
+            return redirect("report")
+
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_font("Arial", size=12)
+        pdf.cell(200, 10, txt="Relatório de Movimentações", ln=True, align="C")
+        pdf.ln(10)
+
+        # Cabeçalho
+        pdf.set_font("Arial", style="B", size=12)
+        pdf.cell(40, 10, "Tipo", border=1)
+        pdf.cell(40, 10, "Data", border=1)
+        pdf.cell(60, 10, "Responsável", border=1)
+        pdf.cell(40, 10, "Valor (R$)", border=1)
+        pdf.ln()
+
+        # Dados
+        pdf.set_font("Arial", size=11)
+        for movement in movements:
+            pdf.cell(40, 10, movement.get_type_display(), border=1)
+            pdf.cell(40, 10, movement.date.strftime("%d/%m/%Y %H:%M"), border=1)
+            pdf.cell(60, 10, f"{movement.user.first_name} {movement.user.last_name}", border=1)
+            pdf.cell(40, 10, f"{movement.value:.2f}", border=1)
+            pdf.ln()
+
+        response = HttpResponse(pdf.output(dest="S").encode("latin1"), content_type="application/pdf")
+        response["Content-Disposition"] = "inline; filename='relatorio.pdf'"
+
+        return response
