@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 {% block title %}
-    Excluir
+    Deletar Movimentação
 {% endblock title %}
 {% block body %}
     <div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-10 px-4 sm:px-6 lg:px-8">
         <div class="max-w-xl mx-auto bg-white dark:bg-gray-800 shadow-xl rounded-lg p-8 border border-red-200 dark:border-red-700">
             <h2 class="text-2xl font-bold text-red-700 dark:text-red-400 mb-4">Confirmar Exclusão</h2>
             <p class="text-gray-700 dark:text-gray-300 mb-6">
-                Tem certeza que deseja excluir a movementação <strong>{{ movement.date|date:"d/m/Y H:i:s" }}</strong>?
+                Tem certeza que deseja excluir a movimentação <strong>{{ movement.date|date:"d/m/Y H:i:s" }}</strong>?
                 <br>
                 <span class="text-red-600 font-semibold">Essa ação não poderá ser desfeita.</span>
             </p>

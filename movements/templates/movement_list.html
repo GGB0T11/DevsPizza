@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %}
-    List
+    Listar Movimentações
 {% endblock title %}
 {% block body %}
     <div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
@@ -79,7 +79,7 @@
                                             </a>
                                             <a href="{% url 'movement_delete' movement.id %}"
                                                class="text-sm text-red-600 dark:text-red-400 hover:text-red-500 dark:hover:text-red-300 transition-colors duration-200">
-                                                Remover
+                                                Deletar
                                             </a>
                                         </div>
                                     </td>
