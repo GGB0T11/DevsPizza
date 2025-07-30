@@ -1,6 +1,11 @@
 asgiref==3.8.1
+defusedxml==0.7.1
 Django==5.2.3
 django-schema-viewer==0.5.3
 django-tailwind==4.0.1
+fonttools==4.59.0
+fpdf==1.7.2
+fpdf2==2.8.3
+pillow==11.3.0
 python-decouple==3.8
 sqlparse==0.5.3
