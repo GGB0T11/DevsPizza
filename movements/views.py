@@ -243,6 +243,9 @@ def report(request):
     pdf.cell(200, 10, f"Período: {start_date} até {end_date}", ln=True, align="C")
     pdf.ln(5)
 
+    total_in = 0
+    total_out = 0
+
     for movement in movements:
         pdf.set_font("Arial", "B", 12)
         pdf.cell(0, 10, f"{movement.get_type_display()} - {movement.date.strftime('%d/%m/%Y %H:%M')}", ln=True)
@@ -252,6 +255,7 @@ def report(request):
 
         pdf.ln(2)
         if movement.type == "in":
+            total_in += movement.value
             pdf.set_font("Arial", "B", 10)
             pdf.cell(60, 8, "Nome", border=1)
             pdf.cell(40, 8, "Quantidade", border=1)
@@ -267,6 +271,7 @@ def report(request):
                 pdf.cell(40, 8, f"{ing.price:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."), border=1)
                 pdf.ln()
         else:
+            total_out += movement.value
             pdf.set_font("Arial", "B", 10)
             pdf.cell(60, 8, "Nome", border=1)
             pdf.cell(40, 8, "Quantidade", border=1)
@@ -281,6 +286,14 @@ def report(request):
                 pdf.ln()
 
         pdf.ln(5)  # espaço entre movimentos
+
+    pdf.set_font("Arial", "B", 12)
+    pdf.cell(0, 10, "Resumo Financeiro", ln=True)
+    
+    pdf.set_font("Arial", size=10)
+    pdf.cell(0, 8, f"Total de Entradas: R$ {total_in:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."), ln=True)
+    pdf.cell(0, 8, f"Total de Saídas:   R$ {total_out:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."), ln=True)
+
 
     response = HttpResponse(pdf.output(dest="S").encode("latin1"), content_type="application/pdf")
     response["Content-Disposition"] = "inline; filename='relatorio.pdf'"
