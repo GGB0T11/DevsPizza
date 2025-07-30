@@ -1,10 +1,8 @@
 from django.db import models
 
-from accounts.models import CustomUser
-
 
 class Movement(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING)
+    user = models.CharField(max_length=100)
     value = models.DecimalField(default=0, max_digits=10, decimal_places=2)
     type = models.CharField(max_length=10, choices=([("in", "Entrada"), ("out", "Saida")]))
     date = models.DateTimeField(auto_now_add=True)

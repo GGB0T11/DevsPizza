@@ -44,6 +44,7 @@ def movement_create(request):
     else:
         try:
             user = request.user
+            username = f"{user.first_name} {user.last_name}"
             transaction_type = request.POST.get("type")
             commentary = request.POST.get("commentary")
 
@@ -75,7 +76,7 @@ def movement_create(request):
                 Ingredient.objects.bulk_update([i[0] for i in ingredients_to_add], ["qte"])
 
                 movement = Movement.objects.create(
-                    user=user,
+                    user=username,
                     value=value,
                     type="in",
                     commentary=commentary,
@@ -123,7 +124,7 @@ def movement_create(request):
                     products_sold.append((product.name, quantity, value))
 
                 movement = Movement.objects.create(
-                    user=user,
+                    user=username,
                     value=total_value,
                     type="out",
                     commentary=commentary,
@@ -213,15 +214,16 @@ def report(request):
 
     if not (start_date and end_date):
         messages.error(request, "Insira uma data válida!")
-        return render(request, "report.html", {"error": True})
+        return redirect("report")
 
     start_dt = make_aware(datetime.strptime(start_date, "%Y-%m-%d"))
     end_dt = make_aware(datetime.strptime(end_date + " 23:59:59", "%Y-%m-%d %H:%M:%S"))
 
-    movements = Movement.objects.filter(date__range=(start_dt, end_dt)) \
-        .select_related("user") \
-        .prefetch_related("ingredients", "products") \
+    movements = (
+        Movement.objects.filter(date__range=(start_dt, end_dt))
+        .prefetch_related("ingredients", "products")
         .order_by("-date")
+    )
 
     pdf = FPDF()
     pdf.add_page()
@@ -235,7 +237,7 @@ def report(request):
         pdf.set_font("Arial", "B", 12)
         pdf.cell(0, 10, f"{movement.get_type_display()} - {movement.date.strftime('%d/%m/%Y %H:%M')}", ln=True)
         pdf.set_font("Arial", size=10)
-        pdf.cell(0, 8, f"Responsável: {movement.user.get_full_name()}", ln=True)
+        pdf.cell(0, 8, f"Responsável: {movement.user}", ln=True)
         pdf.cell(0, 8, f"Valor total: R$ {movement.value:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."), ln=True)
 
         pdf.ln(2)
