@@ -13,6 +13,7 @@ class Movement(models.Model):
 
 
 class MovementInflow(models.Model):
+    # related_name para fazer acesso reverso e pegar essas informações
     movement = models.ForeignKey(Movement, on_delete=models.CASCADE, related_name="ingredients")
     name = models.CharField(max_length=100)
     quantity = models.DecimalField(default=0, max_digits=10, decimal_places=2)
@@ -24,6 +25,7 @@ class MovementInflow(models.Model):
 
 
 class MovementOutflow(models.Model):
+    # Acesso reverso aqui tambem
     movement = models.ForeignKey(Movement, on_delete=models.CASCADE, related_name="products")
     name = models.CharField(max_length=100)
     quantity = models.PositiveIntegerField(default=0)

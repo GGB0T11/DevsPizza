@@ -31,6 +31,7 @@ class Product(models.Model):
         return self.name
 
 
+# Tabela intermediária para gerenciar o ingrediente e quantidade de cada produto
 class ProductIngredient(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)

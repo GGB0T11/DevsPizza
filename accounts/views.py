@@ -177,9 +177,9 @@ def account_update(request, id):
 @require_http_methods(["GET", "POST"])
 def account_delete(request, id):
     account = get_object_or_404(CustomUser, id=id)
+    context = {"account": account}
 
     if request.method == "GET":
-        context = {"account": account}
         return render(request, "account_delete.html", context)
 
     else:
@@ -187,7 +187,7 @@ def account_delete(request, id):
 
         if not request.user.check_password(password):
             messages.error(request, "A senha que você inseriu está incorreta!")
-            return redirect("account_list")
+            return render(request, "account_delete.html", context)
 
         account.delete()
 

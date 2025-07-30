@@ -157,9 +157,11 @@ def movement_list(request):
     end_date = request.GET.get("end_date")
 
     if start_date and end_date:
+        # Pegando as datas e formatando
         start_dt = datetime.strptime(start_date, "%Y-%m-%d")
         end_dt = datetime.strptime(end_date + " 23:59:59", "%Y-%m-%d %H:%M:%S")
 
+        # Adicionando o timezone
         start_dt = make_aware(start_dt)
         end_dt = make_aware(end_dt)
 
@@ -229,6 +231,7 @@ def report(request):
     start_dt = make_aware(datetime.strptime(start_date, "%Y-%m-%d"))
     end_dt = make_aware(datetime.strptime(end_date + " 23:59:59", "%Y-%m-%d %H:%M:%S"))
 
+    # prefetch_related para realizar apenas uma busca por todos os dados que atendem ao filtro
     movements = (
         Movement.objects.filter(date__range=(start_dt, end_dt))
         .prefetch_related("ingredients", "products")
@@ -294,7 +297,7 @@ def report(request):
     pdf.cell(0, 8, f"Total de Entradas: R$ {total_in:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."), ln=True)
     pdf.cell(0, 8, f"Total de Saídas:   R$ {total_out:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."), ln=True)
 
-
+    # Retornando o pdf como resposta HTTP
     response = HttpResponse(pdf.output(dest="S").encode("latin1"), content_type="application/pdf")
     response["Content-Disposition"] = "inline; filename='relatorio.pdf'"
     return response
