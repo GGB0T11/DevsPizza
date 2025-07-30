@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth import login as login_django
 from django.contrib.auth import logout as logout_django
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods
 
@@ -104,8 +105,15 @@ def account_list(request):
         elif field == "role":
             accounts = accounts.filter(role=value)
 
+    page_number = request.GET.get("page") or 1
+    paginator = Paginator(accounts, 10)
+
+    page_obj = paginator.get_page(page_number)
+
     context = {
-        "accounts": accounts,
+        "page_obj": page_obj,
+        "Paginator": paginator,
+        "is_paginated": page_obj.has_other_pages(),
         "role_choices": CustomUser._meta.get_field("role").choices,
         "field": field,
         "value": value,

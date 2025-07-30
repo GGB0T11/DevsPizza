@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods
 
@@ -35,7 +36,18 @@ def category_create(request):
 @admin_required
 @require_http_methods(["GET"])
 def category_list(request):
-    context = {"categories": Category.objects.all()}
+    categories = Category.objects.all()
+
+    page_number = request.GET.get("page") or 1
+    paginator = Paginator(categories, 10)
+
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        "page_obj": page_obj,
+        "Paginator": paginator,
+        "is_paginated": page_obj.has_other_pages(),
+    }
     return render(request, "category_list.html", context)
 
 
@@ -171,8 +183,15 @@ def ingredient_list(request):
         elif field == "min_qte":
             ingredients = ingredients.filter(min_qte=value)
 
+    page_number = request.GET.get("page") or 1
+    paginator = Paginator(ingredients, 10)
+
+    page_obj = paginator.get_page(page_number)
+
     context = {
-        "ingredients": ingredients,
+        "page_obj": page_obj,
+        "Paginator": paginator,
+        "is_paginated": page_obj.has_other_pages(),
         "categories": categories,
         "field": field,
         "value": value,
@@ -330,8 +349,15 @@ def product_list(request):
 
             products = products.filter(price=value)
 
+    page_number = request.GET.get("page") or 1
+    paginator = Paginator(products, 10)
+
+    page_obj = paginator.get_page(page_number)
+
     context = {
-        "products": products,
+        "page_obj": page_obj,
+        "Paginator": paginator,
+        "is_paginated": page_obj.has_other_pages(),
         "field": field,
         "value": value,
     }

@@ -64,7 +64,7 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                            {% for movement in movements %}
+                            {% for movement in page_obj %}
                                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
                                     <td class="px-4 py-4 text-sm text-gray-900 dark:text-gray-100">{{ movement.get_type_display }}</td>
                                     <td class="px-4 py-4 text-sm text-gray-900 dark:text-gray-100">{{ movement.date|date:"d/m/Y H:i:s" }}</td>
@@ -94,6 +94,25 @@
                     </table>
                 </div>
             </div>
+            {% if is_paginated %}
+                <div class="flex justify-center mt-6 space-x-2">
+                    {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.start_date %}&start_date={{ request.GET.start_date }}{% endif %}{% if request.GET.end_date %}&end_date={{ request.GET.end_date }}{% endif %}"
+                           class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+                            ← Anterior
+                        </a>
+                    {% endif %}
+                    <span class="px-4 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-white border border-gray-300 dark:border-gray-600 rounded">
+                        Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                    </span>
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}{% if request.GET.start_date %}&start_date={{ request.GET.start_date }}{% endif %}{% if request.GET.end_date %}&end_date={{ request.GET.end_date }}{% endif %}"
+                           class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+                            Próxima →
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
         </div>
     </div>
 {% endblock body %}

@@ -3,6 +3,7 @@ from decimal import Decimal, InvalidOperation
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.timezone import make_aware
@@ -159,14 +160,23 @@ def movement_list(request):
         start_dt = datetime.strptime(start_date, "%Y-%m-%d")
         end_dt = datetime.strptime(end_date + " 23:59:59", "%Y-%m-%d %H:%M:%S")
 
-        start_dt = timezone.make_aware(start_dt)
-        end_dt = timezone.make_aware(end_dt)
+        start_dt = make_aware(start_dt)
+        end_dt = make_aware(end_dt)
 
         movements = Movement.objects.filter(date__range=(start_dt, end_dt)).order_by("-date")
     else:
         movements = Movement.objects.all().order_by("-date")
 
-    context = {"movements": movements}
+    page_number = request.GET.get("page") or 1
+    paginator = Paginator(movements, 10)
+
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        "page_obj": page_obj,
+        "Paginator": paginator,
+        "is_paginated": page_obj.has_other_pages(),
+    }
     return render(request, "movement_list.html", context)
 
 

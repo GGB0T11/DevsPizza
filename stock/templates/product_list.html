@@ -8,7 +8,7 @@
         <div class="max-w-4xl mx-auto space-y-8">
             <!-- Header -->
             <div class="text-center">
-                <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white">Lista de Contas</h2>
+                <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white">Lista de Produtos</h2>
             </div>
             <!-- Filtro -->
             <div class="bg-white dark:bg-gray-800 py-8 px-6 shadow-xl rounded-lg border border-gray-200 dark:border-gray-700">
@@ -63,7 +63,7 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                            {% for product in products %}
+                            {% for product in page_obj %}
                                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                                     <td class="px-4 py-4 text-sm text-gray-900 dark:text-gray-100">{{ product.name }}</td>
                                     <td class="px-4 py-4 text-sm text-gray-900 dark:text-gray-100">R$ {{ product.price }}</td>
@@ -89,6 +89,25 @@
                     </table>
                 </div>
             </div>
+            {% if is_paginated %}
+                <div class="flex justify-center mt-6 space-x-2">
+                    {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}&{% if request.GET.field and request.GET.value %}field={{ request.GET.field }}&value={{ request.GET.value }}{% endif %}"
+                           class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+                            ← Anterior
+                        </a>
+                    {% endif %}
+                    <span class="px-4 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-white border border-gray-300 dark:border-gray-600 rounded">
+                        Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                    </span>
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}&{% if request.GET.field and request.GET.value %}field={{ request.GET.field }}&value={{ request.GET.value }}{% endif %}"
+                           class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+                            Próxima →
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
         </div>
     </div>
 {% endblock body %}
