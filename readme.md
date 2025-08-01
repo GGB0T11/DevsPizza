@@ -44,13 +44,13 @@ devspizza
 │   │   ├── ...
 │   ├── urls.py
 │   └── views.py
-├── movements
+├── movements           # Módulo responsável por gerenciar as movimentações
 │   ├── models.py
 │   ├── templates
 │   │   ├── ...
 │   ├── urls.py
 │   └── views.py
-├── stock
+├── stock               # Módulo responsável por gerenciar o estoque
 │   ├── models.py
 │   ├── templates
 │   │   ├── ...
