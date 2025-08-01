@@ -77,15 +77,16 @@ devspizza
 ## Instalação
 
 1. **Clone o repositório:**
+
    ```bash
    git clone [https://github.com/GGB0T11/Dev-sPizza.git](https://github.com/GGB0T11/Dev-sPizza.git)
-   cd Dev-sPizza  
+   cd Dev-sPizza
    ```
 
 2. **Defina as variáveis de ambiente:**
-   
+
    Crie o arquivo `.env` na raiz do projeto com as seguintes variáveis:
-   
+
    ```env
    SECRET_KEY=sua_chave_secreta_do_django # Gere um cheve única e complexa para produção
    DEBUG=True                             # Defina como False para produção
@@ -114,16 +115,14 @@ docker-compose up -d
 docker-compose down
 ```
 
-
 Apos iniciar o serviço voce pode acessar:
+
 - **Aplicação**: http://localhost:8000
 - **Visualização do Banco de Dados**: http://127.0.0.1:8000/schema-viewer/
 
+## Primeiro acesso
 
-
-## Administrador no Django
-
-Para acessar a aplicação pela primeira vez é necessário criar um super usuario
+Para a primeira utilização da aplicação, é necessário criar um superusuário. Este superusuário é essencial para que seja possível criar outros usuários no sistema posteriormente. Para isso, execute o seguinte comando no seu terminal:
 
 1.  **Criando o Superuser:**
     Execute o comando abaixo no seu terminal:
