@@ -79,7 +79,7 @@ devspizza
 1. **Clone o repositório:**
 
    ```bash
-   git clone [https://github.com/GGB0T11/Dev-sPizza.git](https://github.com/GGB0T11/Dev-sPizza.git)
+   git clone https://github.com/GGB0T11/Dev-sPizza.git
    cd Dev-sPizza
    ```
 
