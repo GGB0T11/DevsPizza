@@ -1,5 +1,6 @@
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
+from io import BytesIO
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -298,6 +299,6 @@ def report(request):
     pdf.cell(0, 8, f"Total de Saídas:   R$ {total_out:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."), ln=True)
 
     # Retornando o pdf como resposta HTTP
-    response = HttpResponse(pdf.output(dest="S").encode("latin1"), content_type="application/pdf")
+    response = HttpResponse(bytes(pdf.output(dest="S")), content_type="application/pdf")
     response["Content-Disposition"] = "inline; filename='relatorio.pdf'"
     return response
