@@ -1,6 +1,5 @@
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
-from io import BytesIO
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -73,7 +72,7 @@ def movement_create(request):
 
                     ingredients_to_add.append((ingredient, qte_to_add, price, measure))
 
-                    value += qte_to_add * price
+                    value += price
 
                 Ingredient.objects.bulk_update([i[0] for i in ingredients_to_add], ["qte"])
 
