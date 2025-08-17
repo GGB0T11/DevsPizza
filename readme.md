@@ -130,7 +130,3 @@ Para a primeira utilização da aplicação, é necessário criar um superusuár
     docker-compose exec backend python manage.py createsuperuser
     ```
     Siga os prompts para configurar o seu nome, email e senha.
-
-### Licença
-
-Esse Projeto está sob a licença MIT - consulte o arquivo ![LICENSE](./LICENSE) para mais detalhes
