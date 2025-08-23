@@ -4,7 +4,7 @@ from decimal import Decimal, InvalidOperation
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.http import HttpResponse
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.timezone import make_aware
 from django.views.decorators.http import require_http_methods
@@ -16,7 +16,18 @@ from stock.models import Ingredient, Product
 from .models import Movement, MovementInflow, MovementOutflow
 
 
-def convert_measures(qte, origin, destiny):
+def convert_measures(qte: Decimal, origin: str, destiny: str) -> Decimal:
+    """Converte Gramas em Kg e vice versa.
+
+    Args:
+        qte (Decimal): Quantidade a ser convertida.
+        origin (str): Unidade de medida inserida na transação.
+        destiny (str): Unidade de medida do item.
+
+    Returns:
+        Decimal: Número convertido.
+    """
+
     factors = {
         ("g", "kg"): lambda x: x / 1000,
         ("kg", "g"): lambda x: x * 1000,
@@ -32,7 +43,26 @@ def convert_measures(qte, origin, destiny):
 
 @login_required
 @require_http_methods(["GET", "POST"])
-def movement_create(request):
+def movement_create(request: HttpRequest) -> HttpResponse:
+    """Renderiza a página de criação de movimentação e processa o registro.
+
+    Args:
+        request (HttpRequest): Objeto de requisição do Django.
+
+    GET:
+        Renderiza a tela de registro de movimentação com ingredientes e produtos a serem transacionados.
+
+    POST:
+        Valida os campos fornecidos de acordo com o tipo de movimentação:
+            - Se válida redireciona para a lista de movimentações e exibe uma mensagem de sucesso.
+            - Se Inválida redireciona para a crição novamente com ao dados preenchidos e exibe uma mensagem de erro.
+
+    Returns:
+        HttpResponse: Página de criar movimentação (GET ou POST com dados inválidos).
+        HttpResponseRedirect: Redirecionamento para a lista de movimentações (POST válido).
+
+    """
+
     context = {
         "products": Product.objects.all(),
         "ingredients": Ingredient.objects.all(),
@@ -152,7 +182,21 @@ def movement_create(request):
 
 @login_required
 @require_http_methods(["GET"])
-def movement_list(request):
+def movement_list(request: HttpRequest) -> HttpResponse:
+    """Exibe uma lista com as movimentações do sistema.
+
+    Args:
+        request (HttpRequest): Objeto de requisição do Django.
+
+    GET:
+        renderiza a tela de movimentações com o filtro de data vazio.
+            - Se tiver filtro, retorna as movimentações correspondentes ao período.
+            - Se não tiver filtro, retorna as movimentações de acordo com a página.
+
+    Returns:
+        HttpResponse: Listando as movimentações
+    """
+
     start_date = request.GET.get("start_date")
     end_date = request.GET.get("end_date")
 
@@ -184,7 +228,21 @@ def movement_list(request):
 
 @login_required
 @require_http_methods(["GET"])
-def movement_detail(request, id):
+def movement_detail(request: HttpRequest, id: int) -> HttpResponse:
+    """Renderiza uma página com detalhes da movimentação.
+
+    Args:
+        request (HttpRequest): Objeto de requisição do Django.
+        id (int): Identificador único da movimentação.
+
+    GET:
+        Renderiza a tela com os dados da movimentação.
+
+    Returns:
+        HttpResponse: Página de detalhamento.
+
+    """
+
     movement = get_object_or_404(Movement, id=id)
 
     context = {"movement": movement}
@@ -194,7 +252,26 @@ def movement_detail(request, id):
 @login_required
 @admin_required
 @require_http_methods(["GET", "POST"])
-def movement_delete(request, id):
+def movement_delete(request: HttpRequest, id: int) -> HttpResponse:
+    """Exibe e processa a exclusão da movimentação.
+
+    Args:
+        request (HttpRequest): Objeto de requisição do Django.
+        id (int): identificador único da movimentação.
+
+    GET:
+        Renderiza a tela de deletar movimentação solicitando senha.
+
+    POST:
+        Valida a senha:
+            - Se válida, deleta movimentação do do banco de dados com uma mensagem de sucesso.
+            - Se inválido, redireciona para a página de insersão de senha com uma mensagem de erro.
+
+    Returns:
+        HttpResponse: Página de deletar movimentação (senha inválida).
+        HttpResponseRedirect: Redirecionamento para a página a lista de movimentações (POST válido).
+    """
+
     movement = get_object_or_404(Movement, id=id)
     context = {"movement": movement}
 
@@ -217,7 +294,25 @@ def movement_delete(request, id):
 @login_required
 @admin_required
 @require_http_methods(["GET", "POST"])
-def report(request):
+def report(request: HttpRequest) -> HttpResponse:
+    """Cria um relatório de movimentações de acordo com um período específico.
+
+    Args:
+        request (HttpRequest): Objeto de requisição do django.
+
+    GET:
+        Renderiza a página de relatório.
+
+    POST:
+        Valida o período inserido:
+            - Se válido, gera um relatório com base em um período específico.
+            - Se inválido, retorna para a página de relatório com uma mensagem de erro.
+
+    Returns:
+        HttpRequest: Página de geração de relatório (data inválida).
+        HttpsResponseRedirect: PDF do relatório (POST válido).
+    """
+
     if request.method == "GET":
         return render(request, "report.html")
 
@@ -292,7 +387,7 @@ def report(request):
 
     pdf.set_font("Arial", "B", 12)
     pdf.cell(0, 10, "Resumo Financeiro", ln=True)
-    
+
     pdf.set_font("Arial", size=10)
     pdf.cell(0, 8, f"Total de Entradas: R$ {total_in:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."), ln=True)
     pdf.cell(0, 8, f"Total de Saídas:   R$ {total_out:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."), ln=True)

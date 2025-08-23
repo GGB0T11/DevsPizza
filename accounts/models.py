@@ -4,6 +4,18 @@ from django.db import models
 
 # Customizando o Model do user
 class CustomUser(AbstractUser):
+    """Representa um usuário.
+
+    Atributes:
+        first_name (str): Nome.
+        last_name (str): Sobrenome.
+        email (str): Email.
+        role (str): Cargo (employee/admin).
+        created_at (timestamp): Data de criação.
+        updated_at (timestamp): Data de atualização.
+
+    """
+
     email = models.EmailField(max_length=100, unique=True)
     role = models.CharField(
         max_length=20,

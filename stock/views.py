@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods
 
@@ -12,7 +13,21 @@ from .models import Category, Ingredient, Product, ProductIngredient
 @login_required
 @admin_required
 @require_http_methods(["GET", "POST"])
-def category_create(request):
+def category_create(request: HttpRequest) -> HttpResponse:
+    """Cria uma nova categoria.
+
+    GET:
+        Renderiza o formulário de criação de categoria.
+
+    POST:
+        - Cria uma nova categoria se o nome não existir.
+        - Caso já exista, redireciona para a lista exibindo mensagem de erro.
+
+    Returns:
+        HttpResponse: Página de criação (GET ou POST inválido).
+        HttpResponseRedirect: Redireciona para a lista de categorias após criação ou erro.
+    """
+
     if request.method == "GET":
         return render(request, "category_create.html")
 
@@ -35,7 +50,16 @@ def category_create(request):
 @login_required
 @admin_required
 @require_http_methods(["GET"])
-def category_list(request):
+def category_list(request: HttpRequest) -> HttpResponse:
+    """Lista todas as categorias cadastradas, com paginação.
+
+    GET:
+        Renderiza a lista paginada de categorias.
+
+    Returns:
+        HttpResponse: Página com a lista de categorias.
+    """
+
     categories = Category.objects.all()
 
     page_number = request.GET.get("page") or 1
@@ -54,7 +78,19 @@ def category_list(request):
 @login_required
 @admin_required
 @require_http_methods(["GET"])
-def category_detail(request, id):
+def category_detail(request: HttpRequest, id: int) -> HttpResponse:
+    """Exibe os detalhes de uma categoria específica.
+
+    Args:
+        id (int): Identificador único da categoria.
+
+    GET:
+        Renderiza a página de detalhes da categoria.
+
+    Returns:
+        HttpResponse: Página com os detalhes da categoria.
+    """
+
     context = {"category": get_object_or_404(Category, id=id)}
 
     return render(request, "category_detail.html", context)
@@ -63,7 +99,24 @@ def category_detail(request, id):
 @login_required
 @admin_required
 @require_http_methods(["GET", "POST"])
-def category_update(request, id):
+def category_update(request: HttpRequest, id: int) -> HttpResponse:
+    """Atualiza uma categoria existente.
+
+    Args:
+        id (int): Identificador único da categoria.
+
+    GET:
+        Renderiza o formulário com os dados atuais da categoria.
+
+    POST:
+        - Atualiza nome e descrição.
+        - Caso o nome já exista em outra categoria, exibe mensagem de erro.
+
+    Returns:
+        HttpResponse: Página de edição (GET ou POST inválido).
+        HttpResponseRedirect: Redireciona para a lista de categorias após atualização.
+    """
+
     category = get_object_or_404(Category, id=id)
     context = {"category": category}
 
@@ -88,7 +141,24 @@ def category_update(request, id):
 @login_required
 @admin_required
 @require_http_methods(["GET", "POST"])
-def category_delete(request, id):
+def category_delete(request: HttpRequest, id: int) -> HttpResponse:
+    """Exclui uma categoria existente.
+
+    Args:
+        id (int): Identificador único da categoria.
+
+    GET:
+        Renderiza a página de confirmação da exclusão.
+
+    POST:
+        - Valida a senha do usuário autenticado.
+        - Remove a categoria se a senha for correta.
+
+    Returns:
+        HttpResponse: Página de confirmação de exclusão (GET).
+        HttpResponseRedirect: Redireciona para a lista após exclusão ou erro de senha.
+    """
+
     category = get_object_or_404(Category, id=id)
 
     if request.method == "GET":
@@ -111,7 +181,22 @@ def category_delete(request, id):
 @login_required
 @admin_required
 @require_http_methods(["GET", "POST"])
-def ingredient_create(request):
+def ingredient_create(request: HttpRequest) -> HttpResponse:
+    """Cria um novo ingrediente.
+
+    GET:
+        Renderiza o formulário de criação de ingrediente.
+
+    POST:
+        - Cria um ingrediente associado a uma categoria.
+        - Valida nome único, quantidades e medida.
+        - Caso algum dado seja inválido, retorna o formulário preenchido com erros.
+
+    Returns:
+        HttpResponse: Página de criação (GET ou POST inválido).
+        HttpResponseRedirect: Redireciona para a lista de ingredientes após criação.
+    """
+
     if request.method == "GET":
         context = {
             "categories": Category.objects.all(),
@@ -166,7 +251,17 @@ def ingredient_create(request):
 @login_required
 @admin_required
 @require_http_methods(["GET"])
-def ingredient_list(request):
+def ingredient_list(request: HttpRequest) -> HttpResponse:
+    """Lista todos os ingredientes cadastrados, com filtros e paginação.
+
+    GET:
+        - Permite filtrar por nome, categoria, quantidade ou quantidade mínima.
+        - Renderiza a lista paginada de ingredientes.
+
+    Returns:
+        HttpResponse: Página com a lista de ingredientes.
+    """
+
     ingredients = Ingredient.objects.all()
     categories = Category.objects.all()
 
@@ -202,7 +297,19 @@ def ingredient_list(request):
 @login_required
 @admin_required
 @require_http_methods(["GET"])
-def ingredient_detail(request, id):
+def ingredient_detail(request: HttpRequest, id: int) -> HttpResponse:
+    """Exibe os detalhes de um ingrediente específico.
+
+    Args:
+        id (int): Identificador único do ingrediente.
+
+    GET:
+        Renderiza a página de detalhes do ingrediente.
+
+    Returns:
+        HttpResponse: Página com os detalhes do ingrediente.
+    """
+
     context = {"ingredient": get_object_or_404(Ingredient, id=id)}
     return render(request, "ingredient_detail.html", context)
 
@@ -210,7 +317,25 @@ def ingredient_detail(request, id):
 @login_required
 @admin_required
 @require_http_methods(["GET", "POST"])
-def ingredient_update(request, id):
+def ingredient_update(request: HttpRequest, id: int) -> HttpResponse:
+    """Atualiza um ingrediente existente.
+
+    Args:
+        id (int): Identificador único do ingrediente.
+
+    GET:
+        Renderiza o formulário com os dados atuais do ingrediente.
+
+    POST:
+        - Atualiza nome, categoria, quantidades e medida.
+        - Valida nome único e valores numéricos.
+        - Caso algum dado seja inválido, exibe mensagem de erro.
+
+    Returns:
+        HttpResponse: Página de edição (GET ou POST inválido).
+        HttpResponseRedirect: Redireciona para a lista de ingredientes após atualização.
+    """
+
     ingredient = get_object_or_404(Ingredient, id=id)
     context = {
         "ingredient": ingredient,
@@ -257,7 +382,24 @@ def ingredient_update(request, id):
 @login_required
 @admin_required
 @require_http_methods(["GET", "POST"])
-def ingredient_delete(request, id):
+def ingredient_delete(request: HttpRequest, id: int) -> HttpResponse:
+    """Exclui um ingrediente existente.
+
+    Args:
+        id (int): Identificador único do ingrediente.
+
+    GET:
+        Renderiza a página de confirmação da exclusão.
+
+    POST:
+        - Valida a senha do usuário autenticado.
+        - Remove o ingrediente se a senha for correta.
+
+    Returns:
+        HttpResponse: Página de confirmação (GET).
+        HttpResponseRedirect: Redireciona para a lista após exclusão ou erro de senha.
+    """
+
     ingredient = get_object_or_404(Ingredient, id=id)
 
     if request.method == "GET":
@@ -280,7 +422,22 @@ def ingredient_delete(request, id):
 @login_required
 @admin_required
 @require_http_methods(["GET", "POST"])
-def product_create(request):
+def product_create(request: HttpRequest) -> HttpResponse:
+    """Cria um novo produto com ingredientes associados.
+
+    GET:
+        Renderiza o formulário de criação de produto.
+
+    POST:
+        - Cria o produto com nome, preço e ingredientes.
+        - Valida nome único, preço e quantidades.
+        - Caso algum dado seja inválido, retorna o formulário preenchido com erros.
+
+    Returns:
+        HttpResponse: Página de criação (GET ou POST inválido).
+        HttpResponseRedirect: Redireciona para a lista de produtos após criação.
+    """
+
     context = {"ingredients": Ingredient.objects.all()}
 
     if request.method == "GET":
@@ -331,7 +488,17 @@ def product_create(request):
 @login_required
 @admin_required
 @require_http_methods(["GET"])
-def product_list(request):
+def product_list(request: HttpRequest) -> HttpResponse:
+    """Lista todos os produtos cadastrados, com filtros e paginação.
+
+    GET:
+        - Permite filtrar por nome ou preço.
+        - Renderiza a lista paginada de produtos.
+
+    Returns:
+        HttpResponse: Página com a lista de produtos.
+    """
+
     products = Product.objects.all()
 
     field = request.GET.get("field")
@@ -368,7 +535,19 @@ def product_list(request):
 @login_required
 @admin_required
 @require_http_methods(["GET"])
-def product_detail(request, id):
+def product_detail(request: HttpRequest, id: int) -> HttpResponse:
+    """Exibe os detalhes de um produto específico, incluindo seus ingredientes.
+
+    Args:
+        id (int): Identificador único do produto.
+
+    GET:
+        Renderiza a página de detalhes do produto.
+
+    Returns:
+        HttpResponse: Página com os detalhes do produto.
+    """
+
     product = get_object_or_404(Product, id=id)
     context = {
         "product": product,
@@ -380,7 +559,25 @@ def product_detail(request, id):
 @login_required
 @admin_required
 @require_http_methods(["GET", "POST"])
-def product_update(request, id):
+def product_update(request: HttpRequest, id: int) -> HttpResponse:
+    """Atualiza um produto existente e seus ingredientes.
+
+    Args:
+        id (int): Identificador único do produto.
+
+    GET:
+        Renderiza o formulário com os dados atuais do produto.
+
+    POST:
+        - Atualiza nome, preço e ingredientes associados.
+        - Valida nome único, preço e quantidades.
+        - Adiciona ou remove ingredientes conforme seleção.
+
+    Returns:
+        HttpResponse: Página de edição (GET ou POST inválido).
+        HttpResponseRedirect: Redireciona para a lista de produtos após atualização.
+    """
+
     product = get_object_or_404(Product, id=id)
 
     if request.method == "GET":
@@ -434,7 +631,24 @@ def product_update(request, id):
 @login_required
 @admin_required
 @require_http_methods(["GET", "POST"])
-def product_delete(request, id):
+def product_delete(request: HttpRequest, id: int) -> HttpResponse:
+    """Exclui um produto existente.
+
+    Args:
+        id (int): Identificador único do produto.
+
+    GET:
+        Renderiza a página de confirmação da exclusão.
+
+    POST:
+        - Valida a senha do usuário autenticado.
+        - Remove o produto se a senha for correta.
+
+    Returns:
+        HttpResponse: Página de confirmação (GET).
+        HttpResponseRedirect: Redireciona para a lista após exclusão ou erro de senha.
+    """
+
     product = get_object_or_404(Product, id=id)
 
     if request.method == "GET":
