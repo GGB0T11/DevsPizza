@@ -92,7 +92,8 @@ def register(request: HttpRequest) -> HttpResponse:
         return redirect("account_list")
 
     except ValidationError as e:
-        messages.error(request, str(e))
+        for msg in e.messages:
+            messages.error(request, msg)
         context["old_data"] = request.POST
         return render(request, "register.html", context)
 
@@ -224,7 +225,8 @@ def account_update(request: HttpRequest, id: int) -> HttpResponse:
         messages.success(request, "Conta alterada com sucesso!")
         return redirect("account_list")
     except ValidationError as e:
-        messages.error(request, str(e))
+        for msg in e.messages:
+            messages.error(request, msg)
         return render(request, "account_update.html", context)
 
 

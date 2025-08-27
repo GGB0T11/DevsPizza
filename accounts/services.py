@@ -3,18 +3,37 @@ from django.core.exceptions import ValidationError
 from .models import CustomUser
 
 
-def validate_password(password: str, confirm_password: str) -> None:
+def validate_email(email: str, account_id=None) -> list:
+    """Valida email único"""
+    errors = []
+    if account_id:
+        exists = CustomUser.objects.filter(email=email).exclude(id=account_id).exists()
+    else:
+        exists = CustomUser.objects.filter(email=email).exists()
+    if exists:
+        errors.append("Já existe uma conta com esse email.")
+    return errors
+
+
+def validate_password(password: str, confirm_password: str) -> list:
+    """Valida senha e confirmação"""
+    errors = []
     if password != confirm_password:
-        raise ValidationError("As senhas devem ser iguais!")
+        errors.append("As senhas devem ser iguais!")
     if len(password) < 8:
-        raise ValidationError("A senha deve ter no mínimo 8 caracteres!")
+        errors.append("A senha deve ter no mínimo 8 caracteres!")
+    return errors
 
 
 def create_account(data: dict) -> CustomUser:
-    if CustomUser.objects.filter(email=data["email"]).exists():
-        raise ValidationError("Já existe um usuário cadastrado com esse email, insira outro")
+    """Cria a conta"""
+    errors = []
 
-    validate_password(data["password"], data["confirm_password"])
+    errors.extend(validate_email(data["email"]))
+    errors.extend(validate_password(data["password"], data["confirm_password"]))
+
+    if errors:
+        raise ValidationError(errors)
 
     account = CustomUser.objects.create_user(
         username=data["email"],
@@ -29,17 +48,21 @@ def create_account(data: dict) -> CustomUser:
 
 
 def update_account(account: CustomUser, data: dict):
-    if CustomUser.objects.filter(email=account.email).exclude(id=account.id).exists():
-        raise ValidationError("O novo email que deseja inserir já está associado a uma conta!")
+    """Atualiza as informações de uma conta"""
+    errors = []
+
+    errors.extend(validate_email(data["email"]))
+
+    password, confirm_password = data["password"], data["confirm_password"]
+    if password and confirm_password:
+        errors.extend(validate_password(password, confirm_password))
+
+    if errors:
+        raise ValidationError(errors)
 
     account.first_name = data["first_name"]
     account.last_name = data["last_name"]
     account.email = data["email"]
     account.role = data["role"]
-
-    password, confirm_password = data["password"], data["confirm_password"]
-
-    if password and confirm_password:
-        validate_password(password, confirm_password)
 
     return account
