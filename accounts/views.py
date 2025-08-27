@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth import login as login_django
 from django.contrib.auth import logout as logout_django
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -11,6 +12,7 @@ from django.views.decorators.http import require_http_methods
 from core.decorators import admin_required
 
 from .models import CustomUser
+from .services import create_account, update_account
 
 
 @require_http_methods(["GET", "POST"])
@@ -36,29 +38,29 @@ def login(request: HttpRequest) -> HttpResponse:
     if request.method == "GET":
         if request.user.is_authenticated:
             return redirect("home")
-        else:
-            return render(request, "login.html")
+        return render(request, "login.html")
 
-    else:
-        email = request.POST.get("email")
-        password = request.POST.get("password")
+    email = request.POST.get("email")
+    password = request.POST.get("password")
 
-        user = authenticate(email=email, password=password)
+    if not email or not password:
+        messages.error(request, "Preencha todos os campos")
+        return redirect("login")
 
-        if user:
-            login_django(request, user)
-            return redirect("home")
-        else:
-            messages.error(request, "Email ou senha inválidos")
-            return redirect("login")
+    user = authenticate(email=email, password=password)
+
+    if user:
+        login_django(request, user)
+        return redirect("home")
+    messages.error(request, "Email ou senha inválidos")
+    return redirect("login", {"email": email})
 
 
 @login_required
 @admin_required
 @require_http_methods(["GET", "POST"])
 def register(request: HttpRequest) -> HttpResponse:
-    """
-    Renderiza a página de registro e processa o cadastro do usuário.
+    """Renderiza a página de registro e processa o cadastro do usuário.
 
     Args:
         request (HttpRequest): Objeto de requisição do Django.
@@ -76,46 +78,23 @@ def register(request: HttpRequest) -> HttpResponse:
         HttpResponseRedirect: Redirecionamento para a página a lista de usuários (POST válido).
     """
 
+    context = {"role_choices": CustomUser._meta.get_field("role").choices}
+
     if request.method == "GET":
-        context = {"role_choices": CustomUser._meta.get_field("role").choices}
         return render(request, "register.html", context)
 
-    else:
-        try:
-            first_name = request.POST.get("first_name")
-            last_name = request.POST.get("last_name")
-            email = request.POST.get("email")
-            role = request.POST.get("role")
-            password = request.POST.get("password")
-            confirm_password = request.POST.get("confirm_password")
+    try:
+        user = create_account(request.POST)
 
-            if CustomUser.objects.filter(email=email):
-                raise Exception("Já existe um usuário cadastrado com esse email, insira outro")
+        user.save()
 
-            if password != confirm_password:
-                raise Exception("As senhas devem ser iguais!")
+        messages.success(request, "Usuário criado com sucesso!")
+        return redirect("account_list")
 
-            if len(password) < 8:
-                raise Exception("A senha deve ter no mínimo 8 caracteres!")
-
-            user = CustomUser.objects.create_user(
-                username=email,
-                first_name=first_name,
-                last_name=last_name,
-                email=email,
-                role=role,
-                password=password,
-            )
-
-            user.save()
-
-            messages.success(request, "Usuário criado com sucesso!")
-            return redirect("account_list")
-
-        except Exception as e:
-            messages.error(request, str(e))
-            context = context = {"role_choices": CustomUser._meta.get_field("role").choices, "old_data": request.POST}
-            return render(request, "register.html", context)
+    except ValidationError as e:
+        messages.error(request, str(e))
+        context["old_data"] = request.POST
+        return render(request, "register.html", context)
 
 
 @login_required
@@ -162,12 +141,13 @@ def account_list(request: HttpRequest) -> HttpResponse:
     value = request.GET.get("value")
 
     if field and value:
-        if field == "first_name":
-            accounts = accounts.filter(first_name__icontains=value)
-        elif field == "email":
-            accounts = accounts.filter(email=value)
-        elif field == "role":
-            accounts = accounts.filter(role=value)
+        match field:
+            case "first_name":
+                accounts = accounts.filter(first_name__icontains=value)
+            case "email":
+                accounts = accounts.filter(email=value)
+            case "role":
+                accounts = accounts.filter(role=value)
 
     page_number = request.GET.get("page") or 1
     paginator = Paginator(accounts, 10)
@@ -204,8 +184,7 @@ def account_detail(request: HttpRequest, id: int) -> HttpResponse:
 
     account = get_object_or_404(CustomUser, id=id)
 
-    context = {"account": account}
-    return render(request, "account_detail.html", context)
+    return render(request, "account_detail.html", {"account": account})
 
 
 @login_required
@@ -237,35 +216,16 @@ def account_update(request: HttpRequest, id: int) -> HttpResponse:
     if request.method == "GET":
         return render(request, "account_update.html", context)
 
-    else:
-        try:
-            email = request.POST.get("email")
+    try:
+        account = update_account(account, request.POST)
 
-            if CustomUser.objects.filter(email=email).exclude(id=account.id).exists():
-                raise Exception("O novo email que deseja inserir já está associado a uma conta!")
+        account.save()
 
-            account.first_name = request.POST.get("first_name")
-            account.last_name = request.POST.get("last_name")
-            account.email = email
-            account.role = request.POST.get("role")
-            password = request.POST.get("password")
-            confirm_password = request.POST.get("confirm_password")
-            if password and confirm_password:
-                if password == confirm_password:
-                    if len(password) >= 8:
-                        account.set_password(request.POST.get("password"))
-                    else:
-                        raise Exception("A senha deve ter no mínimo 8 caracteres")
-                else:
-                    raise Exception("As senhas não coincidem!")
-
-            account.save()
-
-            messages.success(request, "Conta alterada com sucesso!")
-            return redirect("account_list")
-        except Exception as e:
-            messages.error(request, str(e))
-            return render(request, "account_update.html", context)
+        messages.success(request, "Conta alterada com sucesso!")
+        return redirect("account_list")
+    except ValidationError as e:
+        messages.error(request, str(e))
+        return render(request, "account_update.html", context)
 
 
 @login_required
@@ -290,7 +250,7 @@ def account_delete(request, id):
         HttpResponse: Página de deletar usuário (senha inválida).
         HttpResponseRedirect: Redirecionamento para a página a lista de usuários (POST válido).
     """
-    
+
     account = get_object_or_404(CustomUser, id=id)
     context = {"account": account}
 
