@@ -41,6 +41,20 @@ def convert_measures(qte: Decimal, origin: str, destiny: str) -> Decimal:
         raise ValueError(f"Conversão inválida de {origin} para {destiny}")
 
 
+def parse_value_br(value: str) -> Decimal:
+    """
+    Converte valor no formato brasileiro (1.234,56)
+    para Decimal no padrão internacional (1234.56).
+    """
+
+    try:
+        value = value.replace(".", "")
+        value = value.replace(",", ".")
+        return Decimal(value)
+    except InvalidOperation:
+        raise ValueError("Insira um valor válido!")
+
+
 @login_required
 @require_http_methods(["GET", "POST"])
 def movement_create(request: HttpRequest) -> HttpResponse:
@@ -86,11 +100,12 @@ def movement_create(request: HttpRequest) -> HttpResponse:
 
                 for ingredient_id in ingredients_ids:
                     ingredient = Ingredient.objects.get(pk=ingredient_id)
-                    try:
-                        qte_to_add = Decimal(request.POST.get(f"qi-{ingredient_id}"))
-                        price = Decimal(request.POST.get(f"pi-{ingredient_id}"))
-                    except (InvalidOperation, ValueError):
-                        raise Exception(f"Insira um valor válido para o ingrediente {ingredient.name}!")
+                    
+                    qte_to_add = request.POST.get(f"qi-{ingredient_id}")
+                    qte_to_add = parse_value_br(qte_to_add)                      
+
+                    price = request.POST.get(f"pi-{ingredient_id}")
+                    price = parse_value_br(price)
 
                     measure = request.POST.get(f"m-{ingredient_id}")
 
@@ -131,10 +146,8 @@ def movement_create(request: HttpRequest) -> HttpResponse:
                     product = Product.objects.get(pk=product_id)
                     ingredients_to_reduce = []
 
-                    try:
-                        quantity = int(request.POST.get(f"qp-{product_id}"))
-                    except ValueError:
-                        raise Exception(f"Insira uma quantidade válida para o produto {product.name}")
+                    quantity = request.POST.get(f"qp-{product_id}")
+                    quantity = parse_value_br(quantity)
 
                     for recipe_item in product.productingredient_set.all():
                         ingredient = recipe_item.ingredient
@@ -349,7 +362,12 @@ def report(request: HttpRequest) -> HttpResponse:
         pdf.cell(0, 10, f"{movement.get_type_display()} - {movement.date.strftime('%d/%m/%Y %H:%M')}", ln=True)
         pdf.set_font("Arial", size=10)
         pdf.cell(0, 8, f"Responsável: {movement.user}", ln=True)
-        pdf.cell(0, 8, f"Valor total: R$ {movement.value:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."), ln=True)
+        pdf.cell(
+            0,
+            8,
+            f"Valor total: R$ {movement.value:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."),
+            ln=True,
+        )
 
         pdf.ln(2)
         if movement.type == "in":
@@ -389,8 +407,12 @@ def report(request: HttpRequest) -> HttpResponse:
     pdf.cell(0, 10, "Resumo Financeiro", ln=True)
 
     pdf.set_font("Arial", size=10)
-    pdf.cell(0, 8, f"Total de Entradas: R$ {total_in:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."), ln=True)
-    pdf.cell(0, 8, f"Total de Saídas:   R$ {total_out:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."), ln=True)
+    pdf.cell(
+        0, 8, f"Total de Entradas: R$ {total_in:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."), ln=True
+    )
+    pdf.cell(
+        0, 8, f"Total de Saídas:   R$ {total_out:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."), ln=True
+    )
 
     # Retornando o pdf como resposta HTTP
     response = HttpResponse(bytes(pdf.output(dest="S")), content_type="application/pdf")
