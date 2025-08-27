@@ -36,28 +36,28 @@
                     </div>
                     <!-- Navegação -->
                     <div class="flex flex-wrap gap-2">
-                        <a href="{% url 'movement_list' %}"
-                           class="px-3 py-2 text-sm font-medium rounded-md bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white transition">
-                            Movimentações
-                        </a>
                         {% if request.user.role == "admin" %}
                             <a href="{% url 'account_list' %}"
                                class="px-3 py-2 text-sm font-medium rounded-md bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white transition">
                                 Contas
                             </a>
-                            <a href="{% url 'product_list' %}"
+                            <a href="{% url 'category_list' %}"
                                class="px-3 py-2 text-sm font-medium rounded-md bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white transition">
-                                Produtos
+                                Categorias
                             </a>
                             <a href="{% url 'ingredient_list' %}"
                                class="px-3 py-2 text-sm font-medium rounded-md bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white transition">
                                 Ingredientes
                             </a>
-                            <a href="{% url 'category_list' %}"
+                            <a href="{% url 'product_list' %}"
                                class="px-3 py-2 text-sm font-medium rounded-md bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white transition">
-                                Categorias
+                                Produtos
                             </a>
                         {% endif %}
+                        <a href="{% url 'movement_list' %}"
+                           class="px-3 py-2 text-sm font-medium rounded-md bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white transition">
+                            Movimentações
+                        </a>
                     </div>
                     <!-- Logout -->
                     <div>
