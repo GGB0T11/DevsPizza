@@ -15,18 +15,25 @@
                     <span class="block text-sm font-medium text-gray-500 dark:text-gray-400">Categoria:</span>
                     <span class="text-lg">{{ ingredient.category }}</span>
                 </div>
-                <div>
-                    <span class="block text-sm font-medium text-gray-500 dark:text-gray-400">Quantidade em Estoque:</span>
-                    <span class="text-lg">{{ ingredient.qte }}</span>
-                </div>
-                <div>
-                    <span class="block text-sm font-medium text-gray-500 dark:text-gray-400">Quantidade Mínima:</span>
-                    <span class="text-lg">{{ ingredient.min_qte }}</span>
-                </div>
-                <div>
-                    <span class="block text-sm font-medium text-gray-500 dark:text-gray-400">Unidade de Medida:</span>
-                    <span class="text-lg">{{ ingredient.measure }}</span>
-                </div>
+                {% if ingredient.measure == "kg" %}
+                    <div>
+                        <span class="block text-sm font-medium text-gray-500 dark:text-gray-400">Quantidade em Estoque:</span>
+                        <span class="text-lg">{{ ingredient.qte }} {{ ingredient.get_measure_display }}</span>
+                    </div>
+                    <div>
+                        <span class="block text-sm font-medium text-gray-500 dark:text-gray-400">Quantidade Mínima:</span>
+                        <span class="text-lg">{{ ingredient.min_qte }} {{ ingredient.get_measure_display }}</span>
+                    </div>
+                {% else %}
+                    <div>
+                        <span class="block text-sm font-medium text-gray-500 dark:text-gray-400">Quantidade em Estoque:</span>
+                        <span class="text-lg">{{ ingredient.qte|floatformat:0 }} {{ ingredient.get_measure_display }}</span>
+                    </div>
+                    <div>
+                        <span class="block text-sm font-medium text-gray-500 dark:text-gray-400">Quantidade Mínima:</span>
+                        <span class="text-lg">{{ ingredient.min_qte|floatformat:0 }} {{ ingredient.get_measure_display }}</span>
+                    </div>
+                {% endif %}
             </div>
             <div class="mt-8 flex flex-col sm:flex-row sm:justify-end sm:space-x-4 space-y-4 sm:space-y-0">
                 <a href="{% url 'ingredient_list' %}"

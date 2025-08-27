@@ -82,12 +82,21 @@
                             {% for ingredient in page_obj %}
                                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                                     <td class="px-4 py-4 text-sm text-gray-900 dark:text-gray-100">{{ ingredient.name }}</td>
-                                    <td class="px-4 py-4 text-sm text-gray-900 dark:text-gray-100">
-                                        {{ ingredient.qte }} {{ ingredient.get_measure_display }}
-                                    </td>
-                                    <td class="px-4 py-4 text-sm text-gray-900 dark:text-gray-100">
-                                        {{ ingredient.min_qte }} {{ ingredient.get_measure_display }}
-                                    </td>
+                                    {% if ingredient.measure == "kg" %}
+                                        <td class="px-4 py-4 text-sm text-gray-900 dark:text-gray-100">
+                                            {{ ingredient.qte }} {{ ingredient.get_measure_display }}
+                                        </td>
+                                        <td class="px-4 py-4 text-sm text-gray-900 dark:text-gray-100">
+                                            {{ ingredient.min_qte }} {{ ingredient.get_measure_display }}
+                                        </td>
+                                    {% else %}
+                                        <td class="px-4 py-4 text-sm text-gray-900 dark:text-gray-100">
+                                            {{ ingredient.qte|floatformat:0 }} {{ ingredient.get_measure_display }}
+                                        </td>
+                                        <td class="px-4 py-4 text-sm text-gray-900 dark:text-gray-100">
+                                            {{ ingredient.min_qte|floatformat:0 }} {{ ingredient.get_measure_display }}
+                                        </td>
+                                    {% endif %}
                                     <td class="px-4 py-4 text-right">
                                         <div class="flex justify-end space-x-2">
                                             <a href="{% url 'ingredient_detail' ingredient.id %}"

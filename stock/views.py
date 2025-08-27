@@ -1,3 +1,6 @@
+from decimal import Decimal, InvalidOperation
+
+from core.decorators import admin_required
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
@@ -5,9 +8,21 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods
 
-from core.decorators import admin_required
-
 from .models import Category, Ingredient, Product, ProductIngredient
+
+
+def parse_value_br(value: str) -> Decimal:
+    """
+    Converte valor no formato brasileiro (1.234,56)
+    para Decimal no padrão internacional (1234.56).
+    """
+
+    try:
+        value = value.replace(".", "")
+        value = value.replace(",", ".")
+        return Decimal(value)
+    except InvalidOperation:
+        raise ValueError("Insira um valor válido!")
 
 
 @login_required
@@ -215,15 +230,11 @@ def ingredient_create(request: HttpRequest) -> HttpResponse:
             if Ingredient.objects.filter(name__iexact=name).exists():
                 raise Exception("O ingrediente que deseja cadastrar já existe!")
 
-            try:
-                qte = int(request.POST.get("qte"))
-            except ValueError:
-                raise Exception("Insira uma quantidade válida!")
+            qte = request.POST.get("qte")
+            qte = parse_value_br(qte)
 
-            try:
-                min_qte = int(request.POST.get("min_qte"))
-            except ValueError:
-                raise Exception("Insira uma quantidade mínima válida!")
+            min_qte = request.POST.get("min_qte")
+            min_qte = parse_value_br(min_qte)
 
             ingredient = Ingredient.objects.create(
                 name=name,
@@ -352,15 +363,11 @@ def ingredient_update(request: HttpRequest, id: int) -> HttpResponse:
             if Ingredient.objects.filter(name__iexact=name).exclude(id=ingredient.id).exists():
                 raise Exception("O novo nome que deseja inserir já está associado a um ingrediente")
 
-            try:
-                qte = int(request.POST.get("qte"))
-            except ValueError:
-                raise Exception("Insira uma quantidade válida!")
+            qte = request.POST.get("qte")
+            qte = parse_value_br(qte)
 
-            try:
-                min_qte = int(request.POST.get("min_qte"))
-            except ValueError:
-                raise Exception("Insira uma quantidade mínima válida!")
+            min_qte = request.POST.get("min_qte")
+            min_qte = parse_value_br(min_qte)
 
             ingredient.name = name
             category_id = request.POST.get("category")

@@ -30,9 +30,9 @@ class Ingredient(models.Model):
 
     name = models.CharField(max_length=100, unique=True)
     category = models.ForeignKey(Category, null=True, on_delete=models.SET_NULL)
-    qte = models.PositiveIntegerField(default=0)
-    min_qte = models.PositiveIntegerField(default=0)
-    measure = models.CharField(max_length=10, choices=([("g", "Gramas"), ("kg", "Quilo"), ("unit", "Unidade")]))
+    qte = models.DecimalField(default=0, max_digits=10, decimal_places=3)
+    min_qte = models.DecimalField(default=0, max_digits=10, decimal_places=3)
+    measure = models.CharField(max_length=10, choices=([("g", "Gramas"), ("kg", "Quilos"), ("unit", "Unidades")]))
 
     def __str__(self):
         return self.name

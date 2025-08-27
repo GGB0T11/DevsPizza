@@ -34,28 +34,6 @@
                     </select>
                 </div>
                 <div>
-                    <label for="qte"
-                           class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Quantidade:</label>
-                    <input type="number"
-                           name="qte"
-                           value="{{ ingredient.qte }}"
-                           min="0"
-                           required
-                           class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                </div>
-                <div>
-                    <label for="min_qte"
-                           class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Quantidade Mínima:
-                    </label>
-                    <input type="number"
-                           name="min_qte"
-                           value="{{ ingredient.min_qte }}"
-                           min="0"
-                           required
-                           class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                </div>
-                <div>
                     <label for="measure"
                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Unidade de Medida:
@@ -70,6 +48,53 @@
                         {% endfor %}
                     </select>
                 </div>
+                {% if ingredient.measure == "kg" %}
+                    <div>
+                        <label for="qte"
+                               class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Quantidade:
+                        </label>
+                        <input type="text"
+                               name="qte"
+                               value="{{ ingredient.qte }}"
+                               required
+                               class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    </div>
+                    <div>
+                        <label for="min_qte"
+                               class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Quantidade Mínima:
+                        </label>
+                        <input type="text"
+                               name="min_qte"
+                               value="{{ ingredient.min_qte }}"
+                               required
+                               class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    </div>
+                {% else %}
+                    <div>
+                        <label for="qte"
+                               class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Quantidade:
+                        </label>
+                        <input type="text"
+                               name="qte"
+                               value="{{ ingredient.qte|floatformat:0 }}"
+                               required
+                               class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    </div>
+                    <div>
+                        <label for="min_qte"
+                               class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Quantidade Mínima:
+                        </label>
+                        <input type="text"
+                               name="min_qte"
+                               value="{{ ingredient.min_qte|floatformat:0 }}"
+                               required
+                               class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    </div>
+                {% endif %}
                 <div class="flex flex-col sm:flex-row sm:justify-end sm:space-x-4 space-y-4 sm:space-y-0 pt-4">
                     <a href="{% url 'ingredient_list' %}"
                        class="inline-block px-5 py-2.5 text-sm font-medium rounded-md bg-gray-300 hover:bg-gray-400 text-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white transition">

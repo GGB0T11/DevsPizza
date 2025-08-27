@@ -32,28 +32,6 @@
                     </select>
                 </div>
                 <div>
-                    <label for="qte"
-                           class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Quantidade:</label>
-                    <input type="number"
-                           name="qte"
-                           min="0"
-                           value="{{ old_data.qte|default:'' }}"
-                           required
-                           class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                </div>
-                <div>
-                    <label for="min_qte"
-                           class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Quantidade Mínima:
-                    </label>
-                    <input type="number"
-                           name="min_qte"
-                           min="0"
-                           value="{{ old_data.min_qte|default:'' }}"
-                           required
-                           class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                </div>
-                <div>
                     <label for="measure"
                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Unidade de Medida:
@@ -65,6 +43,28 @@
                             <option value="{{ val }}" {% if old_data.measure == val %}selected{% endif %}>{{ label }}</option>
                         {% endfor %}
                     </select>
+                </div>
+                <div>
+                    <label for="qte"
+                           class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Quantidade:</label>
+                    <input type="text"
+                           name="qte"
+                           pattern="^\d+(,\d{1,2})?$"
+                           value="{{ old_data.qte|default:'' }}"
+                           required
+                           class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+                <div>
+                    <label for="min_qte"
+                           class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Quantidade Mínima:
+                    </label>
+                    <input type="text"
+                           name="min_qte"
+                           pattern="^\d+(,\d{1,2})?$"
+                           value="{{ old_data.min_qte|default:'' }}"
+                           required
+                           class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 </div>
                 <div class="flex justify-end pt-4">
                     <button type="submit"
