@@ -72,7 +72,10 @@ class ProductIngredient(models.Model):
 
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
-    quantity = models.DecimalField(max_digits=10, decimal_places=2)
+    quantity = models.DecimalField(max_digits=10, decimal_places=3)
+
+    class Meta:
+        unique_together = ("product", "ingredient")
 
     def __str__(self):
         return f"{self.product} - {self.ingredient}: {self.quantity}"

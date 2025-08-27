@@ -457,21 +457,16 @@ def product_create(request: HttpRequest) -> HttpResponse:
             if Product.objects.filter(name__iexact=name).exists():
                 raise Exception("O produto que deseja criar já existe!")
 
-            try:
-                price = request.POST.get("price")
-            except ValueError:
-                raise Exception("Insira um preço válido!")
+            price = request.POST.get("price")
+            price = parse_value_br(price)
 
             ingredients_ids = request.POST.getlist("ingredients")
 
             ingredients_to_create = []
 
             for ingredient_id in ingredients_ids:
-                try:
-                    quantity = float(request.POST.get(f"q-{ingredient_id}"))
-                except ValueError:
-                    ingredient_name = Ingredient.objects.get(pk=ingredient_id).name
-                    raise Exception(f"Forneça uma quantidade válida para o ingrediente {ingredient_name}!")
+                quantity = request.POST.get(f"q-{ingredient_id}")
+                quantity = parse_value_br(quantity)
 
                 ingredients_to_create.append((int(ingredient_id), quantity))
 
@@ -603,6 +598,7 @@ def product_update(request: HttpRequest, id: int) -> HttpResponse:
             return redirect("product_list")
 
         price = request.POST.get("price")
+        price = parse_value_br(price)
         selected_ids = request.POST.getlist("ingredients")
 
         product.name = name
@@ -618,17 +614,13 @@ def product_update(request: HttpRequest, id: int) -> HttpResponse:
             ProductIngredient.objects.filter(product=product, ingredient_id__in=ids_to_remove).delete()
 
         for ingredient_id in new_ingredients_ids:
-            try:
-                quantity = float(request.POST.get(f"q-{ingredient_id}"))
-            except ValueError:
-                ingredient_name = Ingredient.objects.get(pk=ingredient_id).name
-                messages.error(request, f"Forneça uma quantidade válida para o ingrediente {ingredient_name}")
-                return redirect("product_list")
-
+            quantity = request.POST.get(f"q-{ingredient_id}")
+            quantity = parse_value_br(quantity)
+            print(type(quantity))
             ProductIngredient.objects.update_or_create(
                 product=product,
                 ingredient_id=ingredient_id,
-                quantity=quantity,
+                defaults={"quantity": quantity},
             )
 
         messages.success(request, "Produto alterado com sucesso!")
