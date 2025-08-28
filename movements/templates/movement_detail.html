@@ -27,18 +27,16 @@
                                 <thead class="bg-gray-100 dark:bg-gray-700">
                                     <tr>
                                         <th class="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">Nome</th>
-                                        <th class="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">Quantidade</th>
-                                        <th class="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">Medida</th>
                                         <th class="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">Preço</th>
+                                        <th class="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">Quantidade</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                                     {% for ingredient in movement.ingredients.all %}
                                         <tr>
                                             <td class="px-4 py-2">{{ ingredient.name }}</td>
-                                            <td class="px-4 py-2">{{ ingredient.quantity }}</td>
-                                            <td class="px-4 py-2">{{ ingredient.measure }}</td>
-                                            <td class="px-4 py-2">{{ ingredient.price }}</td>
+                                            <td class="px-4 py-2">R$ {{ ingredient.price }}</td>
+                                            <td class="px-4 py-2">{{ ingredient.quantity }} {{ ingredient.get_measure_display }}</td>
                                         </tr>
                                     {% endfor %}
                                 </tbody>

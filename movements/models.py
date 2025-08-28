@@ -40,7 +40,7 @@ class MovementInflow(models.Model):
     name = models.CharField(max_length=100)
     quantity = models.DecimalField(default=0, max_digits=10, decimal_places=2)
     price = models.DecimalField(default=0, max_digits=10, decimal_places=2)
-    measure = models.CharField(max_length=10, choices=([("g", "Gramas"), ("kg", "Quilo"), ("unit", "Unidade")]))
+    measure = models.CharField(max_length=10, choices=([("g", "Gramas"), ("kg", "Quilos"), ("unit", "Unidades")]))
 
     def __str__(self):
         return f"{self.name}: {self.quantity} - {self.price}"
