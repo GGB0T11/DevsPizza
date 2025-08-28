@@ -1,8 +1,8 @@
 from datetime import datetime
-from decimal import Decimal, InvalidOperation
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -13,46 +13,8 @@ from fpdf import FPDF
 from core.decorators import admin_required
 from stock.models import Ingredient, Product
 
-from .models import Movement, MovementInflow, MovementOutflow
-
-
-def convert_measures(qte: Decimal, origin: str, destiny: str) -> Decimal:
-    """Converte Gramas em Kg e vice versa.
-
-    Args:
-        qte (Decimal): Quantidade a ser convertida.
-        origin (str): Unidade de medida inserida na transação.
-        destiny (str): Unidade de medida do item.
-
-    Returns:
-        Decimal: Número convertido.
-    """
-
-    factors = {
-        ("g", "kg"): lambda x: x / 1000,
-        ("kg", "g"): lambda x: x * 1000,
-        ("g", "g"): lambda x: x,
-        ("kg", "kg"): lambda x: x,
-        ("unit", "unit"): lambda x: x,
-    }
-    try:
-        return factors[(origin, destiny)](qte)
-    except KeyError:
-        raise ValueError(f"Conversão inválida de {origin} para {destiny}")
-
-
-def parse_value_br(value: str) -> Decimal:
-    """
-    Converte valor no formato brasileiro (1.234,56)
-    para Decimal no padrão internacional (1234.56).
-    """
-
-    try:
-        value = value.replace(".", "")
-        value = value.replace(",", ".")
-        return Decimal(value)
-    except InvalidOperation:
-        raise ValueError("Insira um valor válido!")
+from .models import Movement
+from .services import create_inflow, create_outflow
 
 
 @login_required
@@ -69,7 +31,7 @@ def movement_create(request: HttpRequest) -> HttpResponse:
     POST:
         Valida os campos fornecidos de acordo com o tipo de movimentação:
             - Se válida redireciona para a lista de movimentações e exibe uma mensagem de sucesso.
-            - Se Inválida redireciona para a crição novamente com ao dados preenchidos e exibe uma mensagem de erro.
+            - Se Inválida redireciona para a crição novamente e exibe uma mensagem de erro.
 
     Returns:
         HttpResponse: Página de criar movimentação (GET ou POST com dados inválidos).
@@ -86,111 +48,24 @@ def movement_create(request: HttpRequest) -> HttpResponse:
     if request.method == "GET":
         return render(request, "movement_create.html", context)
 
-    else:
-        try:
-            user = request.user
-            username = f"{user.first_name} {user.last_name}"
-            transaction_type = request.POST.get("type")
-            commentary = request.POST.get("commentary")
+    try:
+        user = request.user
+        username = f"{user.first_name} {user.last_name}"
+        transaction_type = request.POST.get("type")
 
-            if transaction_type == "in":
-                ingredients_ids = request.POST.getlist("ingredients")
-                ingredients_to_add = []
-                value = 0
-
-                for ingredient_id in ingredients_ids:
-                    ingredient = Ingredient.objects.get(pk=ingredient_id)
-                    
-                    qte_to_add = request.POST.get(f"qi-{ingredient_id}")
-                    qte_to_add = parse_value_br(qte_to_add)                      
-
-                    price = request.POST.get(f"pi-{ingredient_id}")
-                    price = parse_value_br(price)
-
-                    measure = request.POST.get(f"m-{ingredient_id}")
-
-                    try:
-                        converted_qte = convert_measures(qte_to_add, measure, ingredient.measure)
-                        ingredient.qte += converted_qte
-                    except ValueError:
-                        raise Exception(f"Insira uma unidade de medida válida para o ingrediente {ingredient.name}")
-
-                    ingredients_to_add.append((ingredient, qte_to_add, price, measure))
-
-                    value += price
-
-                Ingredient.objects.bulk_update([i[0] for i in ingredients_to_add], ["qte"])
-
-                movement = Movement.objects.create(
-                    user=username,
-                    value=value,
-                    type="in",
-                    commentary=commentary,
-                )
-
-                for ingredient, qte_added, price, measure in ingredients_to_add:
-                    MovementInflow.objects.create(
-                        movement=movement,
-                        name=ingredient.name,
-                        quantity=qte_added,
-                        price=price,
-                        measure=measure,
-                    )
-
-            elif transaction_type == "out":
-                products_ids = request.POST.getlist("products")
-                products_sold = []
-                total_value = 0
-
-                for product_id in products_ids:
-                    product = Product.objects.get(pk=product_id)
-                    ingredients_to_reduce = []
-
-                    quantity = request.POST.get(f"qp-{product_id}")
-                    quantity = parse_value_br(quantity)
-
-                    for recipe_item in product.productingredient_set.all():
-                        ingredient = recipe_item.ingredient
-                        decrease_qte = recipe_item.quantity * quantity
-                        remaining = ingredient.qte - decrease_qte
-
-                        if remaining < 0:
-                            raise Exception(f"Estoque insuficiente para o ingrediente {ingredient.name}!")
-
-                        ingredient.qte = remaining
-                        ingredients_to_reduce.append(ingredient)
-
-                    value = product.price * quantity
-                    total_value += value
-
-                    Ingredient.objects.bulk_update(ingredients_to_reduce, ["qte"])
-
-                    products_sold.append((product.name, quantity, value))
-
-                movement = Movement.objects.create(
-                    user=username,
-                    value=total_value,
-                    type="out",
-                    commentary=commentary,
-                )
-
-                for name, quantity, price in products_sold:
-                    MovementOutflow.objects.create(
-                        movement=movement,
-                        name=name,
-                        quantity=quantity,
-                        price=price,
-                    )
-
-            else:
-                raise Exception("Tipo de movimentação inválida!")
-
-        except Exception as e:
-            messages.error(request, str(e))
-            return render(request, "movement_create.html", context)
+        match transaction_type:
+            case "in":
+                create_inflow(request.POST, username)
+            case "out":
+                create_outflow(request.POST, username)
 
         messages.success(request, "Movimentação registrada com sucesso!")
         return redirect("movement_list")
+
+    except ValidationError as e:
+        for msg in e.messages:
+            messages.error(request, msg)
+        return render(request, "movement_create.html", context)
 
 
 @login_required
@@ -215,8 +90,8 @@ def movement_list(request: HttpRequest) -> HttpResponse:
 
     if start_date and end_date:
         # Pegando as datas e formatando
-        start_dt = datetime.strptime(start_date, "%Y-%m-%d")
-        end_dt = datetime.strptime(end_date + " 23:59:59", "%Y-%m-%d %H:%M:%S")
+        start_dt = datetime.strptime(str(start_date), "%Y-%m-%d")
+        end_dt = datetime.strptime(str(end_date) + " 23:59:59", "%Y-%m-%d %H:%M:%S")
 
         # Adicionando o timezone
         start_dt = make_aware(start_dt)
@@ -291,17 +166,16 @@ def movement_delete(request: HttpRequest, id: int) -> HttpResponse:
     if request.method == "GET":
         return render(request, "movement_delete.html", context)
 
-    else:
-        password = request.POST.get("password")
+    password = request.POST.get("password")
 
-        if not request.user.check_password(password):
-            messages.error(request, "A senha que você inseriu está incorreta!")
-            return render(request, "movement_delete.html", context)
+    if not request.user.check_password(password):
+        messages.error(request, "A senha que você inseriu está incorreta!")
+        return render(request, "movement_delete.html", context)
 
-        movement.delete()
+    movement.delete()
 
-        messages.success(request, "Movimentação deletada com sucesso!")
-        return redirect("movement_list")
+    messages.success(request, "Movimentação deletada com sucesso!")
+    return redirect("movement_list")
 
 
 @login_required
@@ -336,8 +210,8 @@ def report(request: HttpRequest) -> HttpResponse:
         messages.error(request, "Insira uma data válida!")
         return redirect("report")
 
-    start_dt = make_aware(datetime.strptime(start_date, "%Y-%m-%d"))
-    end_dt = make_aware(datetime.strptime(end_date + " 23:59:59", "%Y-%m-%d %H:%M:%S"))
+    start_dt = make_aware(datetime.strptime(str(start_date), "%Y-%m-%d"))
+    end_dt = make_aware(datetime.strptime(str(end_date) + " 23:59:59", "%Y-%m-%d %H:%M:%S"))
 
     # prefetch_related para realizar apenas uma busca por todos os dados que atendem ao filtro
     movements = (
