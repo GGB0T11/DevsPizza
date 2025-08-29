@@ -45,7 +45,7 @@ def login(request: HttpRequest) -> HttpResponse:
 
     if not email or not password:
         messages.error(request, "Preencha todos os campos")
-        return redirect("login")
+        return render(request, "login.html", {"email": email})
 
     user = authenticate(email=email, password=password)
 
@@ -53,7 +53,7 @@ def login(request: HttpRequest) -> HttpResponse:
         login_django(request, user)
         return redirect("home")
     messages.error(request, "Email ou senha inválidos")
-    return redirect("login", {"email": email})
+    return render(request, "login.html", {"email": email})
 
 
 @login_required
