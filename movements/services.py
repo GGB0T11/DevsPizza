@@ -1,11 +1,37 @@
+from datetime import datetime
 from decimal import Decimal, InvalidOperation
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.utils.timezone import is_naive, make_aware
 
 from stock.models import Ingredient, Product
 
 from .models import Movement, MovementInflow, MovementOutflow
+
+
+def format_period(start: str, end: str) -> tuple[datetime, datetime]:
+    try:
+        start_dt = datetime.strptime(start + " 00:00:00", "%Y-%m-%d %H:%M:%S")
+        end_dt = datetime.strptime(end + " 23:59:59", "%Y-%m-%d %H:%M:%S")
+
+        if start_dt > end_dt:
+            raise ValidationError("O período não pode ser negativo")
+
+        if (end_dt - start_dt).days >= 31:
+            raise ValidationError("O período máximo de consulta é de 30 dias")
+
+        if is_naive(start_dt):
+            start_dt = make_aware(start_dt)
+        if is_naive(end_dt):
+            end_dt = make_aware(end_dt)
+        
+        return start_dt, end_dt
+
+    except ValueError as e:
+        raise ValidationError("Insira uma data válida") from e
+    except ValidationError:
+        raise
 
 
 def convert_measures(qte: Decimal, origin: str, destiny: str) -> Decimal:

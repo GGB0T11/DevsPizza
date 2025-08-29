@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.utils.timezone import make_aware
+from django.utils import timezone
 from django.views.decorators.http import require_http_methods
 from fpdf import FPDF
 
@@ -14,7 +14,7 @@ from core.decorators import admin_required
 from stock.models import Ingredient, Product
 
 from .models import Movement
-from .services import create_inflow, create_outflow
+from .services import create_inflow, create_outflow, format_period
 
 
 @login_required
@@ -88,18 +88,21 @@ def movement_list(request: HttpRequest) -> HttpResponse:
     start_date = request.GET.get("start_date")
     end_date = request.GET.get("end_date")
 
+    start_dt, end_dt = None, None
+    has_error = False
+
     if start_date and end_date:
-        # Pegando as datas e formatando
-        start_dt = datetime.strptime(str(start_date), "%Y-%m-%d")
-        end_dt = datetime.strptime(str(end_date) + " 23:59:59", "%Y-%m-%d %H:%M:%S")
+        try:
+            start_dt, end_dt = format_period(str(start_date), str(end_date))
+        except ValidationError as e:
+            messages.error(request, e.message)
+            has_error = True
 
-        # Adicionando o timezone
-        start_dt = make_aware(start_dt)
-        end_dt = make_aware(end_dt)
-
-        movements = Movement.objects.filter(date__range=(start_dt, end_dt)).order_by("-date")
-    else:
-        movements = Movement.objects.all().order_by("-date")
+    if not start_dt or not end_dt or has_error:
+        end_dt = timezone.now()
+        start_dt = end_dt - timezone.timedelta(days=7)
+    
+    movements = Movement.objects.filter(date__range=(start_dt, end_dt)).order_by("-date")
 
     page_number = request.GET.get("page") or 1
     paginator = Paginator(movements, 10)
@@ -110,6 +113,8 @@ def movement_list(request: HttpRequest) -> HttpResponse:
         "page_obj": page_obj,
         "Paginator": paginator,
         "is_paginated": page_obj.has_other_pages(),
+        "start_date": start_date,
+        "end_date": end_date,
     }
     return render(request, "movement_list.html", context)
 
@@ -206,12 +211,11 @@ def report(request: HttpRequest) -> HttpResponse:
     start_date = request.POST.get("start_date")
     end_date = request.POST.get("end_date")
 
-    if not (start_date and end_date):
-        messages.error(request, "Insira uma data válida!")
-        return redirect("report")
-
-    start_dt = make_aware(datetime.strptime(str(start_date), "%Y-%m-%d"))
-    end_dt = make_aware(datetime.strptime(str(end_date) + " 23:59:59", "%Y-%m-%d %H:%M:%S"))
+    try:
+        start_dt, end_dt = format_period(str(start_date), str(end_date))
+    except ValidationError as e:
+        messages.error(request, e.message)
+        return render(request, "report.html", {"start_date": start_date, "end_date": end_date})
 
     # prefetch_related para realizar apenas uma busca por todos os dados que atendem ao filtro
     movements = (
