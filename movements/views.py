@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
@@ -101,7 +99,7 @@ def movement_list(request: HttpRequest) -> HttpResponse:
     if not start_dt or not end_dt or has_error:
         end_dt = timezone.now()
         start_dt = end_dt - timezone.timedelta(days=7)
-    
+
     movements = Movement.objects.filter(date__range=(start_dt, end_dt)).order_by("-date")
 
     page_number = request.GET.get("page") or 1
