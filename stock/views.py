@@ -1,28 +1,16 @@
-from decimal import Decimal, InvalidOperation
-
-from core.decorators import admin_required
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
+from django.db import transaction
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods
 
+from core.decorators import admin_required
+
 from .models import Category, Ingredient, Product, ProductIngredient
-
-
-def parse_value_br(value: str) -> Decimal:
-    """
-    Converte valor no formato brasileiro (1.234,56)
-    para Decimal no padrão internacional (1234.56).
-    """
-
-    try:
-        value = value.replace(".", "")
-        value = value.replace(",", ".")
-        return Decimal(value)
-    except InvalidOperation:
-        raise ValueError("Insira um valor válido!")
+from .services import parse_value_br
 
 
 @login_required
@@ -46,20 +34,19 @@ def category_create(request: HttpRequest) -> HttpResponse:
     if request.method == "GET":
         return render(request, "category_create.html")
 
-    else:
-        name = request.POST.get("name")
-        description = request.POST.get("description")
+    name = request.POST.get("name")
+    description = request.POST.get("description")
 
-        if Category.objects.filter(name__iexact=name):
-            messages.error(request, "A categoria que deseja cadastrar já existe!")
-            return redirect("category_list")
-
-        category = Category.objects.create(name=name, description=description)
-
-        category.save()
-
-        messages.success(request, "Categoria criada com sucesso!")
+    if Category.objects.filter(name__iexact=name):
+        messages.error(request, "A categoria que deseja cadastrar já existe!")
         return redirect("category_list")
+
+    category = Category.objects.create(name=name, description=description)
+
+    category.save()
+
+    messages.success(request, "Categoria criada com sucesso!")
+    return redirect("category_list")
 
 
 @login_required
@@ -107,7 +94,6 @@ def category_detail(request: HttpRequest, id: int) -> HttpResponse:
     """
 
     context = {"category": get_object_or_404(Category, id=id)}
-
     return render(request, "category_detail.html", context)
 
 
@@ -138,19 +124,18 @@ def category_update(request: HttpRequest, id: int) -> HttpResponse:
     if request.method == "GET":
         return render(request, "category_update.html", context)
 
-    else:
-        name = request.POST.get("name")
+    name = request.POST.get("name")
 
-        if Category.objects.filter(name__iexact=name).exclude(id=category.id).exists():
-            messages.error(request, "O novo nome que deseja inserir já está associado a uma categoria")
-            return render(request, "category_update.html", context)
+    if Category.objects.filter(name__iexact=name).exclude(id=category.id).exists():
+        messages.error(request, "O novo nome que deseja inserir já está associado a uma categoria!")
+        return render(request, "category_update.html", context)
 
-        category.name = name
-        category.description = request.POST.get("description")
-        category.save()
+    category.name = name
+    category.description = request.POST.get("description")
+    category.save()
 
-        messages.success(request, "Categoria alterada com sucesso!")
-        return redirect("category_list")
+    messages.success(request, "Categoria alterada com sucesso!")
+    return redirect("category_list")
 
 
 @login_required
@@ -180,17 +165,16 @@ def category_delete(request: HttpRequest, id: int) -> HttpResponse:
         context = {"category": category}
         return render(request, "category_delete.html", context)
 
-    else:
-        password = request.POST.get("password")
+    password = request.POST.get("password")
 
-        if not request.user.check_password(password):
-            messages.error(request, "A senha que você inseriu está incorreta!")
-            return redirect("category_list")
-
-        category.delete()
-
-        messages.success(request, "Categoria deletada com sucesso!")
+    if not request.user.check_password(password):
+        messages.error(request, "A senha que você inseriu está incorreta!")
         return redirect("category_list")
+
+    category.delete()
+
+    messages.success(request, "Categoria deletada com sucesso!")
+    return redirect("category_list")
 
 
 @login_required
@@ -212,51 +196,51 @@ def ingredient_create(request: HttpRequest) -> HttpResponse:
         HttpResponseRedirect: Redireciona para a lista de ingredientes após criação.
     """
 
+    context = {
+        "categories": Category.objects.all(),
+        "measure_choices": Ingredient._meta.get_field("measure").choices,
+    }
+
     if request.method == "GET":
-        context = {
-            "categories": Category.objects.all(),
-            "measure_choices": Ingredient._meta.get_field("measure").choices,
-        }
         return render(request, "ingredient_create.html", context)
 
-    else:
-        try:
-            name = request.POST.get("name")
-            category_id = request.POST.get("category")
-            measure = request.POST.get("measure")
+    try:
+        name = request.POST.get("name")
+        category_id = request.POST.get("category")
+        measure = request.POST.get("measure")
 
-            category = get_object_or_404(Category, id=category_id)
+        category = get_object_or_404(Category, id=category_id)
 
-            if Ingredient.objects.filter(name__iexact=name).exists():
-                raise Exception("O ingrediente que deseja cadastrar já existe!")
+        if Ingredient.objects.filter(name__iexact=name).exists():
+            raise ValidationError("O ingrediente que deseja cadastrar já existe!")
 
-            qte = request.POST.get("qte")
-            qte = parse_value_br(qte)
+        qte = request.POST.get("qte")
+        qte, qte_error = parse_value_br(str(qte), "Insira uma quantidade válida!")
 
-            min_qte = request.POST.get("min_qte")
-            min_qte = parse_value_br(min_qte)
+        min_qte = request.POST.get("min_qte")
+        min_qte, min_qte_error = parse_value_br(str(min_qte), "Insira uma quantidade mínima válida!")
 
-            ingredient = Ingredient.objects.create(
-                name=name,
-                category=category,
-                qte=qte,
-                min_qte=min_qte,
-                measure=measure,
-            )
+        if qte_error or min_qte_error:
+            raise ValidationError([qte_error, min_qte_error])
 
-            ingredient.save()
+        ingredient = Ingredient.objects.create(
+            name=name,
+            category=category,
+            qte=qte,
+            min_qte=min_qte,
+            measure=measure,
+        )
 
-            messages.success(request, "Ingrediente cadastrado com sucesso!")
-            return redirect("ingredient_list")
+        ingredient.save()
 
-        except Exception as e:
-            messages.error(request, str(e))
-            context = {
-                "categories": Category.objects.all(),
-                "measure_choices": Ingredient._meta.get_field("measure").choices,
-                "old_data": request.POST,
-            }
-            return render(request, "ingredient_create.html", context)
+        messages.success(request, "Ingrediente cadastrado com sucesso!")
+        return redirect("ingredient_list")
+
+    except ValidationError as e:
+        for msg in e.messages:
+            messages.error(request, msg)
+        context["old_data"] = request.POST
+        return render(request, "ingredient_create.html", context)
 
 
 @login_required
@@ -280,14 +264,15 @@ def ingredient_list(request: HttpRequest) -> HttpResponse:
     value = request.GET.get("value")
 
     if field and value:
-        if field == "name":
-            ingredients = ingredients.filter(name__icontains=value)
-        elif field == "category":
-            ingredients = ingredients.filter(category__name__icontains=value)
-        elif field == "qte":
-            ingredients = ingredients.filter(qte=value)
-        elif field == "min_qte":
-            ingredients = ingredients.filter(min_qte=value)
+        match field:
+            case "name":
+                ingredients = ingredients.filter(name__icontains=value)
+            case "category":
+                ingredients = ingredients.filter(category__name__icontains=value)
+            case "qte":
+                ingredients = ingredients.filter(qte=value)
+            case "min_qte":
+                ingredients = ingredients.filter(min_qte=value)
 
     page_number = request.GET.get("page") or 1
     paginator = Paginator(ingredients, 10)
@@ -356,34 +341,37 @@ def ingredient_update(request: HttpRequest, id: int) -> HttpResponse:
     if request.method == "GET":
         return render(request, "ingredient_update.html", context)
 
-    else:
-        try:
-            name = request.POST.get("name")
+    try:
+        name = request.POST.get("name")
 
-            if Ingredient.objects.filter(name__iexact=name).exclude(id=ingredient.id).exists():
-                raise Exception("O novo nome que deseja inserir já está associado a um ingrediente")
+        if Ingredient.objects.filter(name__iexact=name).exclude(id=ingredient.id).exists():
+            raise ValidationError("O novo nome que deseja inserir já está associado a um ingrediente")
 
-            qte = request.POST.get("qte")
-            qte = parse_value_br(qte)
+        qte = request.POST.get("qte")
+        qte, qte_error = parse_value_br(str(qte), "Insira uma quantidade válida!")
 
-            min_qte = request.POST.get("min_qte")
-            min_qte = parse_value_br(min_qte)
+        min_qte = request.POST.get("min_qte")
+        min_qte, min_qte_error = parse_value_br(str(min_qte), "Insira uma quantidade mínima válida!")
 
-            ingredient.name = name
-            category_id = request.POST.get("category")
-            ingredient.category = get_object_or_404(Category, id=category_id)
-            ingredient.qte = qte
-            ingredient.min_qte = min_qte
-            ingredient.measure = request.POST.get("measure")
+        if qte_error or min_qte_error:
+            raise ValidationError([qte_error, min_qte_error])
 
-            ingredient.save()
+        ingredient.name = name
+        category_id = request.POST.get("category")
+        ingredient.category = get_object_or_404(Category, id=category_id)
+        ingredient.qte = qte
+        ingredient.min_qte = min_qte
+        ingredient.measure = request.POST.get("measure")
 
-            messages.success(request, "Ingrediente alterado com sucesso!")
-            return redirect("ingredient_list")
+        ingredient.save()
 
-        except Exception as e:
-            messages.error(request, str(e))
-            return render(request, "ingredient_update.html", context)
+        messages.success(request, "Ingrediente alterado com sucesso!")
+        return redirect("ingredient_list")
+
+    except ValidationError as e:
+        for msg in e.messages:
+            messages.error(request, msg)
+        return render(request, "ingredient_update.html", context)
 
 
 @login_required
@@ -413,21 +401,21 @@ def ingredient_delete(request: HttpRequest, id: int) -> HttpResponse:
         context = {"ingredient": ingredient}
         return render(request, "ingredient_delete.html", context)
 
-    else:
-        password = request.POST.get("password")
+    password = request.POST.get("password")
 
-        if not request.user.check_password(password):
-            messages.error(request, "A senha que você inseriu está incorreta!")
-            return redirect("ingredient_list")
-
-        ingredient.delete()
-
-        messages.success(request, "Ingrediente deletado com sucesso!")
+    if not request.user.check_password(password):
+        messages.error(request, "A senha que você inseriu está incorreta!")
         return redirect("ingredient_list")
+
+    ingredient.delete()
+
+    messages.success(request, "Ingrediente deletado com sucesso!")
+    return redirect("ingredient_list")
 
 
 @login_required
 @admin_required
+@transaction.atomic
 @require_http_methods(["GET", "POST"])
 def product_create(request: HttpRequest) -> HttpResponse:
     """Cria um novo produto com ingredientes associados.
@@ -450,41 +438,55 @@ def product_create(request: HttpRequest) -> HttpResponse:
     if request.method == "GET":
         return render(request, "product_create.html", context)
 
-    else:
-        try:
-            name = request.POST.get("name")
+    try:
+        errors = []
 
-            if Product.objects.filter(name__iexact=name).exists():
-                raise Exception("O produto que deseja criar já existe!")
+        name = request.POST.get("name")
 
-            price = request.POST.get("price")
-            price = parse_value_br(price)
+        if Product.objects.filter(name__iexact=name).exists():
+            raise ValidationError("O produto que deseja criar já existe!")
 
-            ingredients_ids = request.POST.getlist("ingredients")
+        price = request.POST.get("price")
+        price = parse_value_br(str(price), "Insira um preço válido!")
 
-            ingredients_to_create = []
+        ingredients_ids = request.POST.getlist("ingredients")
 
-            for ingredient_id in ingredients_ids:
-                quantity = request.POST.get(f"q-{ingredient_id}")
-                quantity = parse_value_br(quantity)
+        ingredients_to_create = []
 
-                ingredients_to_create.append((int(ingredient_id), quantity))
+        if not ingredients_ids:
+            raise ValidationError("Selecione pelo menos 1 ingrediente")
+        for ingredient_id in ingredients_ids:
+            quantity = request.POST.get(f"q-{ingredient_id}")
+            quantity, quantity_error = parse_value_br(
+                str(quantity), f"Insira uma quantidade válida para {Ingredient.objects.get(pk=ingredient_id).name}"
+            )
 
-            product = Product.objects.create(name=name, price=price)
+            if quantity_error:
+                errors.append(quantity_error)
+                continue
 
-            for ingredient_id, quantity in ingredients_to_create:
-                ProductIngredient.objects.create(
-                    product=product,
-                    ingredient_id=ingredient_id,
-                    quantity=quantity,
-                )
+            ingredients_to_create.append((int(ingredient_id), quantity))
 
-            messages.success(request, "Produto criado com sucesso!")
-            return redirect("product_list")
+        if errors:
+            raise ValidationError(errors)
 
-        except Exception as e:
-            messages.error(request, str(e))
-            return render(request, "product_create.html", context)
+        product = Product.objects.create(name=name, price=price)
+
+        for ingredient_id, quantity in ingredients_to_create:
+            ProductIngredient.objects.create(
+                product=product,
+                ingredient_id=ingredient_id,
+                quantity=quantity,
+            )
+
+        messages.success(request, "Produto criado com sucesso!")
+        return redirect("product_list")
+
+    except ValidationError as e:
+        for msg in e.messages:
+            messages.error(request, msg)
+        context["old_data"] = request.POST
+        return render(request, "product_create.html", context)
 
 
 @login_required
@@ -507,16 +509,15 @@ def product_list(request: HttpRequest) -> HttpResponse:
     value = request.GET.get("value")
 
     if field and value:
-        if field == "name":
-            products = products.filter(name__icontains=value)
-        elif field == "price":
-            try:
-                value = float(value)
-            except ValueError:
-                messages.error(request, "Insira um número válido!")
-                return redirect("product_list")
-
-            products = products.filter(price=value)
+        match field:
+            case "name":
+                products = products.filter(name__icontains=value)
+            case "price":
+                value, value_error = parse_value_br(str(value), "Insira um preço válido!")
+                if value_error:
+                    messages.error(request, value_error)
+                    return redirect("product_list")
+                products = products.filter(price=value)
 
     page_number = request.GET.get("page") or 1
     paginator = Paginator(products, 10)
@@ -530,7 +531,6 @@ def product_list(request: HttpRequest) -> HttpResponse:
         "field": field,
         "value": value,
     }
-
     return render(request, "product_list.html", context)
 
 
@@ -582,24 +582,26 @@ def product_update(request: HttpRequest, id: int) -> HttpResponse:
 
     product = get_object_or_404(Product, id=id)
 
+    context = {
+        "product": product,
+        "ingredients": Ingredient.objects.all(),
+        "product_ingredients": product.productingredient_set.all(),
+    }
+
     if request.method == "GET":
-        context = {
-            "product": product,
-            "ingredients": Ingredient.objects.all(),
-            "product_ingredients": product.productingredient_set.all(),
-        }
         return render(request, "product_update.html", context)
 
-    else:
+    try:
         name = request.POST.get("name")
 
         if Product.objects.filter(name__iexact=name).exclude(id=product.id).exists():
-            messages.error(request, "O novo nome que deseja inserir já está associado a um produto!")
-            return redirect("product_list")
+            raise ValidationError("O novo nome que deseja inserir já está associado a um produto!")
 
         price = request.POST.get("price")
-        price = parse_value_br(price)
+        price = parse_value_br(str(price), "Insira um preço válido!")
         selected_ids = request.POST.getlist("ingredients")
+        if not selected_ids:
+            raise ValidationError(f"Insira pelo menos 1 ingrediente!")
 
         product.name = name
         product.price = price
@@ -613,10 +615,21 @@ def product_update(request: HttpRequest, id: int) -> HttpResponse:
         if ids_to_remove:
             ProductIngredient.objects.filter(product=product, ingredient_id__in=ids_to_remove).delete()
 
+        errors = []
+        ingredients_list = []
         for ingredient_id in new_ingredients_ids:
             quantity = request.POST.get(f"q-{ingredient_id}")
-            quantity = parse_value_br(quantity)
-            print(type(quantity))
+            quantity, error = parse_value_br(str(quantity), f"Insira uma quantidade válida para {name}!")
+            if error:
+                errors.append(error)
+                continue
+
+            ingredients_list.append((ingredient_id, quantity))
+
+        if errors:
+            raise ValidationError(errors)
+
+        for ingredient_id, quantity in ingredients_list:
             ProductIngredient.objects.update_or_create(
                 product=product,
                 ingredient_id=ingredient_id,
@@ -625,6 +638,11 @@ def product_update(request: HttpRequest, id: int) -> HttpResponse:
 
         messages.success(request, "Produto alterado com sucesso!")
         return redirect("product_list")
+
+    except ValidationError as e:
+        for msg in e:
+            messages.error(request, msg)
+        return render(request, "product_update.html", context)
 
 
 @login_required
@@ -654,14 +672,13 @@ def product_delete(request: HttpRequest, id: int) -> HttpResponse:
         context = {"product": product}
         return render(request, "product_delete.html", context)
 
-    else:
-        password = request.POST.get("password")
+    password = request.POST.get("password")
 
-        if not request.user.check_password(password):
-            messages.error(request, "A senha que você inseriu está incorreta!")
-            return redirect("product_list")
-
-        product.delete()
-
-        messages.success(request, "Produto deletado com sucesso!")
+    if not request.user.check_password(password):
+        messages.error(request, "A senha que você inseriu está incorreta!")
         return redirect("product_list")
+
+    product.delete()
+
+    messages.success(request, "Produto deletado com sucesso!")
+    return redirect("product_list")
