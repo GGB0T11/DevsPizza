@@ -65,17 +65,16 @@
                     <tr>
                         <th class="py-2">Data</th>
                         <th class="py-2">Tipo</th>
-                        <th class="py-2">Usuário</th>
                         <th class="py-2">Valor</th>
                     </tr>
                 </thead>
                 <tbody class="text-gray-900 dark:text-gray-100">
                     {% for m in recent_movements %}
-                        <tr class="border-t border-gray-200 dark:border-gray-700">
+                        <tr class="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-100"
+                            onclick="window.location='{% url 'movement_detail' m.id %}'">
                             <td class="py-2">{{ m.date|date:"d/m/Y H:i:s" }}</td>
                             <td class="py-2">{{ m.get_type_display }}</td>
-                            <td class="py-2">{{ m.user.first_name }}</td>
-                            <td class="py-2 font-semibold {% if m.type == 'in' %}text-green-500{% elif m.type == 'out' %}text-red-500{% endif %}">
+                            <td class="py-2 font-semibold {% if m.type == 'in' %}text-red-500{% elif m.type == 'out' %}text-green-500{% endif %}">
                                 {{ m.value }}
                             </td>
                         </tr>

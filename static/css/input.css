@@ -23,3 +23,75 @@
 #mobile-menu.show {
   @apply flex flex-col gap-2;
 }
+
+.green-button {
+  @apply inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md 
+         text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2
+         focus:ring-green-500 dark:focus:ring-offset-gray-800 transition-colors shadow-md 
+         hover:shadow-lg transform hover:scale-[1.02] active:scale-[0.98];
+}
+
+.blue-button {
+  @apply w-full flex justify-center py-3 px-4 text-sm font-medium rounded-md text-white bg-blue-600
+         hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
+         dark:focus:ring-offset-gray-800 transition-colors shadow-md hover:shadow-lg transform
+         hover:scale-[1.02] active:scale-[0.98];
+}
+
+.purple-button {
+  @apply inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md
+         text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2
+         focus:ring-purple-500 dark:focus:ring-offset-gray-800 transition-colors shadow-md hover:shadow-lg
+         transform hover:scale-[1.02] active:scale-[0.98];
+}
+
+.title {
+  @apply text-3xl font-extrabold text-gray-900 dark:text-white;
+}
+
+.filter {
+  @apply block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2;
+}
+
+.filter-field {
+  @apply appearance-none block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 text-gray-900
+         dark:text-white bg-white dark:bg-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500;
+}
+
+.table-content {
+  @apply bg-white dark:bg-gray-800 py-8 px-6 shadow-xl rounded-lg border border-gray-200 dark:border-gray-700;
+}
+
+.table-head {
+  @apply px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300;
+}
+
+.table-row {
+  @apply hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors;
+}
+
+.table-text {
+  @apply px-4 py-4 text-sm text-gray-900 dark:text-gray-100;
+}
+
+.detail-button {
+  @apply text-sm text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 transition-colors;
+}
+
+.edit-button {
+  @apply text-sm text-yellow-600 dark:text-yellow-400 hover:text-yellow-500 dark:hover:text-yellow-300 transition-colors;
+}
+
+.delete-button {
+  @apply text-sm text-red-600 dark:text-red-400 hover:text-red-500 dark:hover:text-red-300 transition-colors;
+}
+
+.page-info {
+  @apply px-4 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-white border border-gray-300
+           dark:border-gray-600 rounded;
+}
+
+.page-button {
+  @apply px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white rounded hover:bg-gray-300
+           dark:hover:bg-gray-600 transition;
+}
