@@ -1,0 +1,25 @@
+@import "tailwindcss";
+@reference "tailwindcss/utilities";
+
+.nav-link {
+  @apply px-3 py-2 text-sm font-medium rounded-md bg-gray-100 hover:bg-gray-200
+         dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white transition;
+}
+
+.logout-button {
+  @apply px-4 py-2 text-sm font-medium rounded-md bg-red-500 hover:bg-red-600 text-white transition w-full;
+}
+
+#menu-toggle {
+  @apply sm:hidden flex items-center justify-center p-2 rounded-md bg-gray-200 dark:bg-gray-700 
+         text-gray-800 dark:text-gray-100;
+}
+
+#mobile-menu {
+  @apply hidden fixed top-14 right-4 z-50 bg-white dark:bg-gray-800 shadow-lg 
+         rounded-lg p-4 w-48;
+}
+
+#mobile-menu.show {
+  @apply flex flex-col gap-2;
+}
