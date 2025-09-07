@@ -147,3 +147,25 @@
 .detail-tbody {
   @apply bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700;
 }
+
+.delete-container {
+  @apply max-w-xl mx-auto bg-white dark:bg-gray-800 shadow-xl rounded-lg p-8 border 
+         border-red-200 dark:border-red-700;
+}
+
+.delete-title {
+  @apply text-2xl font-bold text-red-700 dark:text-red-400 mb-4;
+}
+
+.delete-text {
+  @apply block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1;
+}
+
+.delete-field {
+  @apply w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900
+         dark:text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500;
+}
+
+.delete-buttons {
+  @apply flex flex-row space-x-4 sm:justify-end;
+}
