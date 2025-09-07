@@ -3,35 +3,35 @@
     Detalhar Movimentação
 {% endblock title %}
 {% block body %}
-    <div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-10 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-3xl mx-auto bg-white dark:bg-gray-800 shadow-xl rounded-lg p-8 border border-gray-200 dark:border-gray-700">
-            <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-6">Detalhes da Movimentação</h2>
+    <div class="main-container">
+        <div class="detail-container">
+            <h2 class="detail-title">Detalhes da Movimentação</h2>
             <div class="space-y-4 text-gray-800 dark:text-gray-300">
                 <div>
-                    <span class="block text-sm font-medium text-gray-500 dark:text-gray-400">Responsável:</span>
+                    <span class="detail-text">Responsável:</span>
                     <span class="text-lg">{{ movement.user }}</span>
                 </div>
                 <div>
-                    <span class="block text-sm font-medium text-gray-500 dark:text-gray-400">Tipo:</span>
+                    <span class="detail-text">Tipo:</span>
                     <span class="text-lg">{{ movement.get_type_display }}</span>
                 </div>
                 <div>
-                    <span class="block text-sm font-medium text-gray-500 dark:text-gray-400">Data:</span>
+                    <span class="detail-text">Data:</span>
                     <span class="text-lg">{{ movement.date|date:"d/m/Y H:i:s" }}</span>
                 </div>
                 {% if movement.type == "in" %}
                     <div>
-                        <span class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Ingredientes:</span>
+                        <span class="detail-text mb-2">Ingredientes:</span>
                         <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
-                                <thead class="bg-gray-100 dark:bg-gray-700">
+                            <table class="detail-table">
+                                <thead class="detail-thead">
                                     <tr>
-                                        <th class="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">Nome</th>
-                                        <th class="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">Preço</th>
-                                        <th class="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">Quantidade</th>
+                                        <th class="detail-th">Nome</th>
+                                        <th class="detail-th">Preço</th>
+                                        <th class="detail-th">Quantidade</th>
                                     </tr>
                                 </thead>
-                                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                <tbody class="detail-tbody">
                                     {% for ingredient in movement.ingredients.all %}
                                         <tr>
                                             <td class="px-4 py-2">{{ ingredient.name }}</td>
@@ -45,17 +45,17 @@
                     </div>
                 {% else %}
                     <div>
-                        <span class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Produtos:</span>
+                        <span class="detail-text mb-2">Produtos:</span>
                         <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
-                                <thead class="bg-gray-100 dark:bg-gray-700">
+                            <table class="detail-table">
+                                <thead class="detail-thead">
                                     <tr>
-                                        <th class="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">Nome</th>
-                                        <th class="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">Quantidade</th>
-                                        <th class="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">Preço</th>
+                                        <th class="detail-th">Nome</th>
+                                        <th class="detail-th">Quantidade</th>
+                                        <th class="detail-th">Preço</th>
                                     </tr>
                                 </thead>
-                                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                <tbody class="detail-tbody">
                                     {% for product in movement.products.all %}
                                         <tr>
                                             <td class="px-4 py-2">{{ product.name }}</td>
@@ -69,25 +69,19 @@
                     </div>
                 {% endif %}
                 <div>
-                    <span class="block text-sm font-medium text-gray-500 dark:text-gray-400">Total:</span>
+                    <span class="detail-text">Total:</span>
                     <span class="text-lg font-semibold {% if movement.type == 'out' %}text-green-600{% else %}text-red-600{% endif %}">
                         R$ {{ movement.value }}
                     </span>
                 </div>
                 <div>
-                    <span class="block text-sm font-medium text-gray-500 dark:text-gray-400">Comentário:</span>
+                    <span class="detail-text">Comentário:</span>
                     <span class="text-lg">{{ movement.commentary }}</span>
                 </div>
             </div>
-            <div class="mt-8 flex flex-col sm:flex-row sm:justify-end sm:space-x-4 space-y-4 sm:space-y-0">
-                <a href="{% url 'movement_list' %}"
-                   class="inline-block px-5 py-2.5 text-sm font-medium rounded-md bg-gray-200 hover:bg-gray-300 text-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white transition">
-                    Voltar para Lista
-                </a>
-                <a href="{% url 'movement_delete' movement.id %}"
-                   class="inline-block px-5 py-2.5 text-sm font-medium rounded-md bg-red-600 hover:bg-red-700 text-white transition">
-                    Deletar
-                </a>
+            <div class="detail-buttons">
+                <a href="{% url 'movement_list' %}" class="gray-button">Voltar para Lista</a>
+                <a href="{% url 'movement_delete' movement.id %}" class="red-button">Deletar</a>
             </div>
         </div>
     </div>

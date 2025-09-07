@@ -3,48 +3,39 @@
     Detalhar Conta
 {% endblock title %}
 {% block body %}
-    <div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-10 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-3xl mx-auto bg-white dark:bg-gray-800 shadow-xl rounded-lg p-8 border border-gray-200 dark:border-gray-700">
-            <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-6">Detalhes da Conta</h2>
+    <div class="main-container">
+        <div class="detail-container">
+            <h2 class="detail-title">Detalhes da Conta</h2>
             <div class="space-y-4 text-gray-800 dark:text-gray-300">
                 <div>
-                    <span class="block text-sm font-medium text-gray-500 dark:text-gray-400">Nome:</span>
+                    <span class="detail-text">Nome:</span>
                     <span class="text-lg">{{ account.first_name }}</span>
                 </div>
                 <div>
-                    <span class="block text-sm font-medium text-gray-500 dark:text-gray-400">Sobrenome:</span>
+                    <span class="detail-text">Sobrenome:</span>
                     <span class="text-lg">{{ account.last_name }}</span>
                 </div>
                 <div>
-                    <span class="block text-sm font-medium text-gray-500 dark:text-gray-400">Email:</span>
+                    <span class="detail-text">Email:</span>
                     <span class="text-lg">{{ account.email }}</span>
                 </div>
                 <div>
-                    <span class="block text-sm font-medium text-gray-500 dark:text-gray-400">Cargo:</span>
+                    <span class="detail-text">Cargo:</span>
                     <span class="text-lg">{{ account.get_role_display }}</span>
                 </div>
                 <div>
-                    <span class="block text-sm font-medium text-gray-500 dark:text-gray-400">Data de Criação:</span>
+                    <span class="detail-text">Data de Criação:</span>
                     <span class="text-lg">{{ account.created_at|date:"d/m/Y H:i:s" }}</span>
                 </div>
                 <div>
-                    <span class="block text-sm font-medium text-gray-500 dark:text-gray-400">Última Alteração:</span>
+                    <span class="detail-text">Última Alteração:</span>
                     <span class="text-lg">{{ account.updated_at|date:"d/m/Y H:i:s" }}</span>
                 </div>
             </div>
-            <div class="mt-8 flex flex-col sm:flex-row sm:justify-end sm:space-x-4 space-y-4 sm:space-y-0">
-                <a href="{% url 'account_list' %}"
-                   class="inline-block px-5 py-2.5 text-sm font-medium rounded-md bg-gray-200 hover:bg-gray-300 text-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white transition">
-                    Voltar para Lista
-                </a>
-                <a href="{% url 'account_update' account.id %}"
-                   class="inline-block px-5 py-2.5 text-sm font-medium rounded-md bg-yellow-500 hover:bg-yellow-600 text-white transition">
-                    Editar
-                </a>
-                <a href="{% url 'account_delete' account.id %}"
-                   class="inline-block px-5 py-2.5 text-sm font-medium rounded-md bg-red-600 hover:bg-red-700 text-white transition">
-                    Deletar
-                </a>
+            <div class="detail-buttons">
+                <a href="{% url 'account_list' %}" class="gray-button">Voltar para Lista</a>
+                <a href="{% url 'account_update' account.id %}" class="yellow-button">Editar</a>
+                <a href="{% url 'account_delete' account.id %}" class="red-button">Deletar</a>
             </div>
         </div>
     </div>
