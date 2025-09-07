@@ -3,28 +3,24 @@
     Editar Ingrediente
 {% endblock title %}
 {% block body %}
-    <div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-10 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-xl mx-auto bg-white dark:bg-gray-800 shadow-xl rounded-lg p-8 border border-gray-200 dark:border-gray-700">
-            <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-6">Atualizar Ingrediente</h2>
+    <div class="main-container">
+        <div class="update-container">
+            <h2 class="update-title">Atualizar Ingrediente</h2>
             <form action="{% url 'ingredient_update' ingredient.id %}"
                   method="POST"
                   class="space-y-6">
                 {% csrf_token %}
                 <div>
-                    <label for="name"
-                           class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nome:</label>
+                    <label for="name" class="update-text">Nome:</label>
                     <input type="text"
                            name="name"
                            value="{{ ingredient.name }}"
                            required
-                           class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                           class="update-field" />
                 </div>
                 <div>
-                    <label for="category"
-                           class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Categoria:</label>
-                    <select name="category"
-                            required
-                            class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <label for="category" class="update-text">Categoria:</label>
+                    <select name="category" required class="update-field">
                         {% for category in categories %}
                             <option value="{{ category.id }}"
                                     {% if ingredient.category.id == category.id %}selected{% endif %}>
@@ -34,14 +30,8 @@
                     </select>
                 </div>
                 <div>
-                    <label for="measure"
-                           class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Unidade de Medida:
-                    </label>
-                    <select name="measure"
-                            id="roles"
-                            required
-                            class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <label for="measure" class="update-text">Unidade de Medida:</label>
+                    <select name="measure" id="roles" required class="update-field">
                         {% for val, label in measure_choices %}
                             <option value="{{ val }}"
                                     {% if val == ingredient.measure %}selected{% endif %}>{{ label }}</option>
@@ -49,38 +39,26 @@
                     </select>
                 </div>
                 <div>
-                    <label for="qte"
-                           class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Quantidade:
-                    </label>
+                    <label for="qte" class="update-text">Quantidade:</label>
                     <input type="text"
                            name="qte"
                            pattern="^\d+(,\d{1,3})?$"
-                            value="{% if ingredient.measure == "kg" %}{{ ingredient.qte }}{% else %}{{ ingredient.qte|floatformat:0 }}{% endif %}"
+                           value="{% if ingredient.measure == "kg" %}{{ ingredient.qte }}{% else %}{{ ingredient.qte|floatformat:0 }}{% endif %}"
                            required
-                           class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                           class="update-field" />
                 </div>
                 <div>
-                    <label for="min_qte"
-                           class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Quantidade Mínima:
-                    </label>
+                    <label for="min_qte" class="update-text">Quantidade Mínima:</label>
                     <input type="text"
                            name="min_qte"
                            pattern="^\d+(,\d{1,3})?$"
-                            value="{% if ingredient.measure == "kg" %}{{ ingredient.min_qte }}{% else %}{{ ingredient.min_qte|floatformat:0 }}{% endif %}"                       
+                           value="{% if ingredient.measure == "kg" %}{{ ingredient.min_qte }}{% else %}{{ ingredient.min_qte|floatformat:0 }}{% endif %}"
                            required
-                           class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                           class="update-field" />
                 </div>
-                <div class="flex flex-col sm:flex-row sm:justify-end sm:space-x-4 space-y-4 sm:space-y-0 pt-4">
-                    <a href="{% url 'ingredient_list' %}"
-                       class="inline-block px-5 py-2.5 text-sm font-medium rounded-md bg-gray-300 hover:bg-gray-400 text-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white transition">
-                        Cancelar
-                    </a>
-                    <button type="submit"
-                            class="inline-block px-5 py-2.5 text-sm font-medium rounded-md bg-blue-600 hover:bg-blue-700 text-white transition">
-                        Alterar
-                    </button>
+                <div class="update-buttons">
+                    <a href="{% url 'ingredient_list' %}" class="gray-button">Cancelar</a>
+                    <button type="submit" class="blue-button">Alterar</button>
                 </div>
             </form>
         </div>
