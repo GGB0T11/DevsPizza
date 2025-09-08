@@ -1,6 +1,14 @@
 @import "tailwindcss";
 @reference "tailwindcss/utilities";
 
+.div-logo {
+  @apply h-10 w-10 flex-shrink-0 overflow-hidden;
+}
+
+.logo {
+  @apply h-full w-full object-contain max-h-10 max-w-10;
+}
+
 .nav-link {
   @apply px-3 py-2 text-sm font-medium rounded-md bg-gray-100 hover:bg-gray-200
          dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white transition;
