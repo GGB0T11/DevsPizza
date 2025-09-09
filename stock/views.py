@@ -415,7 +415,6 @@ def ingredient_delete(request: HttpRequest, id: int) -> HttpResponse:
 
 @login_required
 @admin_required
-@transaction.atomic
 @require_http_methods(["GET", "POST"])
 def product_create(request: HttpRequest) -> HttpResponse:
     """Cria um novo produto com ingredientes associados.
@@ -447,7 +446,10 @@ def product_create(request: HttpRequest) -> HttpResponse:
             raise ValidationError("O produto que deseja criar já existe!")
 
         price = request.POST.get("price")
-        price = parse_value_br(str(price), "Insira um preço válido!")
+        price, price_error = parse_value_br(str(price), "Insira um preço válido!")
+
+        if price_error:
+            errors.append(price_error)
 
         ingredients_ids = request.POST.getlist("ingredients")
 
@@ -486,6 +488,8 @@ def product_create(request: HttpRequest) -> HttpResponse:
         for msg in e.messages:
             messages.error(request, msg)
         context["old_data"] = request.POST
+        context["selected_ingredients"] = request.POST.getlist("ingredients")
+        context["quantities"] = {key[2:]: value for key, value in request.POST.items() if key.startswith("q-")}
         return render(request, "product_create.html", context)
 
 

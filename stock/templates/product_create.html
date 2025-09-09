@@ -23,7 +23,7 @@
                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Preço:</label>
                     <input type="text"
                            name="price"
-                           value="{{ old_data|default:'' }}"
+                           value="{{ old_data.price|default:'' }}"
                            placeholder="9,99"
                            pattern="^\d+(,\d{1,2})?$"
                            required
@@ -47,6 +47,7 @@
                                                name="ingredients"
                                                value="{{ ingredient.id }}"
                                                id="i-{{ ingredient.id }}"
+                                               {% if selected_ingredients and ingredient.id|stringformat:"s" in selected_ingredients %}checked{% endif %}
                                                class="rounded text-blue-600 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600" />
                                     </td>
                                     <td class="px-3 py-2">
@@ -56,6 +57,7 @@
                                         <div class="flex items-center space-x-2">
                                             <input type="text"
                                                    name="q-{{ ingredient.id }}"
+                                                   value="{{ quantities|default_if_none:""|keyvalue:ingredient.id }}"
                                                    step="0.01"
                                                    pattern="^\d+(,\d{1,3})?$"
                                                    placeholder="0,000"
