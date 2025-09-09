@@ -487,13 +487,10 @@ def product_create(request: HttpRequest) -> HttpResponse:
         for msg in e.messages:
             messages.error(request, msg)
         context["old_data"] = request.POST
-        context["selected_ingredients"] = request.POST.getlist("ingredients")
         quantities = {key[2:]: value for key, value in request.POST.items() if key.startswith("q-")}
 
-        ingredients = Ingredient.objects.all()
-
         ingredients_with_data = []
-        for ingredient in ingredients:
+        for ingredient in Ingredient.objects.all():
             ingredient.quantity = quantities.get(str(ingredient.id), "")
             ingredients_with_data.append(ingredient)
 
