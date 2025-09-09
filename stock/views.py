@@ -2,7 +2,6 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
-from django.db import transaction
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods
@@ -489,7 +488,16 @@ def product_create(request: HttpRequest) -> HttpResponse:
             messages.error(request, msg)
         context["old_data"] = request.POST
         context["selected_ingredients"] = request.POST.getlist("ingredients")
-        context["quantities"] = {key[2:]: value for key, value in request.POST.items() if key.startswith("q-")}
+        quantities = {key[2:]: value for key, value in request.POST.items() if key.startswith("q-")}
+
+        ingredients = Ingredient.objects.all()
+
+        ingredients_with_data = []
+        for ingredient in ingredients:
+            ingredient.quantity = quantities.get(str(ingredient.id), "")
+            ingredients_with_data.append(ingredient)
+
+        context["ingredients"] = ingredients_with_data
         return render(request, "product_create.html", context)
 
 

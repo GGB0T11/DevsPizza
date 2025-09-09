@@ -57,7 +57,7 @@
                                         <div class="flex items-center space-x-2">
                                             <input type="text"
                                                    name="q-{{ ingredient.id }}"
-                                                   value="{{ quantities|default_if_none:""|keyvalue:ingredient.id }}"
+                                                   value="{{ ingredient.quantity }}"
                                                    step="0.01"
                                                    pattern="^\d+(,\d{1,3})?$"
                                                    placeholder="0,000"
