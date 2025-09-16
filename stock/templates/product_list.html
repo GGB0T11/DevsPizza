@@ -43,6 +43,7 @@
                 <table class="min-w-full">
                     <thead>
                         <tr class="border-b border-gray-200 dark:border-gray-700">
+                            <th class="px-4 py-3 text-left table-head">Tipo</th>
                             <th class="px-4 py-3 text-left table-head">Nome</th>
                             <th class="px-4 py-3 text-left table-head">Preço</th>
                             <th class="px-4 py-3 text-right table-head">Ações</th>
@@ -51,6 +52,7 @@
                     <tbody>
                         {% for product in page_obj %}
                             <tr class="table-row">
+                                <td class="px-4 py-4 text-sm text-gray-900 dark:text-gray-100">{{ product.get_type_display }}</td>
                                 <td class="px-4 py-4 text-sm text-gray-900 dark:text-gray-100">{{ product.name }}</td>
                                 <td class="px-4 py-4 text-sm text-gray-900 dark:text-gray-100">R$ {{ product.price }}</td>
                                 <td class="px-4 py-4 text-right">

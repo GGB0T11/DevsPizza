@@ -9,7 +9,7 @@ from django.views.decorators.http import require_http_methods
 from core.decorators import admin_required
 
 from .models import Category, Ingredient, Product, ProductIngredient
-from .services import parse_value_br
+from .services import create_drink, create_food, parse_value_br
 
 
 @login_required
@@ -431,54 +431,31 @@ def product_create(request: HttpRequest) -> HttpResponse:
         HttpResponseRedirect: Redireciona para a lista de produtos após criação.
     """
 
-    context = {"ingredients": Ingredient.objects.all()}
+    context = {"ingredients": Ingredient.objects.all(), "type_choices": Product._meta.get_field("type").choices}
 
     if request.method == "GET":
         return render(request, "product_create.html", context)
 
     try:
-        errors = []
-
         name = request.POST.get("name")
+        type = request.POST.get("type")
 
         if Product.objects.filter(name__iexact=name).exists():
             raise ValidationError("O produto que deseja criar já existe!")
 
         price = request.POST.get("price")
-        price, price_error = parse_value_br(str(price), "Insira um preço válido!")
 
-        if price_error:
-            errors.append(price_error)
+        match type:
+            case "food":
+                ingredients_ids = request.POST.getlist("ingredients")
+                if not ingredients_ids:
+                    raise ValidationError("Selecione pelo menos 1 ingrediente")
 
-        ingredients_ids = request.POST.getlist("ingredients")
+                create_food(str(name), str(price), ingredients_ids, request.POST)
 
-        ingredients_to_create = []
-
-        if not ingredients_ids:
-            raise ValidationError("Selecione pelo menos 1 ingrediente")
-        for ingredient_id in ingredients_ids:
-            quantity = request.POST.get(f"q-{ingredient_id}")
-            quantity, quantity_error = parse_value_br(
-                str(quantity), f"Insira uma quantidade válida para {Ingredient.objects.get(pk=ingredient_id).name}"
-            )
-
-            if quantity_error:
-                errors.append(quantity_error)
-                continue
-
-            ingredients_to_create.append((int(ingredient_id), quantity))
-
-        if errors:
-            raise ValidationError(errors)
-
-        product = Product.objects.create(name=name, price=price)
-
-        for ingredient_id, quantity in ingredients_to_create:
-            ProductIngredient.objects.create(
-                product=product,
-                ingredient_id=ingredient_id,
-                quantity=quantity,
-            )
+            case "drink":
+                quantity = request.POST.get("quantity")
+                create_drink(name, price, quantity)
 
         messages.success(request, "Produto criado com sucesso!")
         return redirect("product_list")
