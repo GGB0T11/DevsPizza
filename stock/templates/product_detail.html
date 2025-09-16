@@ -3,29 +3,29 @@
     Detalhar Produto
 {% endblock title %}
 {% block body %}
-    <div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-10 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-3xl mx-auto bg-white dark:bg-gray-800 shadow-xl rounded-lg p-8 border border-gray-200 dark:border-gray-700">
-            <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-6">Detalhes do Produto</h2>
+    <div class="main-content">
+        <div class="detail-content">
+            <h2 class="detail-title">Detalhes do Produto</h2>
             <div class="space-y-4 text-gray-800 dark:text-gray-300">
                 <div>
-                    <span class="block text-sm font-medium text-gray-500 dark:text-gray-400">Nome:</span>
+                    <span class="detail-text">Nome:</span>
                     <span class="text-lg">{{ product.name }}</span>
                 </div>
                 <div>
-                    <span class="block text-sm font-medium text-gray-500 dark:text-gray-400">Preço:</span>
+                    <span class="detail-text">Preço:</span>
                     <span class="text-lg">{{ product.price }}</span>
                 </div>
                 <div>
-                    <span class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Ingredientes:</span>
+                    <span class="detail-text mb-2">Ingredientes:</span>
                     <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
-                            <thead class="bg-gray-100 dark:bg-gray-700">
+                        <table class="detail-table">
+                            <thead class="detail-thead">
                                 <tr>
-                                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">Nome</th>
-                                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">Quantidade</th>
+                                    <th class="detail-th">Nome</th>
+                                    <th class="detail-th">Quantidade</th>
                                 </tr>
                             </thead>
-                            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                            <tbody class="detail-tbody">
                                 {% for  pi in products_ingredients %}
                                     <tr>
                                         <td class="px-4 py-2">{{ pi.ingredient.name }}</td>
@@ -36,19 +36,10 @@
                         </table>
                     </div>
                 </div>
-                <div class="mt-8 flex flex-col sm:flex-row sm:justify-end sm:space-x-4 space-y-4 sm:space-y-0">
-                    <a href="{% url 'product_list' %}"
-                       class="inline-block px-5 py-2.5 text-sm font-medium rounded-md bg-gray-200 hover:bg-gray-300 text-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white transition">
-                        Voltar para Lista
-                    </a>
-                    <a href="{% url 'product_update' product.id %}"
-                       class="inline-block px-5 py-2.5 text-sm font-medium rounded-md bg-yellow-500 hover:bg-yellow-600 text-white transition">
-                        Editar
-                    </a>
-                    <a href="{% url 'product_delete' product.id %}"
-                       class="inline-block px-5 py-2.5 text-sm font-medium rounded-md bg-red-600 hover:bg-red-700 text-white transition">
-                        Deletar
-                    </a>
+                <div class="detail-buttons">
+                    <a href="{% url 'product_list' %}" class="gray-button">Voltar para Lista</a>
+                    <a href="{% url 'product_update' product.id %}" class="yellow-button">Editar</a>
+                    <a href="{% url 'product_delete' product.id %}" class="red-button">Deletar</a>
                 </div>
             </div>
         </div>

@@ -23,7 +23,7 @@ class Ingredient(models.Model):
     Attributes:
         name (str): Nome do ingrediente.
         category (Category): Categoria à qual o ingrediente pertence.
-        qte (int): Quantidade atual disponível em estoque.
+        qte (Decimal): Quantidade atual disponível em estoque.
         min_qte (int): Quantidade mínima de segurança no estoque.
         measure (str): Unidade de medida do ingrediente (g/kg/unit).
     """
@@ -45,13 +45,16 @@ class Product(models.Model):
         name (str): Nome do produto.
         ingredients (QuerySet[Ingredient]): Ingredientes necessários, relacionados através da tabela ProductIngredient.
         price (Decimal): Preço do produto.
+        unit (int): Quantidade do produto (caso sejam bebidas)
     """
 
     name = models.CharField(max_length=100, unique=True)
+    type = models.CharField(max_length=10, choices=([("food", "Comida"), ("drink", "Bebida")]))
     ingredients = models.ManyToManyField(
-        Ingredient, through="ProductIngredient", through_fields=("product", "ingredient")
+        Ingredient, through="ProductIngredient", through_fields=("product", "ingredient"), blank=True
     )
     price = models.DecimalField(default=0, max_digits=10, decimal_places=2)
+    quantity = models.PositiveIntegerField(default=0, blank=True)
 
     def __str__(self):
         return self.name

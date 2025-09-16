@@ -8,20 +8,15 @@
         <div class="max-w-4xl mx-auto space-y-8">
             <!-- Header -->
             <div class="text-center">
-                <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white">Lista de Ingredientes</h2>
+                <h2 class="title">Lista de Ingredientes</h2>
             </div>
             <!-- Filtro -->
-            <div class="bg-white dark:bg-gray-800 py-8 px-6 shadow-xl rounded-lg border border-gray-200 dark:border-gray-700">
+            <div class="table-content">
                 <form method="GET" class="space-y-6">
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div>
-                            <label for="filter-field"
-                                   class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Filtrar por
-                            </label>
-                            <select name="field"
-                                    id="filter-field"
-                                    class="appearance-none block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white bg-white dark:bg-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <label for="filter-field" class="filter">Filtrar por</label>
+                            <select name="field" id="filter-field" class="filter-field">
                                 <option value="name"{% if field == "name" %}selected{% endif %}>Nome</option>
                                 <option value="category"{% if field == "category" %}selected{% endif %}>Categoria</option>
                                 <option value="qte"{% if field == "qte" %}selected{% endif %}>Quantidade</option>
@@ -29,20 +24,17 @@
                             </select>
                         </div>
                         <div id="filter-inputs">
-                            <label for="value-text"
-                                   class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Valor
-                            </label>
+                            <label for="value-text" class="filter">Valor</label>
                             <input type="text"
                                    name="value"
                                    id="value-text"
                                    value="{{ value|default:'' }}"
                                    placeholder="Digite o valor..."
-                                   class="appearance-none block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                   class="filter-field" />
                             <select name=""
                                     id="value-category"
                                     style="display: none"
-                                    class="appearance-none block w-full mt-2 px-3 py-3 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white bg-white dark:bg-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    class="filter-field">
                                 {% for category in categories %}
                                     <option value="{{ category.name }}"
                                             {% if value == category.name %}selected{% endif %}>
@@ -52,89 +44,61 @@
                             </select>
                         </div>
                         <div class="flex items-end">
-                            <button type="submit"
-                                    class="w-full flex justify-center py-3 px-4 text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800 transition-colors shadow-md hover:shadow-lg transform hover:scale-[1.02] active:scale-[0.98]">
-                                Filtrar
-                            </button>
+                            <button type="submit" class="blue-button">Filtrar</button>
                         </div>
                     </div>
                 </form>
             </div>
             <!-- Tabela -->
-            <div class="bg-white dark:bg-gray-800 py-8 px-6 shadow-xl rounded-lg border border-gray-200 dark:border-gray-700">
+            <div class="table-content">
                 <div class="flex justify-end mb-4">
-                    <a href="{% url 'ingredient_create' %}"
-                       class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 dark:focus:ring-offset-gray-800 transition-colors shadow-md hover:shadow-lg transform hover:scale-[1.02] active:scale-[0.98]">
-                        + Registrar Ingrediente
-                    </a>
+                    <a href="{% url 'ingredient_create' %}" class="green-button">+ Registrar Ingrediente</a>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full">
-                        <thead>
-                            <tr class="border-b border-gray-200 dark:border-gray-700">
-                                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Nome</th>
-                                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Quantidade</th>
-                                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Quantidade Mínima</th>
-                                <th class="px-4 py-3 text-right text-sm font-medium text-gray-700 dark:text-gray-300">Ações</th>
+                <table class="min-w-full">
+                    <thead>
+                        <tr class="border-b border-gray-200 dark:border-gray-700">
+                            <th class="px-4 py-3 text-left table-head">Nome</th>
+                            <th class="px-4 py-3 text-left table-head">Quantidade</th>
+                            <th class="px-4 py-3 text-left table-head">Quantidade Mínima</th>
+                            <th class="px-4 py-3 text-right table-head">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                        {% for ingredient in page_obj %}
+                            <tr class="table-row">
+                                <td class="table-text">{{ ingredient.name }}</td>
+                                {% if ingredient.measure == "kg" %}
+                                    <td class="table-text">{{ ingredient.qte }} {{ ingredient.get_measure_display }}</td>
+                                    <td class="table-text">{{ ingredient.min_qte }} {{ ingredient.get_measure_display }}</td>
+                                {% else %}
+                                    <td class="table-text">{{ ingredient.qte|floatformat:0 }} {{ ingredient.get_measure_display }}</td>
+                                    <td class="table-text">{{ ingredient.min_qte|floatformat:0 }} {{ ingredient.get_measure_display }}</td>
+                                {% endif %}
+                                <td class="px-4 py-4 text-right">
+                                    <div class="flex flex-col sm:flex-row justify-end sm:space-x-2 space-y-2 sm:space-y-0">
+                                        <a href="{% url 'ingredient_detail' ingredient.id %}"
+                                           class="detail-button">Ver</a>
+                                        <a href="{% url 'ingredient_update' ingredient.id %}"
+                                           class="edit-button">Editar</a>
+                                        <a href="{% url 'ingredient_delete' ingredient.id %}"
+                                           class="delete-button">Deletar</a>
+                                    </div>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                            {% for ingredient in page_obj %}
-                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                                    <td class="px-4 py-4 text-sm text-gray-900 dark:text-gray-100">{{ ingredient.name }}</td>
-                                    {% if ingredient.measure == "kg" %}
-                                        <td class="px-4 py-4 text-sm text-gray-900 dark:text-gray-100">
-                                            {{ ingredient.qte }} {{ ingredient.get_measure_display }}
-                                        </td>
-                                        <td class="px-4 py-4 text-sm text-gray-900 dark:text-gray-100">
-                                            {{ ingredient.min_qte }} {{ ingredient.get_measure_display }}
-                                        </td>
-                                    {% else %}
-                                        <td class="px-4 py-4 text-sm text-gray-900 dark:text-gray-100">
-                                            {{ ingredient.qte|floatformat:0 }} {{ ingredient.get_measure_display }}
-                                        </td>
-                                        <td class="px-4 py-4 text-sm text-gray-900 dark:text-gray-100">
-                                            {{ ingredient.min_qte|floatformat:0 }} {{ ingredient.get_measure_display }}
-                                        </td>
-                                    {% endif %}
-                                    <td class="px-4 py-4 text-right">
-                                        <div class="flex justify-end space-x-2">
-                                            <a href="{% url 'ingredient_detail' ingredient.id %}"
-                                               class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 transition-colors">
-                                                Ver
-                                            </a>
-                                            <a href="{% url 'ingredient_update' ingredient.id %}"
-                                               class="text-sm text-yellow-600 dark:text-yellow-400 hover:text-yellow-500 dark:hover:text-yellow-300 transition-colors">
-                                                Editar
-                                            </a>
-                                            <a href="{% url 'ingredient_delete' ingredient.id %}"
-                                               class="text-sm text-red-600 dark:text-red-400 hover:text-red-500 dark:hover:text-red-300 transition-colors">
-                                                Deletar
-                                            </a>
-                                        </div>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
             {% if is_paginated %}
                 <div class="flex justify-center mt-6 space-x-2">
                     {% if page_obj.has_previous %}
                         <a href="?page={{ page_obj.previous_page_number }}&{% if request.GET.field and request.GET.value %}field={{ request.GET.field }}&value={{ request.GET.value }}{% endif %}"
-                           class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">
-                            ← Anterior
-                        </a>
+                           class="page-button">← Anterior</a>
                     {% endif %}
-                    <span class="px-4 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-white border border-gray-300 dark:border-gray-600 rounded">
-                        Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
-                    </span>
+                    <span class="page-info">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
                     {% if page_obj.has_next %}
                         <a href="?page={{ page_obj.next_page_number }}&{% if request.GET.field and request.GET.value %}field={{ request.GET.field }}&value={{ request.GET.value }}{% endif %}"
-                           class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">
-                            Próxima →
-                        </a>
+                           class="page-button">Próxima →</a>
                     {% endif %}
                 </div>
             {% endif %}

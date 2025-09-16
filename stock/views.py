@@ -2,7 +2,6 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
-from django.db import transaction
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods
@@ -10,7 +9,7 @@ from django.views.decorators.http import require_http_methods
 from core.decorators import admin_required
 
 from .models import Category, Ingredient, Product, ProductIngredient
-from .services import parse_value_br
+from .services import create_drink, create_food, parse_value_br
 
 
 @login_required
@@ -415,7 +414,6 @@ def ingredient_delete(request: HttpRequest, id: int) -> HttpResponse:
 
 @login_required
 @admin_required
-@transaction.atomic
 @require_http_methods(["GET", "POST"])
 def product_create(request: HttpRequest) -> HttpResponse:
     """Cria um novo produto com ingredientes associados.
@@ -433,51 +431,31 @@ def product_create(request: HttpRequest) -> HttpResponse:
         HttpResponseRedirect: Redireciona para a lista de produtos após criação.
     """
 
-    context = {"ingredients": Ingredient.objects.all()}
+    context = {"ingredients": Ingredient.objects.all(), "type_choices": Product._meta.get_field("type").choices}
 
     if request.method == "GET":
         return render(request, "product_create.html", context)
 
     try:
-        errors = []
-
         name = request.POST.get("name")
+        type = request.POST.get("type")
 
         if Product.objects.filter(name__iexact=name).exists():
             raise ValidationError("O produto que deseja criar já existe!")
 
         price = request.POST.get("price")
-        price = parse_value_br(str(price), "Insira um preço válido!")
 
-        ingredients_ids = request.POST.getlist("ingredients")
+        match type:
+            case "food":
+                ingredients_ids = request.POST.getlist("ingredients")
+                if not ingredients_ids:
+                    raise ValidationError("Selecione pelo menos 1 ingrediente")
 
-        ingredients_to_create = []
+                create_food(str(name), str(price), ingredients_ids, request.POST)
 
-        if not ingredients_ids:
-            raise ValidationError("Selecione pelo menos 1 ingrediente")
-        for ingredient_id in ingredients_ids:
-            quantity = request.POST.get(f"q-{ingredient_id}")
-            quantity, quantity_error = parse_value_br(
-                str(quantity), f"Insira uma quantidade válida para {Ingredient.objects.get(pk=ingredient_id).name}"
-            )
-
-            if quantity_error:
-                errors.append(quantity_error)
-                continue
-
-            ingredients_to_create.append((int(ingredient_id), quantity))
-
-        if errors:
-            raise ValidationError(errors)
-
-        product = Product.objects.create(name=name, price=price)
-
-        for ingredient_id, quantity in ingredients_to_create:
-            ProductIngredient.objects.create(
-                product=product,
-                ingredient_id=ingredient_id,
-                quantity=quantity,
-            )
+            case "drink":
+                quantity = request.POST.get("quantity")
+                create_drink(name, price, quantity)
 
         messages.success(request, "Produto criado com sucesso!")
         return redirect("product_list")
@@ -486,6 +464,14 @@ def product_create(request: HttpRequest) -> HttpResponse:
         for msg in e.messages:
             messages.error(request, msg)
         context["old_data"] = request.POST
+        quantities = {key[2:]: value for key, value in request.POST.items() if key.startswith("q-")}
+
+        ingredients_with_data = []
+        for ingredient in Ingredient.objects.all():
+            ingredient.quantity = quantities.get(str(ingredient.id), "")
+            ingredients_with_data.append(ingredient)
+
+        context["ingredients"] = ingredients_with_data
         return render(request, "product_create.html", context)
 
 
