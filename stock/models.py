@@ -49,12 +49,10 @@ class Product(models.Model):
     """
 
     name = models.CharField(max_length=100, unique=True)
-    type = models.CharField(max_length=10, choices=([("food", "Comida"), ("drink", "Bebida")]))
     ingredients = models.ManyToManyField(
         Ingredient, through="ProductIngredient", through_fields=("product", "ingredient"), blank=True
     )
     price = models.DecimalField(default=0, max_digits=10, decimal_places=2)
-    quantity = models.PositiveIntegerField(default=0, blank=True)
 
     def __str__(self):
         return self.name

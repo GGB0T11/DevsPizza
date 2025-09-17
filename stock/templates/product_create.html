@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-{% load static %}
 {% block title %}
     Cadastrar Produto
 {% endblock title %}
@@ -20,17 +19,6 @@
                            class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 </div>
                 <div>
-                    <label for="type"
-                           class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tipo:</label>
-                    <select id="type"
-                            name="type"
-                            class="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200">
-                        {% for val, label in type_choices %}
-                            <option value="{{ val }}" {% if old_data.type == val %}selected{% endif %}>{{ label }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div>
                     <label for="price"
                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Preço:</label>
                     <input type="text"
@@ -39,16 +27,6 @@
                            placeholder="9,99"
                            pattern="^\d+(,\d{1,2})?$"
                            required
-                           class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                </div>
-                <div id="quantity" style="display:none;">
-                    <label for="quantity"
-                           class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Quantidade:</label>
-                    <input type="number"
-                           name="quantity"
-                           value="{{ old_data.unit|default:'' }}"
-                           placeholder="99"
-                           min="0"
                            class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 </div>
                 <div id="ingredients">
@@ -108,5 +86,4 @@
             </form>
         </div>
     </div>
-    <script src="{% static 'stock/js/toggle_ingredients.js' %}"></script>
 {% endblock body %}
