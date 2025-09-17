@@ -209,3 +209,67 @@
 .update-buttons {
   @apply flex flex-row space-x-4 sm:justify-end;
 }
+@layer components {
+  /* Layout */
+  .page-container {
+    @apply space-y-6 pt-16 px-4 md:px-8;
+  }
+
+  /* Tipografia */
+  .title-page {
+    @apply text-2xl font-bold text-gray-900 dark:text-gray-100;
+  }
+  .subtitle {
+    @apply text-gray-600 dark:text-gray-300;
+  }
+
+  /* Cards */
+  .grid-stats {
+    @apply grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-4;
+  }
+  .card {
+    @apply p-4 bg-white dark:bg-gray-800 rounded-xl shadow;
+  }
+  .card-label {
+    @apply text-gray-500 dark:text-gray-400;
+  }
+  .card-value {
+    @apply text-2xl font-bold;
+  }
+
+  /* Botões  (sem reaproveitar .btn) */
+  .btn-primary {
+    @apply px-4 py-2 rounded-lg text-white font-medium transition-colors duration-200
+           bg-blue-600 hover:bg-blue-700;
+  }
+  .btn-success {
+    @apply px-4 py-2 rounded-lg text-white font-medium transition-colors duration-200
+           bg-green-500 hover:bg-green-600;
+  }
+
+  /* Tabela */
+  .table-base {
+    @apply w-full text-left text-sm;
+  }
+  .table-head {
+    @apply text-gray-700 dark:text-gray-300;
+  }
+  .table-row {
+    @apply border-t border-gray-200 dark:border-gray-700
+                       hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer;
+  }
+  .table-cell {
+    @apply py-2;
+  }
+  .value-in {
+    @apply font-semibold text-red-500;
+  }
+  .value-out {
+    @apply font-semibold text-green-500;
+  }
+
+  /* Alerta */
+  .alert-warning {
+    @apply bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded;
+  }
+}

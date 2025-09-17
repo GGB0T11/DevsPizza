@@ -25,7 +25,7 @@ def format_period(start: str, end: str) -> tuple[datetime, datetime]:
             start_dt = make_aware(start_dt)
         if is_naive(end_dt):
             end_dt = make_aware(end_dt)
-        
+
         return start_dt, end_dt
 
     except ValueError as e:
