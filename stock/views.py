@@ -451,7 +451,7 @@ def product_create(request: HttpRequest) -> HttpResponse:
         if price_error:
             errors.append(price_error)
 
-        ingredients_ids = request.POST.get("ingredients")
+        ingredients_ids = request.POST.getlist("ingredients")
         if not ingredients_ids:
             raise ValidationError(["Selecione ao menos 1 ingrediente!"])
         ingredients_to_create = []
@@ -606,10 +606,13 @@ def product_update(request: HttpRequest, id: int) -> HttpResponse:
             raise ValidationError("O novo nome que deseja inserir já está associado a um produto!")
 
         price = request.POST.get("price")
-        price = parse_value_br(str(price), "Insira um preço válido!")
+        price, error = parse_value_br(str(price), "Insira um preço válido!")
+        if error:
+            raise ValidationError([error])
+
         selected_ids = request.POST.getlist("ingredients")
         if not selected_ids:
-            raise ValidationError(f"Insira pelo menos 1 ingrediente!")
+            raise ValidationError(["Insira pelo menos 1 ingrediente!"])
 
         product.name = name
         product.price = price
