@@ -49,16 +49,14 @@ def create_account(data: dict) -> CustomUser:
 
 def update_account(account: CustomUser, data: dict):
     """Atualiza as informações de uma conta"""
-    errors = []
-
-    errors.extend(validate_email(data["email"]))
+    error = []
 
     password, confirm_password = data["password"], data["confirm_password"]
     if password and confirm_password:
-        errors.extend(validate_password(password, confirm_password))
+        error = validate_password(password, confirm_password)
 
-    if errors:
-        raise ValidationError(errors)
+    if error:
+        raise ValidationError(error)
 
     account.first_name = data["first_name"]
     account.last_name = data["last_name"]
