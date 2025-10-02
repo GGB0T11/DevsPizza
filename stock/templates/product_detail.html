@@ -29,7 +29,11 @@
                                 {% for  pi in products_ingredients %}
                                     <tr>
                                         <td class="px-4 py-2">{{ pi.ingredient.name }}</td>
-                                        <td class="px-4 py-2">{{ pi.quantity }} {{ pi.ingredient.get_measure_display }}</td>
+                                        {% if pi.measure == "kg" %}
+                                            <td class="px-4 py-2">{{ pi.quantity }} {{ pi.ingredient.get_measure_display }}</td>
+                                        {% else %}
+                                            <td class="px-4 py-2">{{ pi.quantity|floatformat:0 }} {{ pi.ingredient.get_measure_display }}</td>
+                                        {% endif %}
                                     </tr>
                                 {% endfor %}
                             </tbody>
