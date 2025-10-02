@@ -630,7 +630,7 @@ def product_update(request: HttpRequest, id: int) -> HttpResponse:
         ingredients_list = []
         for ingredient_id in new_ingredients_ids:
             quantity = request.POST.get(f"q-{ingredient_id}")
-            quantity, error = parse_value_br(str(quantity), f"Insira uma quantidade válida para {name}!")
+            quantity, error = parse_value_br(str(quantity), f"Insira uma quantidade válida para {Ingredient.objects.get(pk=ingredient_id).name}!")
             if error:
                 errors.append(error)
                 continue
