@@ -1,6 +1,17 @@
 @import "tailwindcss";
 @reference "tailwindcss/utilities";
 
+@layer base {
+    * {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    *::-webkit-scrollbar {
+        display: none;
+    }
+}
+
 .div-logo {
     @apply h-10 w-10 flex-shrink-0 overflow-hidden;
 }
