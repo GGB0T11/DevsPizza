@@ -74,27 +74,30 @@
                             onclick="window.location='{% url 'movement_detail' m.id %}'">
                             <td class="py-2">{{ m.date|date:"d/m/Y H:i:s" }}</td>
                             <td class="py-2">{{ m.get_type_display }}</td>
-                            <td class="py-2 font-semibold {% if m.type == 'in' %}text-red-500{% elif m.type == 'out' %}text-green-500{% endif %}">
-                                {{ m.value }}
-                            </td>
-                        </tr>
-                    {% empty %}
-                        <tr>
-                            <td colspan="5" class="py-4 text-center text-gray-400">Nenhuma movimentação recente.</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        <!-- Alertas -->
-        {% if low_stock_alerts %}
-            <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded"
-                 role="alert">
-                <strong class="font-bold">Atenção!</strong>
-                <ul class="mt-2 list-disc list-inside text-sm">
-                    {% for ingredient in low_stock_alerts %}<li>{{ ingredient.name }} abaixo do mínimo</li>{% endfor %}
-                </ul>
-            </div>
-        {% endif %}
+                            {% if m.type == "in" %}
+                                <td class="py-2 font-semibold text-red-500">-R$ {{ m.value }}</td>
+                            {% else %}
+                                <td class="py-2 font-semibold text-green-500">+R$ {{ m.value }}</td>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="5" class="py-4 text-center text-gray-400">Nenhuma movimentação recente.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
+    <!-- Alertas -->
+    {% if low_stock_alerts %}
+        <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded"
+             role="alert">
+            <strong class="font-bold">Atenção!</strong>
+            <ul class="mt-2 list-disc list-inside text-sm">
+                {% for ingredient in low_stock_alerts %}<li>{{ ingredient.name }} abaixo do mínimo</li>{% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+</div>
 {% endblock %}
