@@ -70,7 +70,7 @@
                 </thead>
                 <tbody class="text-gray-900 dark:text-gray-100">
                     {% for m in recent_movements %}
-                        <tr class="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-100"
+                        <tr class="table-row"
                             onclick="window.location='{% url 'movement_detail' m.id %}'">
                             <td class="py-2">{{ m.date|date:"d/m/Y H:i:s" }}</td>
                             <td class="py-2">{{ m.get_type_display }}</td>

@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}
     Listar Movimentações
 {% endblock title %}
@@ -53,14 +54,16 @@
                     </thead>
                     <tbody>
                         {% for movement in page_obj %}
-                            <tr class="table-row">
+                            <tr class="table-row"
+                                onclick="window.location='{% url 'movement_detail' movement.id %}'">
                                 <td class="table-text">{{ movement.get_type_display }}</td>
                                 <td class="table-text">{{ movement.date|date:"d/m/Y H:i:s" }}</td>
                                 <td class="table-text">{{ movement.user }}</td>
-                                <td class="px-4 py-4 text-right">
-                                    <div class="flex flex-col sm:flex-row justify-end sm:space-x-2 space-y-2 sm:space-y-0">
-                                        <a href="{% url 'movement_detail' movement.id %}" class="detail-button">Ver</a>
-                                        <a href="{% url 'movement_delete' movement.id %}" class="delete-button">Deletar</a>
+                                <td class="px-4 py-2 text-right">
+                                    <div class="flex flex-row justify-end space-x-2 space-y-0">
+                                        <a href="{% url 'movement_delete' movement.id %}">
+                                            <img src="{% static 'assets/trash.svg' %}" class="w-5 h-5" alt="Deletar">
+                                        </a>
                                     </div>
                                 </td>
                             </tr>

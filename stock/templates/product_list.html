@@ -50,14 +50,18 @@
                     </thead>
                     <tbody>
                         {% for product in page_obj %}
-                            <tr class="table-row">
-                                <td class="px-4 py-4 text-sm text-gray-900 dark:text-gray-100">{{ product.name }}</td>
-                                <td class="px-4 py-4 text-sm text-gray-900 dark:text-gray-100">R$ {{ product.price }}</td>
-                                <td class="px-4 py-4 text-right">
-                                    <div class="flex justify-end space-x-2">
-                                        <a href="{% url 'product_detail' product.id %}" class="detail-button">Ver</a>
-                                        <a href="{% url 'product_update' product.id %}" class="edit-button">Editar</a>
-                                        <a href="{% url 'product_delete' product.id %}" class="delete-button">Deletar</a>
+                            <tr class="table-row"
+                                onclick="window.location='{% url 'product_detail' product.id %}'">
+                                <td class="table-text">{{ product.name }}</td>
+                                <td class="table-text">R$ {{ product.price }}</td>
+                                <td class="px-4 py-2 text-right">
+                                    <div class="flex flex-row justify-end space-x-2 space-y-0">
+                                        <a href="{% url 'product_update' product.id %}">
+                                            <img src="{% static 'assets/edit.svg' %}" class="w-5 h-5" alt="Editar">
+                                        </a>
+                                        <a href="{% url 'product_delete' product.id %}">
+                                            <img src="{% static 'assets/trash.svg' %}" class="w-5 h-5" alt="Deletar">
+                                        </a>
                                     </div>
                                 </td>
                             </tr>

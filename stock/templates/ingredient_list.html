@@ -63,9 +63,10 @@
                             <th class="px-4 py-3 text-right table-head">Ações</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                    <tbody>
                         {% for ingredient in page_obj %}
-                            <tr class="table-row">
+                            <tr class="table-row"
+                                onclick="window.location='{% url 'ingredient_detail' ingredient.id %}'">
                                 <td class="table-text">{{ ingredient.name }}</td>
                                 {% if ingredient.measure == "kg" %}
                                     <td class="table-text">{{ ingredient.qte }} {{ ingredient.get_measure_display }}</td>
@@ -74,14 +75,14 @@
                                     <td class="table-text">{{ ingredient.qte|floatformat:0 }} {{ ingredient.get_measure_display }}</td>
                                     <td class="table-text">{{ ingredient.min_qte|floatformat:0 }} {{ ingredient.get_measure_display }}</td>
                                 {% endif %}
-                                <td class="px-4 py-4 text-right">
-                                    <div class="flex flex-col sm:flex-row justify-end sm:space-x-2 space-y-2 sm:space-y-0">
-                                        <a href="{% url 'ingredient_detail' ingredient.id %}"
-                                           class="detail-button">Ver</a>
-                                        <a href="{% url 'ingredient_update' ingredient.id %}"
-                                           class="edit-button">Editar</a>
-                                        <a href="{% url 'ingredient_delete' ingredient.id %}"
-                                           class="delete-button">Deletar</a>
+                                <td class="px-4 py-2 text-right">
+                                    <div class="flex flex-row justify-end space-x-2 space-y-0">
+                                        <a href="{% url 'ingredient_update' ingredient.id %}">
+                                            <img src="{% static 'assets/edit.svg' %}" class="w-5 h-5" alt="Editar">
+                                        </a>
+                                        <a href="{% url 'ingredient_delete' ingredient.id %}">
+                                            <img src="{% static 'assets/trash.svg' %}" class="w-5 h-5" alt="Deletar">
+                                        </a>
                                     </div>
                                 </td>
                             </tr>

@@ -2,210 +2,198 @@
 @reference "tailwindcss/utilities";
 
 .div-logo {
-  @apply h-10 w-10 flex-shrink-0 overflow-hidden;
+    @apply h-10 w-10 flex-shrink-0 overflow-hidden;
 }
 
 .logo {
-  @apply h-full w-full object-contain max-h-10 max-w-10;
+    @apply h-full w-full object-contain max-h-10 max-w-10;
 }
 
 .nav-link {
-  @apply px-3 py-2 text-sm font-medium rounded-md bg-gray-100 hover:bg-gray-200
+    @apply px-3 py-2 text-sm font-medium rounded-md bg-gray-100 hover:bg-gray-200
          dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white transition;
 }
 
 .logout-button {
-  @apply px-4 py-2 text-sm font-medium rounded-md bg-red-500 hover:bg-red-600 text-white transition w-full;
+    @apply px-4 py-2 text-sm font-medium rounded-md bg-red-500 hover:bg-red-600 text-white transition w-full;
 }
 
 #menu-toggle {
-  @apply sm:hidden flex items-center justify-center p-2 rounded-md bg-gray-200 dark:bg-gray-700 
+    @apply sm:hidden flex items-center justify-center p-2 rounded-md bg-gray-200 dark:bg-gray-700 
          text-gray-800 dark:text-gray-100;
 }
 
 #mobile-menu {
-  @apply hidden fixed top-14 right-4 z-50 bg-white dark:bg-gray-800 shadow-lg 
+    @apply hidden fixed top-14 right-4 z-50 bg-white dark:bg-gray-800 shadow-lg 
          rounded-lg p-4 w-48;
 }
 
 #mobile-menu.show {
-  @apply flex flex-col gap-2;
+    @apply flex flex-col gap-2;
 }
 
 .gray-button {
-  @apply inline-block px-5 py-2.5 text-sm font-medium rounded-md bg-gray-200 hover:bg-gray-300
+    @apply inline-block px-5 py-2.5 text-sm font-medium rounded-md bg-gray-200 hover:bg-gray-300
          text-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white transition;
 }
 
 .green-button {
-  @apply inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md 
+    @apply inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md 
          text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2
          focus:ring-green-500 dark:focus:ring-offset-gray-800 transition-colors shadow-md 
          hover:shadow-lg transform hover:scale-[1.02] active:scale-[0.98];
 }
 
 .blue-button {
-  @apply w-full flex justify-center py-3 px-4 text-sm font-medium rounded-md text-white bg-blue-600
+    @apply w-full flex justify-center py-3 px-4 text-sm font-medium rounded-md text-white bg-blue-600
          hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
          dark:focus:ring-offset-gray-800 transition-colors shadow-md hover:shadow-lg transform
          hover:scale-[1.02] active:scale-[0.98];
 }
 
 .yellow-button {
-  @apply inline-block px-5 py-2.5 text-sm font-medium rounded-md bg-yellow-500 hover:bg-yellow-600 
+    @apply inline-block px-5 py-2.5 text-sm font-medium rounded-md bg-yellow-500 hover:bg-yellow-600 
          text-white transition;
 }
 
 .red-button {
-  @apply inline-block px-5 py-2.5 text-sm font-medium rounded-md bg-red-600 hover:bg-red-700 
+    @apply inline-block px-5 py-2.5 text-sm font-medium rounded-md bg-red-600 hover:bg-red-700 
          text-white transition;
 }
 
 .purple-button {
-  @apply inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md
+    @apply inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md
          text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2
          focus:ring-purple-500 dark:focus:ring-offset-gray-800 transition-colors shadow-md hover:shadow-lg
          transform hover:scale-[1.02] active:scale-[0.98];
 }
 
 .title {
-  @apply text-3xl font-extrabold text-gray-900 dark:text-white;
+    @apply text-3xl font-extrabold text-gray-900 dark:text-white;
 }
 
 .filter {
-  @apply block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2;
+    @apply block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2;
 }
 
 .filter-field {
-  @apply appearance-none block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 text-gray-900
+    @apply appearance-none block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 text-gray-900
          dark:text-white bg-white dark:bg-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500;
 }
 
 .table-content {
-  @apply bg-white dark:bg-gray-800 py-8 px-6 shadow-xl rounded-lg border border-gray-200 dark:border-gray-700;
+    @apply bg-white dark:bg-gray-800 py-8 px-6 shadow-xl rounded-lg border border-gray-200 dark:border-gray-700;
 }
 
 .table-head {
-  @apply px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300;
+    @apply px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300;
 }
 
 .table-row {
-  @apply hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors;
+    @apply hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors;
 }
 
 .table-text {
-  @apply px-4 py-4 text-sm text-gray-900 dark:text-gray-100;
-}
-
-.detail-button {
-  @apply text-sm text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 transition-colors;
-}
-
-.edit-button {
-  @apply text-sm text-yellow-600 dark:text-yellow-400 hover:text-yellow-500 dark:hover:text-yellow-300 transition-colors;
-}
-
-.delete-button {
-  @apply text-sm text-red-600 dark:text-red-400 hover:text-red-500 dark:hover:text-red-300 transition-colors;
+    @apply px-4 py-2 text-sm text-gray-900 dark:text-gray-100;
 }
 
 .page-info {
-  @apply px-4 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-white border border-gray-300
+    @apply px-4 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-white border border-gray-300
            dark:border-gray-600 rounded;
 }
 
 .page-button {
-  @apply px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white rounded hover:bg-gray-300
+    @apply px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white rounded hover:bg-gray-300
            dark:hover:bg-gray-600 transition;
 }
 
 .main-container {
-  @apply min-h-screen bg-gray-50 dark:bg-gray-900 py-10 px-4 sm:px-6 lg:px-8;
+    @apply min-h-screen bg-gray-50 dark:bg-gray-900 py-10 px-4 sm:px-6 lg:px-8;
 }
 
 .detail-container {
-  @apply max-w-3xl mx-auto bg-white dark:bg-gray-800 shadow-xl rounded-lg p-8 border border-gray-200 
+    @apply max-w-3xl mx-auto bg-white dark:bg-gray-800 shadow-xl rounded-lg p-8 border border-gray-200 
          dark:border-gray-700;
 }
 
 .detail-title {
-  @apply text-2xl font-bold text-gray-800 dark:text-white mb-6;
+    @apply text-2xl font-bold text-gray-800 dark:text-white mb-6;
 }
 
 .detail-text {
-  @apply block text-sm font-medium text-gray-500 dark:text-gray-400;
+    @apply block text-sm font-medium text-gray-500 dark:text-gray-400;
 }
 
 .detail-buttons {
-  @apply mt-8 flex flex-col sm:flex-row sm:justify-end sm:space-x-4 space-y-4 sm:space-y-0;
+    @apply mt-8 flex flex-col sm:flex-row sm:justify-end sm:space-x-4 space-y-4 sm:space-y-0;
 }
 
 .detail-table {
-  @apply min-w-full divide-y divide-gray-200 dark:divide-gray-600;
+    @apply min-w-full divide-y divide-gray-200 dark:divide-gray-600;
 }
 
 .detail-thead {
-  @apply bg-gray-100 dark:bg-gray-700;
+    @apply bg-gray-100 dark:bg-gray-700;
 }
 
 .detail-th {
-  @apply px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200;
+    @apply px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200;
 }
 
 .detail-tbody {
-  @apply bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700;
+    @apply bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700;
 }
 
 .delete-container {
-  @apply max-w-xl mx-auto bg-white dark:bg-gray-800 shadow-xl rounded-lg p-8 border 
+    @apply max-w-xl mx-auto bg-white dark:bg-gray-800 shadow-xl rounded-lg p-8 border 
          border-red-200 dark:border-red-700;
 }
 
 .delete-title {
-  @apply text-2xl font-bold text-red-700 dark:text-red-400 mb-4;
+    @apply text-2xl font-bold text-red-700 dark:text-red-400 mb-4;
 }
 
 .delete-text {
-  @apply block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1;
+    @apply block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1;
 }
 
 .delete-field {
-  @apply w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900
+    @apply w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900
          dark:text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500;
 }
 
 .delete-buttons {
-  @apply flex flex-row space-x-4 sm:justify-end;
+    @apply flex flex-row space-x-4 sm:justify-end;
 }
 
 .update-container {
-  @apply max-w-xl mx-auto bg-white dark:bg-gray-800 shadow-xl rounded-lg p-8 border border-gray-200 
+    @apply max-w-xl mx-auto bg-white dark:bg-gray-800 shadow-xl rounded-lg p-8 border border-gray-200 
          dark:border-gray-700;
 }
 
 .update-title {
-  @apply text-2xl font-bold text-gray-800 dark:text-white mb-6;
+    @apply text-2xl font-bold text-gray-800 dark:text-white mb-6;
 }
 
 .update-text {
-  @apply block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1;
+    @apply block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1;
 }
 
 .update-field {
-  @apply w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900
+    @apply w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900
          dark:text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500;
 }
 
 .update-measure {
-  @apply w-24 rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 
+    @apply w-24 rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 
          dark:text-white px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500;
 }
 
 .update-table {
-  @apply grid grid-cols-1 sm:grid-cols-2 items-center gap-4 border border-gray-300 dark:border-gray-600 
+    @apply grid grid-cols-1 sm:grid-cols-2 items-center gap-4 border border-gray-300 dark:border-gray-600 
          rounded-md p-3 bg-gray-50 dark:bg-gray-700;
 }
 
 .update-buttons {
-  @apply flex flex-row space-x-4 sm:justify-end;
+    @apply flex flex-row space-x-4 sm:justify-end;
 }
