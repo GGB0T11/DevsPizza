@@ -17,28 +17,35 @@
                 </div>
                 <div>
                     <span class="detail-text mb-2">Ingredientes:</span>
-                    <div class="overflow-x-auto">
-                        <table class="detail-table">
-                            <thead class="detail-thead">
-                                <tr>
-                                    <th class="detail-th">Nome</th>
-                                    <th class="detail-th">Quantidade</th>
-                                </tr>
-                            </thead>
-                            <tbody class="detail-tbody">
-                                {% for  pi in products_ingredients %}
+                    {% if products_ingredients %}
+                        <div class="rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+                            <table class="detail-table">
+                                <thead class="detail-thead">
                                     <tr>
-                                        <td class="px-4 py-2">{{ pi.ingredient.name }}</td>
-                                        {% if pi.measure == "kg" %}
-                                            <td class="px-4 py-2">{{ pi.quantity }} {{ pi.ingredient.get_measure_display }}</td>
-                                        {% else %}
-                                            <td class="px-4 py-2">{{ pi.quantity|floatformat:0 }} {{ pi.ingredient.get_measure_display }}</td>
-                                        {% endif %}
+                                        <th class="detail-th">Nome</th>
+                                        <th class="detail-th">Quantidade</th>
                                     </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+                                </thead>
+                                <tbody class="detail-tbody">
+                                    {% for pi in products_ingredients %}
+                                        <tr class="table-row"
+                                            onclick="window.location='{% url 'ingredient_detail' pi.ingredient.id %}'">
+                                            <td class="table-text">{{ pi.ingredient.name }}</td>
+                                            <td class="table-text">
+                                                {% if pi.measure == "kg" %}
+                                                    {{ pi.quantity }} {{ pi.ingredient.get_measure_display }}
+                                                {% else %}
+                                                    {{ pi.quantity|floatformat:0 }} {{ pi.ingredient.get_measure_display }}
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-gray-600 dark:text-gray-400 mt-2">Nenhum ingrediente associado.</p>
+                    {% endif %}
                 </div>
                 <div class="detail-buttons">
                     <a href="{% url 'product_list' %}" class="gray-button">Voltar para Lista</a>
