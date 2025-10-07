@@ -59,29 +59,32 @@
                         <tr class="border-b border-gray-200 dark:border-gray-700">
                             <th class="px-4 py-3 text-left table-head">Nome</th>
                             <th class="px-4 py-3 text-left table-head">Quantidade</th>
-                            <th class="px-4 py-3 text-left table-head">Quantidade Mínima</th>
+                            <th class="px-4 py-3 text-left hidden sm: block table-head">Quantidade Mínima</th>
                             <th class="px-4 py-3 text-right table-head">Ações</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                    <tbody>
                         {% for ingredient in page_obj %}
-                            <tr class="table-row">
+                            <tr class="table-row"
+                                onclick="window.location='{% url 'ingredient_detail' ingredient.id %}'">
                                 <td class="table-text">{{ ingredient.name }}</td>
                                 {% if ingredient.measure == "kg" %}
                                     <td class="table-text">{{ ingredient.qte }} {{ ingredient.get_measure_display }}</td>
-                                    <td class="table-text">{{ ingredient.min_qte }} {{ ingredient.get_measure_display }}</td>
+                                    <td class="hidden sm: block table-text">{{ ingredient.min_qte }} {{ ingredient.get_measure_display }}</td>
                                 {% else %}
                                     <td class="table-text">{{ ingredient.qte|floatformat:0 }} {{ ingredient.get_measure_display }}</td>
-                                    <td class="table-text">{{ ingredient.min_qte|floatformat:0 }} {{ ingredient.get_measure_display }}</td>
+                                    <td class="hidden sm: block table-text">
+                                        {{ ingredient.min_qte|floatformat:0 }} {{ ingredient.get_measure_display }}
+                                    </td>
                                 {% endif %}
-                                <td class="px-4 py-4 text-right">
-                                    <div class="flex flex-col sm:flex-row justify-end sm:space-x-2 space-y-2 sm:space-y-0">
-                                        <a href="{% url 'ingredient_detail' ingredient.id %}"
-                                           class="detail-button">Ver</a>
-                                        <a href="{% url 'ingredient_update' ingredient.id %}"
-                                           class="edit-button">Editar</a>
-                                        <a href="{% url 'ingredient_delete' ingredient.id %}"
-                                           class="delete-button">Deletar</a>
+                                <td class="px-4 py-2 text-right">
+                                    <div class="flex flex-row justify-end space-x-2 space-y-0">
+                                        <a href="{% url 'ingredient_update' ingredient.id %}">
+                                            <img src="{% static 'assets/edit.svg' %}" class="w-5 h-5" alt="Editar">
+                                        </a>
+                                        <a href="{% url 'ingredient_delete' ingredient.id %}">
+                                            <img src="{% static 'assets/trash.svg' %}" class="w-5 h-5" alt="Deletar">
+                                        </a>
                                     </div>
                                 </td>
                             </tr>
@@ -95,7 +98,13 @@
                         <a href="?page={{ page_obj.previous_page_number }}&{% if request.GET.field and request.GET.value %}field={{ request.GET.field }}&value={{ request.GET.value }}{% endif %}"
                            class="page-button">← Anterior</a>
                     {% endif %}
-                    <span class="page-info">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+                    <div class="flex items-center space-x-2">
+                        <select id="page-select" class="page-info">
+                            {% for num in page_obj.paginator.page_range %}
+                                <option value="{{ num }}" {% if num == page_obj.number %}selected{% endif %}>Página {{ num }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                     {% if page_obj.has_next %}
                         <a href="?page={{ page_obj.next_page_number }}&{% if request.GET.field and request.GET.value %}field={{ request.GET.field }}&value={{ request.GET.value }}{% endif %}"
                            class="page-button">Próxima →</a>
@@ -105,4 +114,5 @@
         </div>
     </div>
     <script src="{% static 'stock/js/toggle_category.js' %}"></script>
+    <script src="{% static "base/js/page_menu.js" %}"></script>
 {% endblock body %}

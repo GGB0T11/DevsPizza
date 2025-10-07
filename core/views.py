@@ -20,7 +20,7 @@ def home(request):
         saidas = (
             Movement.objects.filter(date__date__gte=start_date, type="out").aggregate(Sum("value"))["value__sum"] or 0
         )
-        return entradas - saidas
+        return saidas - entradas
 
     context = {
         "total_movements": Movement.objects.count(),

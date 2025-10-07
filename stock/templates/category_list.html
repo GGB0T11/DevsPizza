@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}
     Listar Categorias
 {% endblock title %}
@@ -23,13 +24,17 @@
                     </thead>
                     <tbody>
                         {% for category in page_obj %}
-                            <tr class="table-row">
+                            <tr class="table-row"
+                                onclick="window.location='{% url 'category_detail' category.id %}'">
                                 <td class="table-text">{{ category.name }}</td>
-                                <td class="px-4 py-4 text-right">
-                                    <div class="flex flex-col sm:flex-row justify-end sm:space-x-2 space-y-2 sm:space-y-0">
-                                        <a href="{% url 'category_detail' category.id %}" class="detail-button">Ver</a>
-                                        <a href="{% url 'category_update' category.id %}" class="edit-button">Editar</a>
-                                        <a href="{% url 'category_delete' category.id %}" class="delete-button">Deletar</a>
+                                <td class="px-4 py-2 text-right">
+                                    <div class="flex flex-row justify-end space-x-2 space-y-0">
+                                        <a href="{% url 'category_update' category.id %}">
+                                            <img src="{% static 'assets/edit.svg' %}" class="w-5 h-5" alt="Editar">
+                                        </a>
+                                        <a href="{% url 'category_delete' category.id %}">
+                                            <img src="{% static 'assets/trash.svg' %}" class="w-5 h-5" alt="Deletar">
+                                        </a>
                                     </div>
                                 </td>
                             </tr>
@@ -42,10 +47,17 @@
                     {% if page_obj.has_previous %}
                         <a href="?page={{ page_obj.previous_page_number }}" class="page-button">← Anterior</a>
                     {% endif %}
-                    <span class="page-info">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+                    <div class="flex items-center space-x-2">
+                        <select id="page-select" class="page-info">
+                            {% for num in page_obj.paginator.page_range %}
+                                <option value="{{ num }}" {% if num == page_obj.number %}selected{% endif %}>Página {{ num }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                     {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}" class="page-button">Próxima →</a>{% endif %}
                 </div>
             {% endif %}
         </div>
     </div>
+    <script src="{% static "base/js/page_menu.js" %}"></script>
 {% endblock body %}

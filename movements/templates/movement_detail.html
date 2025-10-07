@@ -22,7 +22,7 @@
                 {% if movement.type == "in" %}
                     <div>
                         <span class="detail-text mb-2">Ingredientes:</span>
-                        <div class="overflow-x-auto">
+                        <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
                             <table class="detail-table">
                                 <thead class="detail-thead">
                                     <tr>
@@ -33,10 +33,16 @@
                                 </thead>
                                 <tbody class="detail-tbody">
                                     {% for ingredient in movement.ingredients.all %}
-                                        <tr>
+                                        <tr class="table-row">
                                             <td class="px-4 py-2">{{ ingredient.name }}</td>
                                             <td class="px-4 py-2">R$ {{ ingredient.price }}</td>
-                                            <td class="px-4 py-2">{{ ingredient.quantity }} {{ ingredient.get_measure_display }}</td>
+                                            <td class="px-4 py-2">
+                                                {% if ingredient.measure == "kg" %}
+                                                    {{ ingredient.quantity }} {{ ingredient.get_measure_display }}
+                                                {% else %}
+                                                    {{ ingredient.quantity|floatformat:0 }} {{ ingredient.get_measure_display }}
+                                                {% endif %}
+                                            </td>
                                         </tr>
                                     {% endfor %}
                                 </tbody>
@@ -46,7 +52,7 @@
                 {% else %}
                     <div>
                         <span class="detail-text mb-2">Produtos:</span>
-                        <div class="overflow-x-auto">
+                        <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
                             <table class="detail-table">
                                 <thead class="detail-thead">
                                     <tr>
@@ -57,7 +63,7 @@
                                 </thead>
                                 <tbody class="detail-tbody">
                                     {% for product in movement.products.all %}
-                                        <tr>
+                                        <tr class="table-row">
                                             <td class="px-4 py-2">{{ product.name }}</td>
                                             <td class="px-4 py-2">{{ product.quantity }}</td>
                                             <td class="px-4 py-2">R$ {{ product.price }}</td>
@@ -70,9 +76,11 @@
                 {% endif %}
                 <div>
                     <span class="detail-text">Total:</span>
-                    <span class="text-lg font-semibold {% if movement.type == 'out' %}text-green-600{% else %}text-red-600{% endif %}">
-                        R$ {{ movement.value }}
-                    </span>
+                    {% if movement.type == "in" %}
+                        <span class="text-lg font-semibold text-red-600">-R$ {{ movement.value }}</span>
+                    {% else %}
+                        <span class="text-lg font-semibold text-green-600">+R$ {{ movement.value }}</span>
+                    {% endif %}
                 </div>
                 <div>
                     <span class="detail-text">Comentário:</span>
