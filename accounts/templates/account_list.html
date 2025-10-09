@@ -51,6 +51,7 @@
                     <thead>
                         <tr class="border-b border-gray-200 dark:border-gray-700">
                             <th class="text-left table-head">Nome</th>
+                            <th class="hidden sm:flex text-left table-head">Email</th>
                             <th class="text-left table-head">Cargo</th>
                             <th class="text-right table-head">Ações</th>
                         </tr>
@@ -60,6 +61,7 @@
                             <tr class="table-row"
                                 onclick="window.location='{% url 'account_detail' account.id %}'">
                                 <td class="table-text">{{ account.first_name }} {{ account.last_name }}</td>
+                                <td class="hidden sm:flex table-text">{{ account.email }}</td>
                                 <td class="table-text">{{ account.get_role_display }}</td>
                                 <td class="px-4 py-2 text-right">
                                     <div class="flex flex-row justify-end space-x-2 space-y-0">
