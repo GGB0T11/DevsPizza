@@ -19,8 +19,8 @@
                 <p class="text-2xl font-bold text-red-500">{{ low_stock_count }}</p>
             </div>
             <div class="p-4 bg-white dark:bg-gray-800 rounded shadow">
-                <p class="text-gray-500">Categorias</p>
-                <p class="text-2xl font-bold text-green-500">{{ total_categories }}</p>
+                <p class="text-gray-500">Ingredientes</p>
+                <p class="text-2xl font-bold text-green-500">{{ total_ingredients }}</p>
             </div>
         </div>
         <!-- Cards Faturamento -->
@@ -95,7 +95,15 @@
              role="alert">
             <strong class="font-bold">Atenção!</strong>
             <ul class="mt-2 list-disc list-inside text-sm">
-                {% for ingredient in low_stock_alerts %}<li>{{ ingredient.name }} abaixo do mínimo</li>{% endfor %}
+                {% for ingredient in low_stock_alerts %}
+                    {% if ingredient.measure == "kg" %}
+                        <li>{{ ingredient.name }} abaixo do mínimo ({{ ingredient.qte }} {{ ingredient.get_measure_display }})</li>
+                    {% else %}
+                        <li>
+                            {{ ingredient.name }} abaixo do mínimo ({{ ingredient.qte|floatformat:0 }} {{ ingredient.get_measure_display }})
+                        </li>
+                    {% endif %}
+                {% endfor %}
             </ul>
         </div>
     {% endif %}

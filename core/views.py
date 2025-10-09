@@ -26,7 +26,7 @@ def home(request):
         "total_movements": Movement.objects.count(),
         "total_products": Product.objects.count(),
         "low_stock_count": Ingredient.objects.filter(qte__lt=F("min_qte")).count(),
-        "total_categories": Category.objects.count(),
+        "total_ingredients": Ingredient.objects.count(),
         "recent_movements": Movement.objects.order_by("-date")[:5],
         "low_stock_alerts": Ingredient.objects.filter(qte__lt=F("min_qte")),
         "daily_net": get_net(today),
