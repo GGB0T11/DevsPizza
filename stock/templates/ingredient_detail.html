@@ -37,9 +37,11 @@
             </div>
             <div class="detail-buttons">
                 <a href="{% url 'ingredient_list' %}" class="gray-button">Voltar para Lista</a>
-                <a href="{% url 'ingredient_update' ingredient.id %}"
-                   class="yellow-button">Editar</a>
-                <a href="{% url 'ingredient_delete' ingredient.id %}" class="red-button">Deletar</a>
+                {% if request.user.role == "admin" %}
+                    <a href="{% url 'ingredient_update' ingredient.id %}"
+                       class="yellow-button">Editar</a>
+                    <a href="{% url 'ingredient_delete' ingredient.id %}" class="red-button">Deletar</a>
+                {% endif %}
             </div>
         </div>
     </div>

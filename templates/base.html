@@ -48,7 +48,9 @@
                         {% if request.user.role == "admin" %}
                             <a href="{% url 'account_list' %}" class="nav-link">Contas</a>
                             <a href="{% url 'category_list' %}" class="nav-link">Categorias</a>
-                            <a href="{% url 'ingredient_list' %}" class="nav-link">Ingredientes</a>
+                        {% endif %}
+                        <a href="{% url 'ingredient_list' %}" class="nav-link">Ingredientes</a>
+                        {% if request.user.role == "admin" %}
                             <a href="{% url 'product_list' %}" class="nav-link">Produtos</a>
                         {% endif %}
                         <a href="{% url 'movement_list' %}" class="nav-link">Movimentações</a>

@@ -243,7 +243,6 @@ def ingredient_create(request: HttpRequest) -> HttpResponse:
 
 
 @login_required
-@admin_required
 @require_http_methods(["GET"])
 def ingredient_list(request: HttpRequest) -> HttpResponse:
     """Lista todos os ingredientes cadastrados, com filtros e paginação.
@@ -290,7 +289,6 @@ def ingredient_list(request: HttpRequest) -> HttpResponse:
 
 
 @login_required
-@admin_required
 @require_http_methods(["GET"])
 def ingredient_detail(request: HttpRequest, id: int) -> HttpResponse:
     """Exibe os detalhes de um ingrediente específico.
