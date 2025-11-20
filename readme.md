@@ -79,8 +79,8 @@ devspizza
 1. **Clone o repositório:**
 
    ```bash
-   git clone https://github.com/GGB0T11/Dev-sPizza.git
-   cd Dev-sPizza
+   git clone https://github.com/GGB0T11/DevsPizza.git
+   cd DevsPizza
    ```
 
 2. **Defina as variáveis de ambiente:**
@@ -105,13 +105,13 @@ devspizza
 ### Usando Docker Compose (Recomendado)
 
 ```bash
-# Build and start all services
+# Constrou e inicia todos os serviços
 docker-compose up --build
 
-# Run in detached mode
+# Roda em segundo plano
 docker-compose up -d
 
-# Stop services
+# Para o serviço
 docker-compose down
 ```
 
@@ -133,4 +133,4 @@ Para a primeira utilização da aplicação, é necessário criar um superusuár
 
 ### Licença
 
-Esse Projeto está sob a licença MIT - consulte o arquivo ![LICENSE](./LICENSE) para mais detalhes
+Esse Projeto está sob a licença MIT - consulte o arquivo [LICENSE](LICENSE) para mais detalhes
