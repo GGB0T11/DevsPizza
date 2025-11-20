@@ -4,7 +4,6 @@ from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.utils import timezone
 from django.views.decorators.http import require_http_methods
 from fpdf import FPDF
 
@@ -96,11 +95,10 @@ def movement_list(request: HttpRequest) -> HttpResponse:
             messages.error(request, e.message)
             has_error = True
 
-    if not start_dt or not end_dt or has_error:
-        end_dt = timezone.now()
-        start_dt = end_dt - timezone.timedelta(days=7)
+        movements = Movement.objects.filter(date__range=(start_dt, end_dt)).order_by("-date")
 
-    movements = Movement.objects.filter(date__range=(start_dt, end_dt)).order_by("-date")
+    if not start_dt or not end_dt or has_error:
+        movements = Movement.objects.all().order_by("-date")
 
     page_number = request.GET.get("page") or 1
     paginator = Paginator(movements, 10)
